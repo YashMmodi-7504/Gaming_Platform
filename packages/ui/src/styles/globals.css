@@ -1,0 +1,294 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Design tokens — PREMIUM LIGHT theme.
+ * Bright, glassy, colorful: off-white surfaces, soft blue / purple / cyan / pink
+ * gradients, soft shadows, rounded everything. Light-first; `.dark` kept only as
+ * a fallback for any legacy surface. Values are HSL channels via hsl(var(--x)).
+ */
+@layer base {
+  :root,
+  .light {
+    --background: 222 40% 98%;
+    --foreground: 230 35% 16%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 230 35% 16%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 230 35% 16%;
+
+    --primary: 263 80% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 222 36% 95%;
+    --secondary-foreground: 230 35% 20%;
+
+    --muted: 222 32% 94%;
+    /* Darker secondary text for stronger hierarchy + WCAG AA on light surfaces. */
+    --muted-foreground: 225 16% 38%;
+
+    --accent: 190 92% 46%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 350 84% 56%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 152 64% 42%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 36 94% 50%;
+    --warning-foreground: 30 50% 14%;
+
+    /* Gaming accent ramp */
+    --neon: 190 92% 46%;
+    --neon-foreground: 0 0% 100%;
+    --violet: 268 78% 62%;
+    --gold: 38 94% 50%;
+    --gold-foreground: 30 50% 14%;
+    --emerald: 152 64% 42%;
+    --pink: 326 82% 60%;
+
+    /* Stronger borders so cards/panels separate from the aurora background. */
+    --border: 224 24% 84%;
+    --input: 224 24% 82%;
+    --ring: 263 80% 60%;
+
+    --radius: 1rem;
+  }
+
+  /* Legacy dark fallback (player UI is forced light; admin still works). */
+  .dark {
+    --background: 230 45% 7%;
+    --foreground: 213 31% 97%;
+    --card: 229 40% 11%;
+    --card-foreground: 213 31% 97%;
+    --popover: 229 42% 9%;
+    --popover-foreground: 213 31% 97%;
+    --primary: 263 85% 66%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 224 36% 18%;
+    --secondary-foreground: 213 31% 97%;
+    --muted: 225 30% 16%;
+    --muted-foreground: 217 20% 70%;
+    --accent: 190 96% 52%;
+    --accent-foreground: 230 45% 7%;
+    --destructive: 350 88% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 70% 46%;
+    --success-foreground: 0 0% 100%;
+    --warning: 36 96% 55%;
+    --warning-foreground: 230 45% 7%;
+    --neon: 190 96% 52%;
+    --neon-foreground: 230 45% 7%;
+    --violet: 270 80% 64%;
+    --gold: 43 96% 56%;
+    --gold-foreground: 36 60% 12%;
+    --emerald: 152 70% 48%;
+    --pink: 326 88% 64%;
+    --border: 226 32% 20%;
+    --input: 226 32% 20%;
+    --ring: 263 85% 66%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
+    /* Bright pastel aurora so the page is alive, never flat white. */
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(56rem 56rem at 6% -10%, hsl(263 90% 80% / 0.5), transparent 58%),
+      radial-gradient(46rem 46rem at 102% 4%, hsl(190 90% 78% / 0.42), transparent 55%),
+      radial-gradient(52rem 52rem at 48% 118%, hsl(326 90% 84% / 0.4), transparent 60%),
+      radial-gradient(40rem 40rem at 80% 60%, hsl(210 95% 84% / 0.32), transparent 60%);
+    background-attachment: fixed;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background-image: linear-gradient(hsl(var(--primary) / 0.55), hsl(var(--neon) / 0.5));
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-image: linear-gradient(hsl(var(--primary) / 0.8), hsl(var(--neon) / 0.75));
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.2);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Premium light-glass utilities. Used across the app for a bright, glassy,
+ * AAA gaming feel while staying readable.
+ * ------------------------------------------------------------------------- */
+@layer components {
+  /* Frosted white glass */
+  .glass {
+    background-color: hsl(0 0% 100% / 0.65);
+    backdrop-filter: blur(16px) saturate(160%);
+    border: 1px solid hsl(0 0% 100% / 0.7);
+    box-shadow:
+      0 8px 30px -12px hsl(230 50% 40% / 0.18),
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.6);
+  }
+  .glass-strong {
+    background-color: hsl(0 0% 100% / 0.82);
+    backdrop-filter: blur(22px) saturate(170%);
+    border: 1px solid hsl(0 0% 100% / 0.8);
+    box-shadow: 0 10px 36px -14px hsl(230 50% 40% / 0.22);
+  }
+
+  /* Bright premium card: white with a soft gradient hairline + soft shadow */
+  .card-premium {
+    position: relative;
+    border-radius: var(--radius);
+    background:
+      linear-gradient(hsl(0 0% 100% / 0.92), hsl(0 0% 100% / 0.92)) padding-box,
+      linear-gradient(140deg, hsl(263 80% 70% / 0.35), hsl(190 80% 70% / 0.18) 45%, hsl(0 0% 100% / 0.1))
+        border-box;
+    border: 1px solid transparent;
+    box-shadow:
+      0 12px 34px -18px hsl(230 50% 40% / 0.28),
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.7);
+    backdrop-filter: blur(6px);
+  }
+  .card-premium:hover {
+    box-shadow:
+      0 22px 44px -18px hsl(263 70% 55% / 0.35),
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.8);
+  }
+
+  /* Gradient + neon text */
+  .text-gradient {
+    background-image: linear-gradient(120deg, hsl(263 82% 58%), hsl(190 90% 46%) 55%, hsl(326 82% 60%));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .text-gradient-gold {
+    background-image: linear-gradient(120deg, hsl(38 94% 52%), hsl(28 92% 50%) 60%, hsl(20 90% 52%));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Animated colorful gradient fill */
+  .bg-aurora {
+    background-image: linear-gradient(
+      120deg,
+      hsl(263 85% 66%),
+      hsl(268 80% 66%),
+      hsl(190 90% 56%),
+      hsl(326 85% 68%)
+    );
+    background-size: 300% 300%;
+    animation: gradient-shift 8s ease infinite;
+  }
+
+  /* Subtle dotted grid overlay (light) */
+  .bg-grid {
+    background-image:
+      linear-gradient(hsl(230 40% 30% / 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(230 40% 30% / 0.05) 1px, transparent 1px);
+    background-size: 38px 38px;
+  }
+}
+
+@layer utilities {
+  /* Sheen sweep on hover */
+  .sheen {
+    position: relative;
+    overflow: hidden;
+  }
+  .sheen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-120%);
+    background: linear-gradient(110deg, transparent 30%, hsl(0 0% 100% / 0.55) 50%, transparent 70%);
+    transition: transform 0.7s ease;
+  }
+  .sheen:hover::after {
+    transform: translateX(120%);
+  }
+
+  /* Camera shake for game explosions/losses */
+  @keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+  }
+
+  /* Dynamic-world weather */
+  @keyframes rain-fall {
+    to { transform: translateY(110vh); }
+  }
+  @keyframes snow-fall {
+    to { transform: translateY(110vh) translateX(24px); }
+  }
+
+  .text-glow {
+    text-shadow: 0 6px 24px hsl(263 80% 60% / 0.32);
+  }
+  .text-glow-neon {
+    text-shadow: 0 6px 24px hsl(190 90% 50% / 0.35);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-float,
+    .animate-float-slow,
+    .animate-glow-pulse,
+    .animate-gradient-shift,
+    .animate-shine,
+    .animate-marquee,
+    .animate-spin-slow,
+    .bg-aurora {
+      animation: none !important;
+    }
+  }
+
+  /* Accessibility: user-toggled reduced motion (independent of the OS setting). */
+  .reduce-motion *,
+  .reduce-motion *::before,
+  .reduce-motion *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Accessibility: high-contrast palette overrides (darker text, stronger lines). */
+.high-contrast {
+  --foreground: 230 55% 8%;
+  --muted-foreground: 225 30% 26%;
+  --border: 224 34% 55%;
+  --primary: 263 90% 44%;
+  --accent: 190 95% 34%;
+}
+.high-contrast .card-premium,
+.high-contrast .glass,
+.high-contrast .glass-strong {
+  border-color: hsl(224 34% 55%) !important;
+}

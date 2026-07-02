@@ -1,0 +1,210 @@
+// =============================================================================
+// Promotions, Coupons, Campaigns, Referrals & Loyalty
+// =============================================================================
+
+model Promotion {
+  id                 String          @id @default(uuid(7)) @db.Uuid
+  code               String          @unique
+  name               String
+  description        String?         @db.Text
+  type               PromotionType
+  status             PromotionStatus @default(DRAFT)
+  priority           Int             @default(0)
+  maxRedemptions     Int?            @map("max_redemptions")
+  currentRedemptions Int             @default(0) @map("current_redemptions")
+  terms              Json?           @db.JsonB
+  startsAt           DateTime?       @map("starts_at")
+  endsAt             DateTime?       @map("ends_at")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  coupons      Coupon[]
+  bonusWallets BonusWallet[]
+
+  @@index([status, type])
+  @@index([startsAt, endsAt])
+  @@map("promotions")
+}
+
+model Coupon {
+  id             String       @id @default(uuid(7)) @db.Uuid
+  code           String       @unique
+  promotionId    String?      @map("promotion_id") @db.Uuid
+  discountType   DiscountType @map("discount_type")
+  value          Decimal      @db.Decimal(38, 18)
+  maxRedemptions Int?         @map("max_redemptions")
+  perUserLimit   Int          @default(1) @map("per_user_limit")
+  usedCount      Int          @default(0) @map("used_count")
+  status         CouponStatus @default(ACTIVE)
+  validFrom      DateTime?    @map("valid_from")
+  validTo        DateTime?    @map("valid_to")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  promotion   Promotion?         @relation(fields: [promotionId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  redemptions CouponRedemption[]
+
+  @@index([promotionId])
+  @@index([status, validFrom, validTo])
+  @@map("coupons")
+}
+
+model CouponRedemption {
+  id         String           @id @default(uuid(7)) @db.Uuid
+  couponId   String           @map("coupon_id") @db.Uuid
+  userId     String           @map("user_id") @db.Uuid
+  status     RedemptionStatus @default(APPLIED)
+  amount     Decimal?         @db.Decimal(38, 18)
+  redeemedAt DateTime         @default(now()) @map("redeemed_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([couponId])
+  @@index([userId])
+  @@map("coupon_redemptions")
+}
+
+model Campaign {
+  id       String          @id @default(uuid(7)) @db.Uuid
+  name     String
+  status   CampaignStatus  @default(DRAFT)
+  channel  CampaignChannel
+  content  Json?           @db.JsonB
+  budget   Decimal?        @db.Decimal(38, 18)
+  startsAt DateTime?       @map("starts_at")
+  endsAt   DateTime?       @map("ends_at")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  targets CampaignTarget[]
+
+  @@index([status, channel])
+  @@map("campaigns")
+}
+
+model CampaignTarget {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  campaignId String    @map("campaign_id") @db.Uuid
+  userId     String?   @map("user_id") @db.Uuid
+  segment    String?
+  status     String    @default("pending")
+  sentAt     DateTime? @map("sent_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user     User?    @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([campaignId])
+  @@index([userId])
+  @@map("campaign_targets")
+}
+
+model ReferralProgram {
+  id                   String  @id @default(uuid(7)) @db.Uuid
+  code                 String  @unique
+  name                 String
+  referrerRewardAmount Decimal @default(0) @map("referrer_reward_amount") @db.Decimal(38, 18)
+  refereeRewardAmount  Decimal @default(0) @map("referee_reward_amount") @db.Decimal(38, 18)
+  currencyCode         String? @map("currency_code")
+  isActive             Boolean @default(true) @map("is_active")
+  terms                Json?   @db.JsonB
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  histories ReferralHistory[]
+  rewards   ReferralReward[]
+
+  @@map("referral_programs")
+}
+
+model ReferralHistory {
+  id          String         @id @default(uuid(7)) @db.Uuid
+  programId   String?        @map("program_id") @db.Uuid
+  referrerId  String         @map("referrer_id") @db.Uuid
+  referredId  String         @unique @map("referred_id") @db.Uuid
+  status      ReferralStatus @default(PENDING)
+  qualifiedAt DateTime?      @map("qualified_at")
+  rewardedAt  DateTime?      @map("rewarded_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  program  ReferralProgram? @relation(fields: [programId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  referrer User             @relation("ReferralReferrer", fields: [referrerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  referred User             @relation("ReferralReferred", fields: [referredId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  rewards  ReferralReward[]
+
+  @@index([referrerId])
+  @@index([status])
+  @@map("referral_history")
+}
+
+model ReferralReward {
+  id        String         @id @default(uuid(7)) @db.Uuid
+  programId String?        @map("program_id") @db.Uuid
+  historyId String?        @map("history_id") @db.Uuid
+  userId    String         @map("user_id") @db.Uuid
+  amount    Decimal        @db.Decimal(38, 18)
+  status    ReferralStatus @default(PENDING)
+  paidAt    DateTime?      @map("paid_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  program ReferralProgram? @relation(fields: [programId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  history ReferralHistory? @relation(fields: [historyId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId])
+  @@index([programId])
+  @@index([historyId])
+  @@map("referral_rewards")
+}
+
+model LoyaltyTier {
+  id         String  @id @default(uuid(7)) @db.Uuid
+  name       String  @unique
+  level      Int     @unique
+  minPoints  Decimal @default(0) @map("min_points") @db.Decimal(38, 8)
+  multiplier Decimal @default(1) @db.Decimal(10, 4)
+  benefits   Json?   @db.JsonB
+  isActive   Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  users User[]
+
+  @@index([level])
+  @@map("loyalty_tiers")
+}
+
+model LoyaltyPoints {
+  id           String           @id @default(uuid(7)) @db.Uuid
+  userId       String           @map("user_id") @db.Uuid
+  type         LoyaltyPointType
+  points       Decimal          @db.Decimal(38, 8)
+  balanceAfter Decimal          @map("balance_after") @db.Decimal(38, 8)
+  reference    String?
+  expiresAt    DateTime?        @map("expires_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([type])
+  @@map("loyalty_points")
+}

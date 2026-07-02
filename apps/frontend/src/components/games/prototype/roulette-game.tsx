@@ -1,0 +1,544 @@
+'use client';
+
+import { Button, cn } from '@gaming-platform/ui';
+import { motion } from 'framer-motion';
+import { CircleDot, Flame, RotateCcw, Snowflake, Trophy, Zap } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
+
+import { GameFx, type FxSignal } from '@/components/games/prototype/game-fx';
+import { sound } from '@/lib/sound';
+import { useDemoWallet } from '@/stores/demo-wallet';
+import { useGameStats } from '@/stores/game-stats';
+
+/** European single-zero wheel order (0 at 12 o'clock, clockwise). */
+const WHEEL_ORDER = [
+  0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18,
+  29, 7, 28, 12, 35, 3, 26,
+] as const;
+const POCKETS = WHEEL_ORDER.length; // 37
+const SLICE = 360 / POCKETS;
+
+const REDS = new Set([1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]);
+
+type Color = 'red' | 'black' | 'green';
+function colorOf(n: number): Color {
+  if (n === 0) return 'green';
+  return REDS.has(n) ? 'red' : 'black';
+}
+function labelOf(n: number): string {
+  const c = colorOf(n);
+  return `${n} ${c === 'green' ? 'Green' : c === 'red' ? 'Red' : 'Black'}`;
+}
+function chipClass(c: Color): string {
+  return c === 'green' ? 'bg-emerald text-white' : c === 'red' ? 'bg-destructive text-white' : 'bg-foreground text-white';
+}
+
+/** Outside bet types (all pay 2×). */
+type OutsideKey = 'red' | 'black' | 'even' | 'odd' | 'low' | 'high';
+const OUTSIDE: { key: OutsideKey; label: string; hit: (n: number) => boolean }[] = [
+  { key: 'red', label: 'Red', hit: (n) => colorOf(n) === 'red' },
+  { key: 'black', label: 'Black', hit: (n) => colorOf(n) === 'black' },
+  { key: 'even', label: 'Even', hit: (n) => n !== 0 && n % 2 === 0 },
+  { key: 'odd', label: 'Odd', hit: (n) => n % 2 === 1 },
+  { key: 'low', label: '1–18', hit: (n) => n >= 1 && n <= 18 },
+  { key: 'high', label: '19–36', hit: (n) => n >= 19 && n <= 36 },
+];
+
+type BetSelection = { kind: 'outside'; key: OutsideKey } | { kind: 'straight'; n: number };
+
+/** mulberry32 seeded RNG → deterministic, replayable spins. */
+function rng(seed: number) {
+  let a = seed >>> 0;
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function numberFor(seed: number): number {
+  return Math.floor(rng(seed)() * POCKETS); // 0..36
+}
+
+const QUICK_CHIPS = [100, 500, 1000, 5000];
+const SPIN_MS = 3100;
+
+export function RouletteGame() {
+  const balance = useDemoWallet((s) => s.balance);
+  const spend = useDemoWallet((s) => s.spend);
+  const credit = useDemoWallet((s) => s.credit);
+  const record = useGameStats((s) => s.record);
+  const stat = useGameStats((s) => s.games.roulette);
+
+  const [bet, setBet] = useState(100);
+  const [selection, setSelection] = useState<BetSelection>({ kind: 'outside', key: 'red' });
+  const [spinning, setSpinning] = useState(false);
+  const [rotation, setRotation] = useState(0); // wheel rotation (deg)
+  const [ballRot, setBallRot] = useState(0); // ball rotation (deg)
+  const [ballSettled, setBallSettled] = useState(true);
+  const [winning, setWinning] = useState<number | null>(null);
+  const [result, setResult] = useState<{ win: boolean; payout: number; number: number } | null>(null);
+  const [fx, setFx] = useState<FxSignal>({ key: 0, type: null });
+
+  const rafRef = useRef(0);
+  const timeoutRef = useRef<number[]>([]);
+  const startRef = useRef(0);
+  const fromRotRef = useRef(0);
+  const toRotRef = useRef(0);
+  const seedRef = useRef(1);
+  const fxKeyRef = useRef(0);
+
+  const cleanup = useCallback(() => {
+    cancelAnimationFrame(rafRef.current);
+    timeoutRef.current.forEach((id) => window.clearTimeout(id));
+    timeoutRef.current = [];
+  }, []);
+  useEffect(() => cleanup, [cleanup]);
+
+  const multiplier = selection.kind === 'straight' ? 36 : 2;
+
+  const settle = useCallback(
+    (n: number) => {
+      const sel = selection;
+      const won = sel.kind === 'straight' ? sel.n === n : OUTSIDE.find((o) => o.key === sel.key)!.hit(n);
+      const stake = Math.max(1, Math.floor(bet));
+      if (won) {
+        const gross = Math.round(stake * multiplier);
+        const net = gross - stake;
+        credit(gross);
+        setResult({ win: true, payout: net, number: n });
+        fxKeyRef.current += 1;
+        setFx({ key: fxKeyRef.current, type: 'win', amount: net });
+        sound.play('reward');
+        record('roulette', { label: labelOf(n), win: true, payout: net, value: n });
+      } else {
+        setResult({ win: false, payout: -stake, number: n });
+        sound.play('lose');
+        record('roulette', { label: labelOf(n), win: false, payout: -stake, value: n });
+      }
+    },
+    [selection, bet, multiplier, credit, record],
+  );
+
+  const tick = useCallback(() => {
+    const elapsed = performance.now() - startRef.current;
+    const t = Math.min(1, elapsed / SPIN_MS);
+    // easeOutQuint: fast start, long settle.
+    const eased = 1 - Math.pow(1 - t, 5);
+    const from = fromRotRef.current;
+    const to = toRotRef.current;
+    setRotation(from + (to - from) * eased);
+    setBallRot((from + (to - from) * eased) * -1.35); // ball spins opposite & faster
+    if (t < 1) {
+      rafRef.current = requestAnimationFrame(tick);
+    }
+  }, []);
+
+  const spin = useCallback(
+    (replaySeed?: number) => {
+      if (spinning) return;
+      const stake = Math.max(1, Math.floor(bet));
+      if (stake > balance) {
+        toast.error('Not enough demo coins — hit reload in the balance pill.');
+        return;
+      }
+      const seed =
+        replaySeed ?? ((Math.floor((performance.now() * 1000) % 2 ** 31) ^ (stat.seq * 2654435761)) >>> 0);
+      seedRef.current = seed >>> 0;
+      const n = numberFor(seedRef.current);
+
+      spend(stake);
+      setResult(null);
+      setWinning(null);
+      setSpinning(true);
+      setBallSettled(false);
+      sound.play('chips');
+      sound.play('wheel');
+
+      // Compute target rotation so pocket `n` lands under the top marker.
+      const idx = WHEEL_ORDER.indexOf(n as (typeof WHEEL_ORDER)[number]);
+      const pocketAngle = idx * SLICE; // pocket's base angle from top (clockwise)
+      // rotate so pocketAngle ends at 0 (top): rotation ≡ -pocketAngle (mod 360)
+      const current = ((rotation % 360) + 360) % 360;
+      const targetMod = (360 - pocketAngle) % 360;
+      let delta = targetMod - current;
+      if (delta < 0) delta += 360;
+      const spins = 6; // full turns for drama
+      fromRotRef.current = rotation;
+      toRotRef.current = rotation + spins * 360 + delta;
+
+      startRef.current = performance.now();
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(tick);
+
+      // ball settle sound near the end
+      timeoutRef.current.push(
+        window.setTimeout(() => sound.play('ball'), SPIN_MS - 500),
+        window.setTimeout(() => {
+          setBallSettled(true);
+          setSpinning(false);
+          setWinning(n);
+          settle(n);
+        }, SPIN_MS + 60),
+      );
+    },
+    [spinning, bet, balance, spend, stat.seq, rotation, tick, settle],
+  );
+
+  // Hot / Cold from history (fallback to seeded so never empty).
+  const { hot, cold, redPct, oddPct } = useMemo(() => {
+    const counts = new Map<number, number>();
+    for (const r of stat.history) counts.set(r.value, (counts.get(r.value) ?? 0) + 1);
+    const withCounts = Array.from({ length: POCKETS }, (_, n) => ({ n, c: counts.get(n) ?? 0 }));
+    const sorted = [...withCounts].sort((a, b) => b.c - a.c || a.n - b.n);
+    const coldSorted = [...withCounts].sort((a, b) => a.c - b.c || a.n - b.n);
+    const total = stat.history.length || 1;
+    const reds = stat.history.filter((r) => colorOf(r.value) === 'red').length;
+    const odds = stat.history.filter((r) => r.value % 2 === 1).length;
+    return {
+      hot: sorted.slice(0, 5).map((x) => x.n),
+      cold: coldSorted.slice(0, 5).map((x) => x.n),
+      redPct: Math.round((reds / total) * 100),
+      oddPct: Math.round((odds / total) * 100),
+    };
+  }, [stat.history]);
+
+  const isSelected = (b: BetSelection) =>
+    b.kind === 'outside' && selection.kind === 'outside'
+      ? b.key === selection.key
+      : b.kind === 'straight' && selection.kind === 'straight' && b.n === selection.n;
+
+  const winColor = winning === null ? null : colorOf(winning);
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+      {/* Wheel stage + result */}
+      <div className="space-y-4">
+        <div className="card-premium relative flex aspect-square max-h-[440px] items-center justify-center overflow-hidden p-4">
+          <GameFx trigger={fx} />
+          <div className="bg-grid absolute inset-0 opacity-30" />
+
+          {/* marker */}
+          <div className="absolute left-1/2 top-2 z-20 -translate-x-1/2">
+            <div className="h-0 w-0 border-x-[10px] border-t-[16px] border-x-transparent border-t-gold drop-shadow" />
+          </div>
+
+          <div className="relative aspect-square w-full max-w-[380px]">
+            {/* Wheel */}
+            <div
+              className="absolute inset-0 rounded-full shadow-glow"
+              style={{ transform: `rotate(${rotation}deg)`, willChange: 'transform' }}
+            >
+              <svg viewBox="0 0 200 200" className="h-full w-full">
+                <defs>
+                  <radialGradient id="rlHub" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="hsl(45 90% 65%)" />
+                    <stop offset="100%" stopColor="hsl(38 80% 45%)" />
+                  </radialGradient>
+                </defs>
+                {WHEEL_ORDER.map((n, i) => {
+                  const a0 = (i * SLICE - 90 - SLICE / 2) * (Math.PI / 180);
+                  const a1 = ((i + 1) * SLICE - 90 - SLICE / 2) * (Math.PI / 180);
+                  const R = 100;
+                  const x0 = 100 + R * Math.cos(a0);
+                  const y0 = 100 + R * Math.sin(a0);
+                  const x1 = 100 + R * Math.cos(a1);
+                  const y1 = 100 + R * Math.sin(a1);
+                  const c = colorOf(n);
+                  const fill =
+                    c === 'green' ? 'hsl(160 84% 39%)' : c === 'red' ? 'hsl(0 72% 51%)' : 'hsl(222 20% 18%)';
+                  // label position
+                  const am = ((i + 0.5) * SLICE - 90 - SLICE / 2) * (Math.PI / 180);
+                  const lx = 100 + 84 * Math.cos(am);
+                  const ly = 100 + 84 * Math.sin(am);
+                  return (
+                    <g key={i}>
+                      <path d={`M100 100 L ${x0} ${y0} A ${R} ${R} 0 0 1 ${x1} ${y1} Z`} fill={fill} stroke="hsl(45 60% 55% / 0.5)" strokeWidth={0.6} />
+                      <text
+                        x={lx}
+                        y={ly}
+                        fill="white"
+                        fontSize={7}
+                        fontWeight={700}
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        transform={`rotate(${(i + 0.5) * SLICE} ${lx} ${ly})`}
+                      >
+                        {n}
+                      </text>
+                    </g>
+                  );
+                })}
+                <circle cx={100} cy={100} r={34} fill="url(#rlHub)" stroke="hsl(38 70% 40%)" strokeWidth={1.5} />
+                <circle cx={100} cy={100} r={20} fill="hsl(45 85% 58%)" />
+              </svg>
+            </div>
+
+            {/* Ball track — ball rides just inside the rim, opposite spin */}
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{
+                transform: `rotate(${ballRot}deg)`,
+                transition: ballSettled && !spinning ? 'transform 0.4s ease-out' : undefined,
+                willChange: 'transform',
+              }}
+            >
+              <div
+                className="absolute left-1/2 top-[7%] h-3 w-3 -translate-x-1/2 rounded-full bg-white shadow-[0_0_8px_2px_rgba(255,255,255,0.7)] ring-1 ring-black/10"
+              />
+            </div>
+
+            {/* center readout */}
+            <div className="absolute inset-0 z-10 flex items-center justify-center">
+              {winning !== null ? (
+                <motion.div
+                  key={winning}
+                  initial={{ scale: 0.4, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className={cn(
+                    'flex h-14 w-14 items-center justify-center rounded-full font-display text-2xl font-bold tabular-nums shadow-glow',
+                    chipClass(colorOf(winning)),
+                  )}
+                >
+                  {winning}
+                </motion.div>
+              ) : spinning ? (
+                <CircleDot className="h-8 w-8 animate-spin text-gold/70" />
+              ) : (
+                <CircleDot className="h-8 w-8 text-gold/60" />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Result readout */}
+        <div className="card-premium flex items-center justify-between gap-3 p-4">
+          <div className="flex items-center gap-3">
+            <span
+              className={cn(
+                'flex h-11 w-11 items-center justify-center rounded-full font-display text-lg font-bold tabular-nums',
+                winning !== null ? chipClass(winColor!) : 'bg-black/5 text-muted-foreground',
+              )}
+            >
+              {winning ?? '—'}
+            </span>
+            <div>
+              <p className="font-display text-sm font-bold text-foreground">
+                {winning !== null ? labelOf(winning) : spinning ? 'Spinning…' : 'Place a bet & spin'}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {selection.kind === 'straight'
+                  ? `Straight up ${selection.n} · 36×`
+                  : `${OUTSIDE.find((o) => o.key === selection.key)!.label} · 2×`}
+              </p>
+            </div>
+          </div>
+          {result ? (
+            <span
+              className={cn(
+                'font-display text-lg font-bold tabular-nums',
+                result.win ? 'text-emerald' : 'text-destructive',
+              )}
+            >
+              {result.win ? `+${result.payout.toLocaleString()}` : result.payout.toLocaleString()}
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      {/* Controls + panels */}
+      <div className="space-y-4">
+        {/* Bet panel */}
+        <div className="card-premium space-y-3 p-4">
+          <p className="font-display text-sm font-bold">Your bet</p>
+          <div className="grid grid-cols-3 gap-1.5">
+            {OUTSIDE.map((o) => {
+              const b: BetSelection = { kind: 'outside', key: o.key };
+              const active = isSelected(b);
+              return (
+                <button
+                  key={o.key}
+                  disabled={spinning}
+                  onClick={() => {
+                    setSelection(b);
+                    sound.play('chips');
+                  }}
+                  className={cn(
+                    'rounded-lg py-2 text-xs font-bold transition-colors',
+                    active
+                      ? o.key === 'red'
+                        ? 'bg-destructive text-white shadow-glow'
+                        : o.key === 'black'
+                          ? 'bg-foreground text-white'
+                          : 'bg-primary text-white shadow-glow'
+                      : 'bg-black/[0.04] text-muted-foreground hover:bg-primary/10 hover:text-primary',
+                  )}
+                >
+                  {o.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div>
+            <p className="mb-1.5 text-xs font-semibold text-muted-foreground">Straight up · 36×</p>
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(1.9rem,1fr))] gap-1">
+              {Array.from({ length: POCKETS }, (_, n) => {
+                const b: BetSelection = { kind: 'straight', n };
+                const active = isSelected(b);
+                const c = colorOf(n);
+                return (
+                  <button
+                    key={n}
+                    disabled={spinning}
+                    onClick={() => {
+                      setSelection(b);
+                      sound.play('chips');
+                    }}
+                    className={cn(
+                      'aspect-square rounded-md font-mono text-[11px] font-bold tabular-nums transition-transform',
+                      chipClass(c),
+                      active ? 'scale-110 ring-2 ring-gold ring-offset-1' : 'opacity-70 hover:opacity-100',
+                    )}
+                  >
+                    {n}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Stake */}
+          <div className="flex items-center rounded-xl border border-black/10 bg-white/70 px-2">
+            <input
+              type="number"
+              min={1}
+              value={bet}
+              onChange={(e) => setBet(Math.max(1, Number(e.target.value)))}
+              disabled={spinning}
+              className="h-10 w-full bg-transparent font-mono text-sm outline-none"
+            />
+            <button onClick={() => setBet((b) => Math.max(1, Math.floor(b / 2)))} className="px-1 text-xs text-muted-foreground hover:text-foreground">
+              ½
+            </button>
+            <button onClick={() => setBet((b) => b * 2)} className="px-1 text-xs text-muted-foreground hover:text-foreground">
+              2×
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {QUICK_CHIPS.map((v) => (
+              <button
+                key={v}
+                onClick={() => setBet(v)}
+                disabled={spinning}
+                className="rounded-lg bg-black/[0.04] px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+              >
+                {v.toLocaleString()}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex gap-2">
+            <Button variant="gradient" size="lg" className="sheen w-full" onClick={() => spin()} disabled={spinning}>
+              <CircleDot className="h-5 w-5" /> {spinning ? 'Spinning…' : `Spin · ${bet.toLocaleString()}`}
+            </Button>
+            {result && !spinning ? (
+              <Button variant="glass" size="lg" onClick={() => spin(seedRef.current)} title="Replay same spin">
+                <RotateCcw className="h-5 w-5" />
+              </Button>
+            ) : null}
+          </div>
+        </div>
+
+        {/* Recent numbers */}
+        <div className="card-premium p-4">
+          <p className="mb-2 font-display text-sm font-bold">Recent numbers</p>
+          <div className="flex flex-wrap gap-1.5">
+            {stat.history.slice(0, 14).map((r) => (
+              <span
+                key={r.id}
+                className={cn(
+                  'flex h-7 w-7 items-center justify-center rounded-md font-mono text-[11px] font-bold tabular-nums',
+                  chipClass(colorOf(r.value)),
+                )}
+              >
+                {r.value}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Hot / Cold */}
+        <div className="card-premium grid grid-cols-2 gap-3 p-4">
+          <div>
+            <p className="mb-2 flex items-center gap-1.5 text-xs font-bold text-destructive">
+              <Flame className="h-3.5 w-3.5" /> Hot
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {hot.map((n) => (
+                <span key={n} className={cn('flex h-7 w-7 items-center justify-center rounded-md font-mono text-[11px] font-bold tabular-nums', chipClass(colorOf(n)))}>
+                  {n}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="mb-2 flex items-center gap-1.5 text-xs font-bold text-primary">
+              <Snowflake className="h-3.5 w-3.5" /> Cold
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {cold.map((n) => (
+                <span key={n} className={cn('flex h-7 w-7 items-center justify-center rounded-md font-mono text-[11px] font-bold tabular-nums', chipClass(colorOf(n)))}>
+                  {n}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Quick stats: red/black + odd/even */}
+        <div className="card-premium grid grid-cols-2 gap-3 p-4">
+          <div>
+            <div className="mb-1 flex justify-between text-[11px] font-semibold text-muted-foreground">
+              <span className="text-destructive">Red {redPct}%</span>
+              <span>Black {100 - redPct}%</span>
+            </div>
+            <div className="flex h-2 overflow-hidden rounded-full bg-foreground">
+              <div className="bg-destructive" style={{ width: `${redPct}%` }} />
+            </div>
+          </div>
+          <div>
+            <div className="mb-1 flex justify-between text-[11px] font-semibold text-muted-foreground">
+              <span className="text-primary">Odd {oddPct}%</span>
+              <span>Even {100 - oddPct}%</span>
+            </div>
+            <div className="flex h-2 overflow-hidden rounded-full bg-black/10">
+              <div className="bg-primary" style={{ width: `${oddPct}%` }} />
+            </div>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="card-premium grid grid-cols-3 gap-3 p-4 text-center">
+          <Stat label="Rounds" value={String(stat.rounds)} />
+          <Stat icon={<Trophy className="h-4 w-4 text-gold" />} label="Biggest win" value={`+${stat.biggestWin.toLocaleString()}`} />
+          <Stat icon={<Zap className="h-4 w-4 text-emerald" />} label="Best streak" value={String(stat.bestStreak)} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Stat({ icon, label, value }: { icon?: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="rounded-xl bg-black/[0.03] p-2">
+      <div className="flex items-center justify-center gap-1 text-[11px] uppercase tracking-wide text-muted-foreground">
+        {icon}
+        {label}
+      </div>
+      <div className="mt-0.5 font-display text-lg font-bold tabular-nums">{value}</div>
+    </div>
+  );
+}

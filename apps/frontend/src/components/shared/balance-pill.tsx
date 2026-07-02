@@ -1,0 +1,71 @@
+'use client';
+
+import { useQuery } from '@tanstack/react-query';
+import { Coins, Plus, RotateCw, Wallet } from 'lucide-react';
+import Link from 'next/link';
+import { toast } from 'sonner';
+
+import { clientConfig } from '@/lib/config';
+import { walletApi } from '@/lib/wallet-api';
+import { useAuthStore } from '@/stores/auth-store';
+import { useDemoWallet } from '@/stores/demo-wallet';
+
+/** Animated wallet balance chip shown in the top bar for signed-in players. */
+export function BalancePill() {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const demoBalance = useDemoWallet((s) => s.balance);
+  const reload = useDemoWallet((s) => s.reload);
+
+  // In demo mode we never hit the backend wallet — show the demo coins so there
+  // are never balance errors or empty states.
+  const { data } = useQuery({
+    queryKey: ['wallet', 'balances'],
+    queryFn: () => walletApi.balances(),
+    enabled: isAuthenticated && !clientConfig.demoMode,
+    refetchInterval: 30_000,
+    staleTime: 10_000,
+  });
+
+  if (!isAuthenticated) return null;
+
+  const primary =
+    data?.wallets?.find((w) => w.type === 'main' || w.type === 'cash') ?? data?.wallets?.[0];
+  const amount = clientConfig.demoMode ? demoBalance : primary ? Number(primary.available) : null;
+  const formatted =
+    amount === null
+      ? '—'
+      : amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+  return (
+    <div className="flex items-center rounded-full border border-black/10 bg-white/70 p-1 pl-3 shadow-soft backdrop-blur">
+      {clientConfig.demoMode ? (
+        <Coins className="mr-1.5 h-4 w-4 text-gold" />
+      ) : (
+        <Wallet className="mr-2 h-4 w-4 text-accent" />
+      )}
+      <span className="font-mono text-sm font-bold tabular-nums text-foreground">{formatted}</span>
+      {clientConfig.demoMode ? (
+        <button
+          type="button"
+          aria-label="Reload demo coins"
+          title="Reload demo coins"
+          onClick={() => {
+            reload();
+            toast.success('Reloaded 100,000 demo coins');
+          }}
+          className="ml-2 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-gold to-warning text-gold-foreground shadow-glow-gold transition-transform hover:scale-105 active:rotate-180"
+        >
+          <RotateCw className="h-4 w-4" strokeWidth={2.5} />
+        </button>
+      ) : (
+        <Link
+          href="/wallet"
+          aria-label="Deposit"
+          className="ml-2 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-gold to-warning text-gold-foreground shadow-glow-gold transition-transform hover:scale-105"
+        >
+          <Plus className="h-4 w-4" strokeWidth={3} />
+        </Link>
+      )}
+    </div>
+  );
+}

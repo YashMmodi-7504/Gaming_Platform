@@ -1,0 +1,308 @@
+// =============================================================================
+// Game Catalog
+// =============================================================================
+
+model GameProvider {
+  id      String         @id @default(uuid(7)) @db.Uuid
+  code    String         @unique
+  name    String
+  status  ProviderStatus @default(ACTIVE)
+  website String?
+  logoUrl String?        @map("logo_url")
+  config  Json?          @db.JsonB
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  games Game[]
+
+  @@index([status])
+  @@map("game_providers")
+}
+
+model GameCategory {
+  id           String  @id @default(uuid(7)) @db.Uuid
+  slug         String  @unique
+  name         String
+  description  String?
+  parentId     String? @map("parent_id") @db.Uuid
+  iconUrl      String? @map("icon_url")
+  displayOrder Int     @default(0) @map("display_order")
+  isActive     Boolean @default(true) @map("is_active")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  parent   GameCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  children GameCategory[] @relation("CategoryHierarchy")
+  games    Game[]
+
+  @@index([parentId])
+  @@index([isActive, displayOrder])
+  @@map("game_categories")
+}
+
+model Game {
+  id              String         @id @default(uuid(7)) @db.Uuid
+  slug            String         @unique
+  name            String
+  description     String?        @db.Text
+  categoryId      String         @map("category_id") @db.Uuid
+  providerId      String         @map("provider_id") @db.Uuid
+  currencyId      String?        @map("currency_id") @db.Uuid
+  launcherId      String?        @map("launcher_id") @db.Uuid
+  status          GameStatus     @default(DRAFT)
+  visibility      GameVisibility @default(PUBLIC)
+  ageRating       AgeRating      @default(EVERYONE) @map("age_rating")
+  thumbnailUrl    String?        @map("thumbnail_url")
+  bannerUrl       String?        @map("banner_url")
+  minBet          Decimal        @default(0) @map("min_bet") @db.Decimal(38, 18)
+  maxBet          Decimal        @default(0) @map("max_bet") @db.Decimal(38, 18)
+  rtp             Decimal?       @db.Decimal(6, 3)
+  volatility      String?
+  isFeatured      Boolean        @default(false) @map("is_featured")
+  isNew           Boolean        @default(false) @map("is_new")
+  isTrending      Boolean        @default(false) @map("is_trending")
+  trendingScore   Int            @default(0) @map("trending_score")
+  popularityScore Int            @default(0) @map("popularity_score")
+  playCount       Int            @default(0) @map("play_count")
+  ratingAverage   Decimal        @default(0) @map("rating_average") @db.Decimal(4, 2)
+  ratingCount     Int            @default(0) @map("rating_count")
+  releaseDate     DateTime?      @map("release_date")
+  displayOrder    Int            @default(0) @map("display_order")
+
+  // Maintenance & scheduling
+  maintenanceMode    Boolean   @default(false) @map("maintenance_mode")
+  maintenanceMessage String?   @map("maintenance_message")
+  publishedAt        DateTime? @map("published_at")
+  availableFrom      DateTime? @map("available_from")
+  availableUntil     DateTime? @map("available_until")
+
+  // Launcher / routing (data-driven — the platform never hardcodes routes)
+  launchUrl String? @map("launch_url")
+  deepLink  String? @map("deep_link")
+  routePath String? @map("route_path")
+
+  // Availability matrices (empty array = unrestricted)
+  supportedDevices    String[] @map("supported_devices")
+  supportedLanguages  String[] @map("supported_languages")
+  supportedCurrencies String[] @map("supported_currencies")
+  geoAllow            String[] @map("geo_allow")
+  geoBlock            String[] @map("geo_block")
+
+  // SEO
+  seoTitle       String?  @map("seo_title")
+  seoDescription String?  @map("seo_description")
+  seoKeywords    String[] @map("seo_keywords")
+  releaseNotes   String?  @map("release_notes") @db.Text
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  category         GameCategory         @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  provider         GameProvider         @relation(fields: [providerId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  currency         Currency?            @relation(fields: [currencyId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  launcher         GameLauncher?        @relation(fields: [launcherId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  versions         GameVersion[]
+  assets           GameAsset[]
+  tags             GameTagMapping[]
+  configurations   GameConfiguration[]
+  launchHistory    GameLaunchHistory[]
+  favourites       GameFavourite[]
+  recentlyPlayed   RecentlyPlayed[]
+  ratings          GameRating[]
+  reviews          GameReview[]
+  sessions         GameSession[]
+  results          GameResult[]
+  statistics       GameStatistics?
+  playerStatistics PlayerStatistics[]
+  leaderboards     Leaderboard[]
+  collections      GameCollectionItem[]
+
+  @@index([categoryId])
+  @@index([providerId])
+  @@index([launcherId])
+  @@index([status, visibility])
+  @@index([status, isFeatured])
+  @@index([isTrending, trendingScore])
+  @@index([popularityScore])
+  @@index([displayOrder])
+  @@index([publishedAt])
+  @@map("games")
+}
+
+model GameVersion {
+  id         String            @id @default(uuid(7)) @db.Uuid
+  gameId     String            @map("game_id") @db.Uuid
+  version    String
+  status     GameVersionStatus @default(DRAFT)
+  changelog  String?           @db.Text
+  releaseUrl String?           @map("release_url")
+  isCurrent  Boolean           @default(false) @map("is_current")
+  releasedAt DateTime?         @map("released_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([gameId, version])
+  @@index([gameId, isCurrent])
+  @@map("game_versions")
+}
+
+model GameAsset {
+  id           String        @id @default(uuid(7)) @db.Uuid
+  gameId       String        @map("game_id") @db.Uuid
+  type         GameAssetType
+  url          String
+  storageKey   String?       @map("storage_key")
+  locale       String?
+  displayOrder Int           @default(0) @map("display_order")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([gameId, type])
+  @@map("game_assets")
+}
+
+model GameTag {
+  id   String @id @default(uuid(7)) @db.Uuid
+  slug String @unique
+  name String
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  games GameTagMapping[]
+
+  @@map("game_tags")
+}
+
+model GameTagMapping {
+  id     String @id @default(uuid(7)) @db.Uuid
+  gameId String @map("game_id") @db.Uuid
+  tagId  String @map("tag_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  game Game    @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  tag  GameTag @relation(fields: [tagId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([gameId, tagId])
+  @@index([tagId])
+  @@map("game_tag_mappings")
+}
+
+model GameConfiguration {
+  id          String @id @default(uuid(7)) @db.Uuid
+  gameId      String @map("game_id") @db.Uuid
+  key         String
+  value       Json   @db.JsonB
+  environment String @default("production")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([gameId, key, environment])
+  @@index([gameId])
+  @@map("game_configurations")
+}
+
+model GameLaunchHistory {
+  id         String     @id @default(uuid(7)) @db.Uuid
+  userId     String     @map("user_id") @db.Uuid
+  gameId     String     @map("game_id") @db.Uuid
+  mode       String     @default("real")
+  ipAddress  String?    @map("ip_address")
+  deviceType DeviceType @default(WEB) @map("device_type")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([gameId, createdAt])
+  @@map("game_launch_history")
+}
+
+model GameFavourite {
+  id     String @id @default(uuid(7)) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+  gameId String @map("game_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([userId, gameId])
+  @@index([gameId])
+  @@map("game_favourites")
+}
+
+model RecentlyPlayed {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  gameId       String   @map("game_id") @db.Uuid
+  playCount    Int      @default(1) @map("play_count")
+  lastPlayedAt DateTime @default(now()) @map("last_played_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([userId, gameId])
+  @@index([userId, lastPlayedAt])
+  @@map("recently_played")
+}
+
+model GameRating {
+  id     String @id @default(uuid(7)) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+  gameId String @map("game_id") @db.Uuid
+  rating Int
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([userId, gameId])
+  @@index([gameId, rating])
+  @@map("game_ratings")
+}
+
+model GameReview {
+  id           String       @id @default(uuid(7)) @db.Uuid
+  userId       String       @map("user_id") @db.Uuid
+  gameId       String       @map("game_id") @db.Uuid
+  rating       Int?
+  title        String?
+  body         String       @db.Text
+  status       ReviewStatus @default(PENDING)
+  helpfulCount Int          @default(0) @map("helpful_count")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([userId, gameId])
+  @@index([gameId, status])
+  @@map("game_reviews")
+}

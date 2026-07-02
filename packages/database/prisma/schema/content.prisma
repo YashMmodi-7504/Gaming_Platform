@@ -1,0 +1,189 @@
+// =============================================================================
+// Content / CMS
+// =============================================================================
+
+model Banner {
+  id           String         @id @default(uuid(7)) @db.Uuid
+  title        String
+  imageUrl     String         @map("image_url")
+  linkUrl      String?        @map("link_url")
+  position     BannerPosition @default(HOME_TOP)
+  status       ContentStatus  @default(DRAFT)
+  displayOrder Int            @default(0) @map("display_order")
+  createdById  String?        @map("created_by_id") @db.Uuid
+  startsAt     DateTime?      @map("starts_at")
+  endsAt       DateTime?      @map("ends_at")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  createdBy AdminUser? @relation(fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([position, status])
+  @@index([displayOrder])
+  @@map("banners")
+}
+
+model Carousel {
+  id          String        @id @default(uuid(7)) @db.Uuid
+  slug        String        @unique
+  name        String
+  status      ContentStatus @default(DRAFT)
+  autoplay    Boolean       @default(true)
+  intervalMs  Int           @default(5000) @map("interval_ms")
+  items       Json?         @db.JsonB
+  createdById String?       @map("created_by_id") @db.Uuid
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  createdBy AdminUser? @relation(fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([status])
+  @@map("carousels")
+}
+
+model Page {
+  id              String        @id @default(uuid(7)) @db.Uuid
+  slug            String        @unique
+  title           String
+  status          ContentStatus @default(DRAFT)
+  metaTitle       String?       @map("meta_title")
+  metaDescription String?       @map("meta_description")
+  authorId        String?       @map("author_id") @db.Uuid
+  publishedAt     DateTime?     @map("published_at")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  author   AdminUser?    @relation(fields: [authorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  sections PageSection[]
+
+  @@index([status, publishedAt])
+  @@map("pages")
+}
+
+model PageSection {
+  id           String  @id @default(uuid(7)) @db.Uuid
+  pageId       String  @map("page_id") @db.Uuid
+  type         String
+  title        String?
+  content      Json    @db.JsonB
+  displayOrder Int     @default(0) @map("display_order")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([pageId, displayOrder])
+  @@map("page_sections")
+}
+
+model CMSContent {
+  id          String        @id @default(uuid(7)) @db.Uuid
+  key         String
+  title       String
+  body        String        @db.Text
+  contentType String        @default("html") @map("content_type")
+  status      ContentStatus @default(DRAFT)
+  locale      String        @default("en")
+  authorId    String?       @map("author_id") @db.Uuid
+  publishedAt DateTime?     @map("published_at")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  author AdminUser? @relation(fields: [authorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@unique([key, locale])
+  @@index([status])
+  @@map("cms_contents")
+}
+
+model Faq {
+  id           String        @id @default(uuid(7)) @db.Uuid
+  question     String
+  answer       String        @db.Text
+  category     String?
+  displayOrder Int           @default(0) @map("display_order")
+  status       ContentStatus @default(PUBLISHED)
+  createdById  String?       @map("created_by_id") @db.Uuid
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  createdBy AdminUser? @relation(fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([category, displayOrder])
+  @@map("faqs")
+}
+
+model HelpArticle {
+  id          String        @id @default(uuid(7)) @db.Uuid
+  slug        String        @unique
+  title       String
+  body        String        @db.Text
+  category    String?
+  status      ContentStatus @default(DRAFT)
+  viewCount   Int           @default(0) @map("view_count")
+  authorId    String?       @map("author_id") @db.Uuid
+  publishedAt DateTime?     @map("published_at")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  author AdminUser? @relation(fields: [authorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([status, category])
+  @@map("help_articles")
+}
+
+model MediaFolder {
+  id       String  @id @default(uuid(7)) @db.Uuid
+  name     String
+  parentId String? @map("parent_id") @db.Uuid
+  path     String?
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  parent   MediaFolder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  children MediaFolder[] @relation("FolderHierarchy")
+  media    Media[]
+
+  @@index([parentId])
+  @@map("media_folders")
+}
+
+model Media {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  folderId     String?   @map("folder_id") @db.Uuid
+  type         MediaType @default(IMAGE)
+  url          String
+  storageKey   String?   @map("storage_key")
+  fileName     String    @map("file_name")
+  mimeType     String?   @map("mime_type")
+  size         Int?
+  width        Int?
+  height       Int?
+  uploadedById String?   @map("uploaded_by_id") @db.Uuid
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  folder     MediaFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  uploadedBy AdminUser?   @relation(fields: [uploadedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([folderId])
+  @@index([type])
+  @@map("media")
+}

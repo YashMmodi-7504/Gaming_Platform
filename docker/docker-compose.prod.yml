@@ -1,0 +1,78 @@
+# =============================================================================
+# Production override — apply on top of docker-compose.yml.
+#
+#   docker compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml up -d
+#
+# Adds resource limits/reservations, restart policies, log rotation and a
+# scalable backend/frontend. Tune the numbers to your hosts. Container ports are
+# not published to the host here — front everything with the nginx (or an
+# external load balancer / ingress).
+# =============================================================================
+
+services:
+  postgres:
+    deploy:
+      resources:
+        limits: { cpus: '2.0', memory: 2G }
+        reservations: { cpus: '0.5', memory: 1G }
+    logging:
+      driver: json-file
+      options: { max-size: '20m', max-file: '5' }
+
+  redis:
+    command: ['redis-server', '--appendonly', 'yes', '--maxmemory', '512mb', '--maxmemory-policy', 'allkeys-lru']
+    deploy:
+      resources:
+        limits: { cpus: '1.0', memory: 768M }
+        reservations: { cpus: '0.25', memory: 256M }
+    logging:
+      driver: json-file
+      options: { max-size: '20m', max-file: '5' }
+
+  backend:
+    ports: []
+    deploy:
+      replicas: 2
+      resources:
+        limits: { cpus: '1.5', memory: 1G }
+        reservations: { cpus: '0.5', memory: 512M }
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      update_config:
+        order: start-first # zero-downtime: new task healthy before old stops
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+      rollback_config:
+        parallelism: 1
+        order: stop-first
+    logging:
+      driver: json-file
+      options: { max-size: '20m', max-file: '5' }
+
+  frontend:
+    ports: []
+    deploy:
+      replicas: 2
+      resources:
+        limits: { cpus: '1.0', memory: 768M }
+        reservations: { cpus: '0.25', memory: 256M }
+      update_config:
+        order: start-first
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+    logging:
+      driver: json-file
+      options: { max-size: '20m', max-file: '5' }
+
+  nginx:
+    deploy:
+      resources:
+        limits: { cpus: '0.5', memory: 256M }
+    logging:
+      driver: json-file
+      options: { max-size: '20m', max-file: '5' }

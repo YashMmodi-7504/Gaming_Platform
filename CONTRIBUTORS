@@ -1,0 +1,21 @@
+# Contributors
+
+The Gaming Platform is developed and maintained by LogicRest AI.
+
+## Maintainers
+
+- LogicRest AI <info@logicrest.ai> — Platform engineering, architecture, release management
+
+## Acknowledgements
+
+This release (v1.0.0) was prepared through a structured, multi-phase engineering
+program covering enterprise foundation, game engines, financial systems,
+tournaments, AI, operations, and three release-candidate hardening passes
+(performance, security, deployment).
+
+The platform stands on the work of the open-source community; see NOTICE for the
+third-party components that make it possible.
+
+---
+To be credited here, contributions must be submitted under the terms of the
+project LICENSE and the contribution agreement. Contact info@logicrest.ai.

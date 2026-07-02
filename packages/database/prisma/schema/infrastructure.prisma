@@ -1,0 +1,174 @@
+// =============================================================================
+// Infrastructure — storage, webhooks, jobs, API usage & rate limiting
+// =============================================================================
+
+model StorageProvider {
+  id        String              @id @default(uuid(7)) @db.Uuid
+  code      String              @unique
+  name      String
+  type      StorageProviderType @default(S3)
+  config    Json?               @db.JsonB
+  isActive  Boolean             @default(true) @map("is_active")
+  isDefault Boolean             @default(false) @map("is_default")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  files FileStorage[]
+
+  @@index([isActive])
+  @@map("storage_providers")
+}
+
+model FileStorage {
+  id         String  @id @default(uuid(7)) @db.Uuid
+  providerId String? @map("provider_id") @db.Uuid
+  key        String  @unique
+  url        String
+  bucket     String?
+  fileName   String  @map("file_name")
+  mimeType   String? @map("mime_type")
+  size       Int?
+  checksum   String?
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  provider StorageProvider? @relation(fields: [providerId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([providerId])
+  @@map("file_storage")
+}
+
+model Webhook {
+  id          String        @id @default(uuid(7)) @db.Uuid
+  url         String
+  events      String[]
+  secret      String?
+  status      WebhookStatus @default(ACTIVE)
+  description String?
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  logs WebhookLog[]
+
+  @@index([status])
+  @@map("webhooks")
+}
+
+model WebhookLog {
+  id           String         @id @default(uuid(7)) @db.Uuid
+  webhookId    String         @map("webhook_id") @db.Uuid
+  event        String
+  payload      Json           @db.JsonB
+  status       DeliveryStatus @default(PENDING)
+  statusCode   Int?           @map("status_code")
+  attempt      Int            @default(1)
+  responseBody String?        @map("response_body") @db.Text
+  deliveredAt  DateTime?      @map("delivered_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  webhook Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([webhookId, createdAt])
+  @@index([status])
+  @@map("webhook_logs")
+}
+
+model JobQueue {
+  id          String  @id @default(uuid(7)) @db.Uuid
+  name        String  @unique
+  concurrency Int     @default(1)
+  isPaused    Boolean @default(false) @map("is_paused")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  jobs BackgroundJob[]
+
+  @@map("job_queues")
+}
+
+model BackgroundJob {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  queueId      String?   @map("queue_id") @db.Uuid
+  name         String
+  status       JobStatus @default(PENDING)
+  payload      Json?     @db.JsonB
+  priority     Int       @default(0)
+  attempts     Int       @default(0)
+  maxAttempts  Int       @default(3) @map("max_attempts")
+  failedReason String?   @map("failed_reason") @db.Text
+  scheduledAt  DateTime? @map("scheduled_at")
+  startedAt    DateTime? @map("started_at")
+  completedAt  DateTime? @map("completed_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  queue JobQueue? @relation(fields: [queueId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([queueId, status])
+  @@index([status, scheduledAt])
+  @@index([status, priority])
+  @@map("background_jobs")
+}
+
+model ScheduledTask {
+  id        String              @id @default(uuid(7)) @db.Uuid
+  name      String              @unique
+  cron      String
+  status    ScheduledTaskStatus @default(ACTIVE)
+  payload   Json?               @db.JsonB
+  lastRunAt DateTime?           @map("last_run_at")
+  nextRunAt DateTime?           @map("next_run_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([status, nextRunAt])
+  @@map("scheduled_tasks")
+}
+
+model ApiUsage {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  userId         String?  @map("user_id") @db.Uuid
+  apiKeyId       String?  @map("api_key_id") @db.Uuid
+  endpoint       String
+  method         String
+  statusCode     Int      @map("status_code")
+  responseTimeMs Int      @map("response_time_ms")
+  ipAddress      String?  @map("ip_address")
+  occurredAt     DateTime @default(now()) @map("occurred_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([userId, occurredAt])
+  @@index([endpoint, occurredAt])
+  @@index([apiKeyId])
+  @@map("api_usage")
+}
+
+model RateLimitLog {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  userId      String?  @map("user_id") @db.Uuid
+  identifier  String
+  key         String
+  endpoint    String?
+  count       Int      @default(1)
+  isBlocked   Boolean  @default(false) @map("is_blocked")
+  windowStart DateTime @map("window_start")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([identifier, windowStart])
+  @@index([key])
+  @@index([userId])
+  @@map("rate_limit_logs")
+}

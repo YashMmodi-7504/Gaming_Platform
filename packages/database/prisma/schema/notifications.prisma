@@ -1,0 +1,146 @@
+// =============================================================================
+// Notifications, Announcements & Inbox
+// =============================================================================
+
+model NotificationTemplate {
+  id           String              @id @default(uuid(7)) @db.Uuid
+  code         String              @unique
+  name         String
+  type         NotificationType
+  channel      NotificationChannel
+  locale       String              @default("en")
+  subject      String?
+  bodyTemplate String              @map("body_template") @db.Text
+  isActive     Boolean             @default(true) @map("is_active")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  notifications Notification[]
+
+  @@unique([code, locale])
+  @@index([type, channel])
+  @@map("notification_templates")
+}
+
+model Notification {
+  id         String              @id @default(uuid(7)) @db.Uuid
+  userId     String              @map("user_id") @db.Uuid
+  templateId String?             @map("template_id") @db.Uuid
+  type       NotificationType
+  channel    NotificationChannel @default(IN_APP)
+  status     NotificationStatus  @default(PENDING)
+  title      String
+  body       String              @db.Text
+  data       Json?               @db.JsonB
+  sentAt     DateTime?           @map("sent_at")
+  readAt     DateTime?           @map("read_at")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  user     User                  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  template NotificationTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([userId, status])
+  @@index([userId, createdAt])
+  @@index([type])
+  @@map("notifications")
+}
+
+model NotificationPreference {
+  id      String              @id @default(uuid(7)) @db.Uuid
+  userId  String              @map("user_id") @db.Uuid
+  type    NotificationType
+  channel NotificationChannel
+  enabled Boolean             @default(true)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([userId, type, channel])
+  @@index([userId])
+  @@map("notification_preferences")
+}
+
+model Announcement {
+  id          String               @id @default(uuid(7)) @db.Uuid
+  title       String
+  body        String               @db.Text
+  audience    AnnouncementAudience @default(ALL)
+  status      ContentStatus        @default(DRAFT)
+  createdById String?              @map("created_by_id") @db.Uuid
+  publishedAt DateTime?            @map("published_at")
+  expiresAt   DateTime?            @map("expires_at")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  createdBy AdminUser?         @relation(fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  reads     AnnouncementRead[]
+
+  @@index([status, publishedAt])
+  @@index([audience])
+  @@map("announcements")
+}
+
+model AnnouncementRead {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  announcementId String   @map("announcement_id") @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  readAt         DateTime @default(now()) @map("read_at")
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([announcementId, userId])
+  @@index([userId])
+  @@map("announcement_reads")
+}
+
+model InboxMessage {
+  id          String        @id @default(uuid(7)) @db.Uuid
+  senderId    String?       @map("sender_id") @db.Uuid
+  recipientId String        @map("recipient_id") @db.Uuid
+  parentId    String?       @map("parent_id") @db.Uuid
+  subject     String
+  body        String        @db.Text
+  status      MessageStatus @default(UNREAD)
+  readAt      DateTime?     @map("read_at")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  sender      User?               @relation("MessageSender", fields: [senderId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  recipient   User                @relation("MessageRecipient", fields: [recipientId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  parent      InboxMessage?       @relation("MessageThread", fields: [parentId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  replies     InboxMessage[]      @relation("MessageThread")
+  attachments MessageAttachment[]
+
+  @@index([recipientId, status])
+  @@index([senderId])
+  @@index([parentId])
+  @@map("inbox_messages")
+}
+
+model MessageAttachment {
+  id        String  @id @default(uuid(7)) @db.Uuid
+  messageId String  @map("message_id") @db.Uuid
+  fileUrl   String  @map("file_url")
+  fileName  String? @map("file_name")
+  mimeType  String? @map("mime_type")
+  size      Int?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  message InboxMessage @relation(fields: [messageId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([messageId])
+  @@map("message_attachments")
+}

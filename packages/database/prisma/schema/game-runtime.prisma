@@ -1,0 +1,45 @@
+// =============================================================================
+// Game Runtime — persisted save-state and replays for the runtime engine.
+// Additive: integrates with GameSession via a 1-1 save state and N replays.
+// =============================================================================
+
+model GameRuntimeState {
+  id              String  @id @default(uuid(7)) @db.Uuid
+  sessionId       String  @unique @map("session_id") @db.Uuid
+  userId          String  @map("user_id") @db.Uuid
+  gameId          String  @map("game_id") @db.Uuid
+  pluginKey       String  @map("plugin_key")
+  state           Json    @db.JsonB
+  snapshotVersion Int     @default(0) @map("snapshot_version")
+  checksum        String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  session GameSession @relation(fields: [sessionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId])
+  @@index([gameId])
+  @@map("game_runtime_states")
+}
+
+model GameReplay {
+  id         String @id @default(uuid(7)) @db.Uuid
+  sessionId  String @map("session_id") @db.Uuid
+  userId     String @map("user_id") @db.Uuid
+  gameId     String @map("game_id") @db.Uuid
+  pluginKey  String @map("plugin_key")
+  seed       String
+  frames     Json   @db.JsonB
+  frameCount Int    @default(0) @map("frame_count")
+  durationMs Int    @default(0) @map("duration_ms")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  session GameSession @relation(fields: [sessionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([sessionId, createdAt])
+  @@index([userId, createdAt])
+  @@index([gameId])
+  @@map("game_replays")
+}
