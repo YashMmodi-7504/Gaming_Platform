@@ -310,8 +310,8 @@ importers:
         specifier: ^2.6.0
         version: 2.6.1
       three:
-        specifier: ^0.171.0
-        version: 0.171.0
+        specifier: ^0.185.1
+        version: 0.185.1
       web-vitals:
         specifier: ^4
         version: 4.2.4
@@ -6585,8 +6585,8 @@ packages:
     resolution: {integrity: sha512-OEI0IWCe+Dw46019YLl6V10Us5bi574EvlJEOcAkB29IzQ/mYD1A6RyNHLjZPiHCmuodxvgF6U+vZO1L15lxVA==}
     engines: {node: '>=0.2.6'}
 
-  three@0.171.0:
-    resolution: {integrity: sha512-Y/lAXPaKZPcEdkKjh0JOAHVv8OOnv/NDJqm0wjfCzyQmfKxV7zvkwsnBgPBKTzJHToSOhRGQAGbPJObT59B/PQ==}
+  three@0.185.1:
+    resolution: {integrity: sha512-5aojFCXKwnjBRZvUnt3WFfEcvUJgkN5LlijRFN95hMy8WVkG4I0QNcJE+OuWvuJ0bOdStrbfXn0pkd6/QyiAlg==}
 
   through@2.3.8:
     resolution: {integrity: sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==}
@@ -13482,7 +13482,7 @@ snapshots:
 
   thirty-two@1.0.2: {}
 
-  three@0.171.0: {}
+  three@0.185.1: {}
 
   through@2.3.8: {}
 
