@@ -1,0 +1,225 @@
+// =============================================================================
+// Administration, Settings, Audit & System Logs
+// =============================================================================
+
+model AdminUser {
+  id           String      @id @default(uuid(7)) @db.Uuid
+  userId       String?     @unique @map("user_id") @db.Uuid
+  roleId       String      @map("role_id") @db.Uuid
+  email        String      @unique
+  username     String      @unique
+  passwordHash String      @map("password_hash")
+  status       AdminStatus @default(ACTIVE)
+  lastLoginAt  DateTime?   @map("last_login_at")
+  lastLoginIp  String?     @map("last_login_ip")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  user                User?               @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  role                AdminRole           @relation(fields: [roleId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  auditLogs           AdminAuditLog[]
+  maintenanceWindows  MaintenanceWindow[]
+  reviewedWithdrawals WithdrawalRequest[]
+  announcements       Announcement[]
+  banners             Banner[]
+  carousels           Carousel[]
+  pages               Page[]
+  cmsContents         CMSContent[]
+  helpArticles        HelpArticle[]
+  faqs                Faq[]
+  media               Media[]
+
+  @@index([roleId])
+  @@index([status])
+  @@map("admin_users")
+}
+
+model AdminRole {
+  id          String  @id @default(uuid(7)) @db.Uuid
+  name        String  @unique
+  slug        String  @unique
+  level       Int     @default(0)
+  description String?
+  isSystem    Boolean @default(false) @map("is_system")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  admins      AdminUser[]
+  permissions AdminRolePermission[]
+
+  @@index([level])
+  @@map("admin_roles")
+}
+
+model AdminPermission {
+  id          String  @id @default(uuid(7)) @db.Uuid
+  name        String  @unique
+  slug        String  @unique
+  resource    String
+  action      String
+  description String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  roles AdminRolePermission[]
+
+  @@unique([resource, action])
+  @@map("admin_permissions")
+}
+
+model AdminRolePermission {
+  id           String @id @default(uuid(7)) @db.Uuid
+  roleId       String @map("role_id") @db.Uuid
+  permissionId String @map("permission_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  role       AdminRole       @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  permission AdminPermission @relation(fields: [permissionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([permissionId])
+  @@map("admin_role_permissions")
+}
+
+model AdminAuditLog {
+  id         String      @id @default(uuid(7)) @db.Uuid
+  adminId    String?     @map("admin_id") @db.Uuid
+  action     AuditAction
+  resource   String
+  resourceId String?     @map("resource_id")
+  ipAddress  String?     @map("ip_address")
+  before     Json?       @db.JsonB
+  after      Json?       @db.JsonB
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  admin AdminUser? @relation(fields: [adminId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([adminId, createdAt])
+  @@index([resource, resourceId])
+  @@index([action])
+  @@map("admin_audit_logs")
+}
+
+model FeatureFlag {
+  id                String  @id @default(uuid(7)) @db.Uuid
+  key               String
+  name              String
+  description       String?
+  isEnabled         Boolean @default(false) @map("is_enabled")
+  rolloutPercentage Int     @default(0) @map("rollout_percentage")
+  conditions        Json?   @db.JsonB
+  environment       String  @default("production")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([key, environment])
+  @@index([isEnabled])
+  @@map("feature_flags")
+}
+
+model SystemSetting {
+  id          String           @id @default(uuid(7)) @db.Uuid
+  key         String           @unique
+  valueType   SettingValueType @default(STRING) @map("value_type")
+  value       Json             @db.JsonB
+  description String?
+  isPublic    Boolean          @default(false) @map("is_public")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("system_settings")
+}
+
+model ApplicationSetting {
+  id          String           @id @default(uuid(7)) @db.Uuid
+  scope       String
+  key         String
+  valueType   SettingValueType @default(STRING) @map("value_type")
+  value       Json             @db.JsonB
+  environment String           @default("production")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([scope, key, environment])
+  @@map("application_settings")
+}
+
+model MaintenanceWindow {
+  id               String            @id @default(uuid(7)) @db.Uuid
+  title            String
+  description      String?           @db.Text
+  status           MaintenanceStatus @default(SCHEDULED)
+  affectedServices String[]          @map("affected_services")
+  createdById      String?           @map("created_by_id") @db.Uuid
+  startsAt         DateTime          @map("starts_at")
+  endsAt           DateTime          @map("ends_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  createdBy AdminUser? @relation(fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([status, startsAt])
+  @@map("maintenance_windows")
+}
+
+model SystemLog {
+  id       String   @id @default(uuid(7)) @db.Uuid
+  level    LogLevel @default(INFO)
+  context  String?
+  message  String   @db.Text
+  metadata Json?    @db.JsonB
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([level, createdAt])
+  @@index([context])
+  @@map("system_logs")
+}
+
+model ErrorLog {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  level       LogLevel @default(ERROR)
+  message     String   @db.Text
+  stack       String?  @db.Text
+  context     String?
+  fingerprint String?
+  userId      String?  @map("user_id") @db.Uuid
+  isResolved  Boolean  @default(false) @map("is_resolved")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([fingerprint])
+  @@index([isResolved, createdAt])
+  @@map("error_logs")
+}
+
+model AuditTrail {
+  id         String      @id @default(uuid(7)) @db.Uuid
+  userId     String?     @map("user_id") @db.Uuid
+  action     AuditAction
+  entityType String      @map("entity_type")
+  entityId   String?     @map("entity_id")
+  changes    Json?       @db.JsonB
+  ipAddress  String?     @map("ip_address")
+  userAgent  String?     @map("user_agent")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([entityType, entityId])
+  @@index([action])
+  @@map("audit_trails")
+}

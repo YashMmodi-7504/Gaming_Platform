@@ -1,0 +1,122 @@
+// =============================================================================
+// Analytics — event streams and pre-aggregated reporting tables
+// =============================================================================
+
+model Event {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  userId     String?  @map("user_id") @db.Uuid
+  name       String
+  category   String?
+  sessionId  String?  @map("session_id")
+  properties Json?    @db.JsonB
+  occurredAt DateTime @default(now()) @map("occurred_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([name, occurredAt])
+  @@index([userId, occurredAt])
+  @@index([category])
+  @@map("events")
+}
+
+model PageView {
+  id         String     @id @default(uuid(7)) @db.Uuid
+  userId     String?    @map("user_id") @db.Uuid
+  sessionId  String?    @map("session_id")
+  path       String
+  referrer   String?
+  deviceType DeviceType @default(WEB) @map("device_type")
+  durationMs Int?       @map("duration_ms")
+  occurredAt DateTime   @default(now()) @map("occurred_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([path, occurredAt])
+  @@index([userId, occurredAt])
+  @@map("page_views")
+}
+
+model UserActivity {
+  id          String       @id @default(uuid(7)) @db.Uuid
+  userId      String       @map("user_id") @db.Uuid
+  type        ActivityType
+  description String?
+  ipAddress   String?      @map("ip_address")
+  metadata    Json?        @db.JsonB
+  occurredAt  DateTime     @default(now()) @map("occurred_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId, occurredAt])
+  @@index([type, occurredAt])
+  @@map("user_activities")
+}
+
+model DeviceAnalytics {
+  id           String     @id @default(uuid(7)) @db.Uuid
+  userId       String?    @map("user_id") @db.Uuid
+  deviceType   DeviceType @map("device_type")
+  os           String?
+  browser      String?
+  sessionCount Int        @default(0) @map("session_count")
+  periodDate   DateTime   @map("period_date") @db.Date
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([periodDate])
+  @@index([deviceType])
+  @@map("device_analytics")
+}
+
+model GeoAnalytics {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  countryCode  String   @map("country_code")
+  region       String?
+  city         String?
+  userCount    Int      @default(0) @map("user_count")
+  sessionCount Int      @default(0) @map("session_count")
+  periodDate   DateTime @map("period_date") @db.Date
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([countryCode, region, city, periodDate])
+  @@index([periodDate])
+  @@map("geo_analytics")
+}
+
+model RevenueAnalytics {
+  id                 String   @id @default(uuid(7)) @db.Uuid
+  periodDate         DateTime @map("period_date") @db.Date
+  currencyCode       String?  @map("currency_code")
+  grossRevenue       Decimal  @default(0) @map("gross_revenue") @db.Decimal(38, 18)
+  netRevenue         Decimal  @default(0) @map("net_revenue") @db.Decimal(38, 18)
+  totalDeposits      Decimal  @default(0) @map("total_deposits") @db.Decimal(38, 18)
+  totalWithdrawals   Decimal  @default(0) @map("total_withdrawals") @db.Decimal(38, 18)
+  grossGamingRevenue Decimal  @default(0) @map("gross_gaming_revenue") @db.Decimal(38, 18)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([periodDate, currencyCode])
+  @@index([periodDate])
+  @@map("revenue_analytics")
+}
+
+model TrafficAnalytics {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  periodDate     DateTime @map("period_date") @db.Date
+  source         String?
+  medium         String?
+  sessions       Int      @default(0)
+  uniqueVisitors Int      @default(0) @map("unique_visitors")
+  bounceRate     Decimal  @default(0) @map("bounce_rate") @db.Decimal(6, 4)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([periodDate, source, medium])
+  @@index([periodDate])
+  @@map("traffic_analytics")
+}

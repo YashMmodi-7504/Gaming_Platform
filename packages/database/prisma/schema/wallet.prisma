@@ -1,0 +1,423 @@
+// =============================================================================
+// Wallet System, Double-Entry Ledger & Payments
+// =============================================================================
+
+model Currency {
+  id       String       @id @default(uuid(7)) @db.Uuid
+  code     String       @unique
+  name     String
+  symbol   String
+  type     CurrencyType @default(FIAT)
+  decimals Int          @default(2)
+  isActive Boolean      @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  wallets            Wallet[]
+  baseExchangeRates  ExchangeRate[]      @relation("BaseCurrency")
+  quoteExchangeRates ExchangeRate[]      @relation("QuoteCurrency")
+  walletTransactions WalletTransaction[]
+  ledgers            Ledger[]
+  ledgerEntries      LedgerEntry[]
+  deposits           DepositRequest[]
+  withdrawals        WithdrawalRequest[]
+  refunds            Refund[]
+  bonusWallets       BonusWallet[]
+  rewardWallets      RewardWallet[]
+  lockedFunds        LockedFunds[]
+  userPreferences    UserPreferences[]
+  games              Game[]
+  gameSessions       GameSession[]
+
+  @@index([type, isActive])
+  @@map("currencies")
+}
+
+model ExchangeRate {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  baseCurrencyId  String    @map("base_currency_id") @db.Uuid
+  quoteCurrencyId String    @map("quote_currency_id") @db.Uuid
+  rate            Decimal   @db.Decimal(38, 18)
+  provider        String?
+  validFrom       DateTime  @default(now()) @map("valid_from")
+  validTo         DateTime? @map("valid_to")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  baseCurrency  Currency @relation("BaseCurrency", fields: [baseCurrencyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  quoteCurrency Currency @relation("QuoteCurrency", fields: [quoteCurrencyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([baseCurrencyId, quoteCurrencyId, validFrom])
+  @@index([quoteCurrencyId])
+  @@index([validFrom, validTo])
+  @@map("exchange_rates")
+}
+
+model TransactionType {
+  id          String  @id @default(uuid(7)) @db.Uuid
+  code        String  @unique
+  name        String
+  category    String?
+  description String?
+  isActive    Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  transactions WalletTransaction[]
+
+  @@map("transaction_types")
+}
+
+model TransactionStatus {
+  id      String  @id @default(uuid(7)) @db.Uuid
+  code    String  @unique
+  name    String
+  isFinal Boolean @default(false) @map("is_final")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  transactions WalletTransaction[]
+
+  @@map("transaction_statuses")
+}
+
+model Wallet {
+  id         String       @id @default(uuid(7)) @db.Uuid
+  userId     String       @map("user_id") @db.Uuid
+  currencyId String       @map("currency_id") @db.Uuid
+  type       WalletType   @default(MAIN)
+  status     WalletStatus @default(ACTIVE)
+  isPrimary  Boolean      @default(false) @map("is_primary")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  currency      Currency            @relation(fields: [currencyId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  balance       WalletBalance?
+  transactions  WalletTransaction[]
+  ledgerEntries LedgerEntry[]
+  lockedFunds   LockedFunds[]
+  deposits      DepositRequest[]
+  withdrawals   WithdrawalRequest[]
+
+  @@unique([userId, currencyId, type])
+  @@index([userId])
+  @@index([currencyId])
+  @@index([status])
+  @@map("wallets")
+}
+
+model WalletBalance {
+  id        String  @id @default(uuid(7)) @db.Uuid
+  walletId  String  @unique @map("wallet_id") @db.Uuid
+  available Decimal @default(0) @db.Decimal(38, 18)
+  locked    Decimal @default(0) @db.Decimal(38, 18)
+  pending   Decimal @default(0) @db.Decimal(38, 18)
+  total     Decimal @default(0) @db.Decimal(38, 18)
+  version   Int     @default(0)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("wallet_balances")
+}
+
+model WalletTransaction {
+  id                   String  @id @default(uuid(7)) @db.Uuid
+  userId               String  @map("user_id") @db.Uuid
+  walletId             String  @map("wallet_id") @db.Uuid
+  currencyId           String  @map("currency_id") @db.Uuid
+  typeId               String  @map("type_id") @db.Uuid
+  statusId             String  @map("status_id") @db.Uuid
+  reference            String  @unique
+  idempotencyKey       String? @unique @map("idempotency_key")
+  amount               Decimal @db.Decimal(38, 18)
+  fee                  Decimal @default(0) @db.Decimal(38, 18)
+  balanceBefore        Decimal @map("balance_before") @db.Decimal(38, 18)
+  balanceAfter         Decimal @map("balance_after") @db.Decimal(38, 18)
+  description          String?
+  relatedTransactionId String? @map("related_transaction_id") @db.Uuid
+  metadata             Json?   @db.JsonB
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user               User                @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  wallet             Wallet              @relation(fields: [walletId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  currency           Currency            @relation(fields: [currencyId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  type               TransactionType     @relation(fields: [typeId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  status             TransactionStatus   @relation(fields: [statusId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  relatedTransaction WalletTransaction?  @relation("RelatedTransaction", fields: [relatedTransactionId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  childTransactions  WalletTransaction[] @relation("RelatedTransaction")
+  ledger             Ledger?
+  deposit            DepositRequest?
+  withdrawal         WithdrawalRequest?
+
+  @@index([userId, createdAt])
+  @@index([walletId, createdAt])
+  @@index([statusId])
+  @@index([typeId])
+  @@index([currencyId])
+  @@map("wallet_transactions")
+}
+
+model Ledger {
+  id                  String            @id @default(uuid(7)) @db.Uuid
+  reference           String            @unique
+  walletTransactionId String?           @unique @map("wallet_transaction_id") @db.Uuid
+  currencyId          String            @map("currency_id") @db.Uuid
+  description         String?
+  status              LedgerEntryStatus @default(POSTED)
+  postedAt            DateTime          @default(now()) @map("posted_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  walletTransaction WalletTransaction? @relation(fields: [walletTransactionId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  currency          Currency           @relation(fields: [currencyId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  entries           LedgerEntry[]
+
+  @@index([currencyId])
+  @@index([postedAt])
+  @@map("ledgers")
+}
+
+model LedgerEntry {
+  id           String            @id @default(uuid(7)) @db.Uuid
+  ledgerId     String            @map("ledger_id") @db.Uuid
+  walletId     String            @map("wallet_id") @db.Uuid
+  currencyId   String            @map("currency_id") @db.Uuid
+  direction    LedgerDirection
+  amount       Decimal           @db.Decimal(38, 18)
+  balanceAfter Decimal?          @map("balance_after") @db.Decimal(38, 18)
+  status       LedgerEntryStatus @default(POSTED)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  ledger   Ledger   @relation(fields: [ledgerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  wallet   Wallet   @relation(fields: [walletId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  currency Currency @relation(fields: [currencyId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([ledgerId])
+  @@index([walletId, createdAt])
+  @@index([direction])
+  @@map("ledger_entries")
+}
+
+model PaymentGateway {
+  id               String              @id @default(uuid(7)) @db.Uuid
+  code             String              @unique
+  name             String
+  provider         String
+  supportedMethods PaymentMethodType[] @map("supported_methods")
+  isActive         Boolean             @default(true) @map("is_active")
+  config           Json?               @db.JsonB
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  paymentMethods PaymentMethod[]
+  deposits       DepositRequest[]
+  withdrawals    WithdrawalRequest[]
+
+  @@map("payment_gateways")
+}
+
+model PaymentMethod {
+  id         String            @id @default(uuid(7)) @db.Uuid
+  userId     String            @map("user_id") @db.Uuid
+  gatewayId  String?           @map("gateway_id") @db.Uuid
+  type       PaymentMethodType
+  provider   String?
+  label      String?
+  last4      String?
+  brand      String?
+  token      String?
+  isDefault  Boolean           @default(false) @map("is_default")
+  isVerified Boolean           @default(false) @map("is_verified")
+  expiresAt  DateTime?         @map("expires_at")
+  metadata   Json?             @db.JsonB
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  gateway     PaymentGateway?     @relation(fields: [gatewayId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  deposits    DepositRequest[]
+  withdrawals WithdrawalRequest[]
+
+  @@index([userId])
+  @@index([gatewayId])
+  @@map("payment_methods")
+}
+
+model DepositRequest {
+  id              String        @id @default(uuid(7)) @db.Uuid
+  userId          String        @map("user_id") @db.Uuid
+  walletId        String        @map("wallet_id") @db.Uuid
+  currencyId      String        @map("currency_id") @db.Uuid
+  gatewayId       String?       @map("gateway_id") @db.Uuid
+  paymentMethodId String?       @map("payment_method_id") @db.Uuid
+  transactionId   String?       @unique @map("transaction_id") @db.Uuid
+  reference       String        @unique
+  externalRef     String?       @map("external_ref")
+  amount          Decimal       @db.Decimal(38, 18)
+  fee             Decimal       @default(0) @db.Decimal(38, 18)
+  netAmount       Decimal       @map("net_amount") @db.Decimal(38, 18)
+  status          DepositStatus @default(PENDING)
+  metadata        Json?         @db.JsonB
+  completedAt     DateTime?     @map("completed_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user          User               @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  wallet        Wallet             @relation(fields: [walletId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  currency      Currency           @relation(fields: [currencyId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  gateway       PaymentGateway?    @relation(fields: [gatewayId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  paymentMethod PaymentMethod?     @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  transaction   WalletTransaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  refunds       Refund[]
+
+  @@index([userId, createdAt])
+  @@index([status])
+  @@index([gatewayId])
+  @@map("deposit_requests")
+}
+
+model WithdrawalRequest {
+  id              String           @id @default(uuid(7)) @db.Uuid
+  userId          String           @map("user_id") @db.Uuid
+  walletId        String           @map("wallet_id") @db.Uuid
+  currencyId      String           @map("currency_id") @db.Uuid
+  gatewayId       String?          @map("gateway_id") @db.Uuid
+  paymentMethodId String?          @map("payment_method_id") @db.Uuid
+  transactionId   String?          @unique @map("transaction_id") @db.Uuid
+  reviewedById    String?          @map("reviewed_by_id") @db.Uuid
+  reference       String           @unique
+  externalRef     String?          @map("external_ref")
+  amount          Decimal          @db.Decimal(38, 18)
+  fee             Decimal          @default(0) @db.Decimal(38, 18)
+  netAmount       Decimal          @map("net_amount") @db.Decimal(38, 18)
+  status          WithdrawalStatus @default(PENDING)
+  rejectionReason String?          @map("rejection_reason")
+  metadata        Json?            @db.JsonB
+  approvedAt      DateTime?        @map("approved_at")
+  completedAt     DateTime?        @map("completed_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user          User               @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  wallet        Wallet             @relation(fields: [walletId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  currency      Currency           @relation(fields: [currencyId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  gateway       PaymentGateway?    @relation(fields: [gatewayId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  paymentMethod PaymentMethod?     @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  transaction   WalletTransaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  reviewedBy    AdminUser?         @relation(fields: [reviewedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([status])
+  @@index([reviewedById])
+  @@map("withdrawal_requests")
+}
+
+model Refund {
+  id               String       @id @default(uuid(7)) @db.Uuid
+  userId           String       @map("user_id") @db.Uuid
+  depositRequestId String?      @map("deposit_request_id") @db.Uuid
+  currencyId       String       @map("currency_id") @db.Uuid
+  reference        String       @unique
+  amount           Decimal      @db.Decimal(38, 18)
+  status           RefundStatus @default(REQUESTED)
+  reason           String?
+  processedAt      DateTime?    @map("processed_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user     User            @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  deposit  DepositRequest? @relation(fields: [depositRequestId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  currency Currency        @relation(fields: [currencyId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([userId])
+  @@index([depositRequestId])
+  @@index([status])
+  @@map("refunds")
+}
+
+model BonusWallet {
+  id                  String       @id @default(uuid(7)) @db.Uuid
+  userId              String       @map("user_id") @db.Uuid
+  currencyId          String       @map("currency_id") @db.Uuid
+  sourcePromotionId   String?      @map("source_promotion_id") @db.Uuid
+  balance             Decimal      @default(0) @db.Decimal(38, 18)
+  wageringRequirement Decimal      @default(0) @map("wagering_requirement") @db.Decimal(38, 18)
+  wageringProgress    Decimal      @default(0) @map("wagering_progress") @db.Decimal(38, 18)
+  status              WalletStatus @default(ACTIVE)
+  expiresAt           DateTime?    @map("expires_at")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  currency  Currency   @relation(fields: [currencyId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  promotion Promotion? @relation(fields: [sourcePromotionId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([userId])
+  @@index([currencyId])
+  @@index([status, expiresAt])
+  @@map("bonus_wallets")
+}
+
+model RewardWallet {
+  id             String       @id @default(uuid(7)) @db.Uuid
+  userId         String       @map("user_id") @db.Uuid
+  currencyId     String?      @map("currency_id") @db.Uuid
+  pointsBalance  Decimal      @default(0) @map("points_balance") @db.Decimal(38, 8)
+  tierMultiplier Decimal      @default(1) @map("tier_multiplier") @db.Decimal(10, 4)
+  status         WalletStatus @default(ACTIVE)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  currency Currency? @relation(fields: [currencyId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([userId])
+  @@map("reward_wallets")
+}
+
+model LockedFunds {
+  id         String           @id @default(uuid(7)) @db.Uuid
+  userId     String           @map("user_id") @db.Uuid
+  walletId   String           @map("wallet_id") @db.Uuid
+  currencyId String           @map("currency_id") @db.Uuid
+  amount     Decimal          @db.Decimal(38, 18)
+  status     LockedFundStatus @default(LOCKED)
+  reason     String?
+  releaseAt  DateTime?        @map("release_at")
+  releasedAt DateTime?        @map("released_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  wallet   Wallet   @relation(fields: [walletId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  currency Currency @relation(fields: [currencyId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([userId])
+  @@index([walletId])
+  @@index([status])
+  @@map("locked_funds")
+}

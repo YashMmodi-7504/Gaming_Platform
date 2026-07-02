@@ -1,0 +1,2 @@
+/* The UI package owns the design tokens, base layer, and Tailwind directives. */
+@import '@gaming-platform/ui/styles.css';

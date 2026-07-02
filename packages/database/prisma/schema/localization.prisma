@@ -1,0 +1,96 @@
+// =============================================================================
+// Localization — geography, languages, timezones
+// (Currency is defined in wallet.prisma and shared across domains.)
+// =============================================================================
+
+model Country {
+  id           String  @id @default(uuid(7)) @db.Uuid
+  code         String  @unique
+  code3        String? @unique
+  name         String
+  phoneCode    String? @map("phone_code")
+  currencyCode String? @map("currency_code")
+  flagEmoji    String? @map("flag_emoji")
+  isActive     Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  states    State[]
+  cities    City[]
+  addresses Address[]
+  profiles  UserProfile[]
+
+  @@index([isActive])
+  @@map("countries")
+}
+
+model State {
+  id        String  @id @default(uuid(7)) @db.Uuid
+  countryId String  @map("country_id") @db.Uuid
+  code      String?
+  name      String
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  country   Country   @relation(fields: [countryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  cities    City[]
+  addresses Address[]
+
+  @@unique([countryId, code])
+  @@index([countryId])
+  @@map("states")
+}
+
+model City {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  countryId String   @map("country_id") @db.Uuid
+  stateId   String?  @map("state_id") @db.Uuid
+  name      String
+  latitude  Decimal? @db.Decimal(10, 7)
+  longitude Decimal? @db.Decimal(10, 7)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  country   Country   @relation(fields: [countryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  state     State?    @relation(fields: [stateId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  addresses Address[]
+
+  @@index([countryId])
+  @@index([stateId])
+  @@index([name])
+  @@map("cities")
+}
+
+model Language {
+  id         String  @id @default(uuid(7)) @db.Uuid
+  code       String  @unique
+  name       String
+  nativeName String? @map("native_name")
+  isActive   Boolean @default(true) @map("is_active")
+  isDefault  Boolean @default(false) @map("is_default")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  preferences UserPreferences[]
+
+  @@index([isActive])
+  @@map("languages")
+}
+
+model Timezone {
+  id        String  @id @default(uuid(7)) @db.Uuid
+  name      String  @unique
+  utcOffset String  @map("utc_offset")
+  isActive  Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  preferences UserPreferences[]
+
+  @@map("timezones")
+}

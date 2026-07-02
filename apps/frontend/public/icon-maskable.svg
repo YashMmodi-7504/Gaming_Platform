@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Gaming Platform">
+  <defs>
+    <linearGradient id="gm" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="55%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#gm)"/>
+  <g fill="none" stroke="#ffffff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="146" y="206" width="220" height="120" rx="60"/>
+    <line x1="200" y1="252" x2="200" y2="280"/>
+    <line x1="186" y1="266" x2="214" y2="266"/>
+  </g>
+  <circle cx="312" cy="256" r="14" fill="#ffffff"/>
+  <circle cx="342" cy="286" r="14" fill="#ffffff"/>
+</svg>

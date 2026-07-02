@@ -1,0 +1,67 @@
+name: Rollback
+
+# Promote a previously-released image tag back to the deploy target. Re-tags the
+# known-good GHCR images as `:rollback` (and optionally `:latest`) without a
+# rebuild, so a roll-back is fast and uses an already-scanned artifact.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Known-good version tag to roll back to (e.g. v1.2.2)'
+        required: true
+        type: string
+      promote_latest:
+        description: 'Also move the :latest tag to this version'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  packages: write
+
+env:
+  IMAGE_PREFIX: ghcr.io/${{ github.repository }}
+
+jobs:
+  retag:
+    name: Re-tag known-good images
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [backend, frontend]
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull the target version
+        run: docker pull ${{ env.IMAGE_PREFIX }}-${{ matrix.app }}:${{ inputs.version }}
+
+      - name: Tag as :rollback
+        run: |
+          docker tag ${{ env.IMAGE_PREFIX }}-${{ matrix.app }}:${{ inputs.version }} ${{ env.IMAGE_PREFIX }}-${{ matrix.app }}:rollback
+          docker push ${{ env.IMAGE_PREFIX }}-${{ matrix.app }}:rollback
+
+      - name: Promote to :latest (optional)
+        if: ${{ inputs.promote_latest }}
+        run: |
+          docker tag ${{ env.IMAGE_PREFIX }}-${{ matrix.app }}:${{ inputs.version }} ${{ env.IMAGE_PREFIX }}-${{ matrix.app }}:latest
+          docker push ${{ env.IMAGE_PREFIX }}-${{ matrix.app }}:latest
+
+  notify:
+    name: Rollback summary
+    runs-on: ubuntu-latest
+    needs: retag
+    steps:
+      - name: Summary
+        run: |
+          echo "### Rollback to ${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "Images re-tagged \`:rollback\`. Re-deploy your orchestrator to pull them:" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "kubectl set image deploy/backend backend=${{ env.IMAGE_PREFIX }}-backend:${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "kubectl set image deploy/frontend frontend=${{ env.IMAGE_PREFIX }}-frontend:${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "# or (compose): IMAGE_TAG=${{ inputs.version }} docker compose ... up -d" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

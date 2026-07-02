@@ -1,0 +1,103 @@
+// =============================================================================
+// Game Registry — launchers and collections.
+//
+// The registry is fully data-driven: a game references a launcher (which tells
+// the client HOW to open it) and can belong to any number of curated
+// collections. No game-specific code lives in the platform.
+// =============================================================================
+
+enum GameVisibility {
+  PUBLIC
+  UNLISTED
+  PRIVATE
+
+  @@map("game_visibility")
+}
+
+enum AgeRating {
+  EVERYONE
+  AGE_12
+  AGE_16
+  AGE_18
+
+  @@map("age_rating")
+}
+
+enum GameLauncherType {
+  IFRAME
+  INTERNAL_MODULE
+  EXTERNAL_URL
+  WEBGL
+  NATIVE
+
+  @@map("game_launcher_type")
+}
+
+enum CollectionType {
+  MANUAL
+  AUTOMATED
+  EDITORIAL
+
+  @@map("collection_type")
+}
+
+/// A launcher tells the client how to open any game that references it.
+/// Registering a new launcher is data only — the platform never changes.
+model GameLauncher {
+  id           String           @id @default(uuid(7)) @db.Uuid
+  key          String           @unique
+  name         String
+  type         GameLauncherType @default(IFRAME)
+  entryUrl     String?          @map("entry_url")
+  configSchema Json?            @map("config_schema") @db.JsonB
+  description  String?
+  isActive     Boolean          @default(true) @map("is_active")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  games Game[]
+
+  @@index([isActive])
+  @@map("game_launchers")
+}
+
+model GameCollection {
+  id           String         @id @default(uuid(7)) @db.Uuid
+  slug         String         @unique
+  name         String
+  description  String?
+  type         CollectionType @default(MANUAL)
+  coverUrl     String?        @map("cover_url")
+  isActive     Boolean        @default(true) @map("is_active")
+  isFeatured   Boolean        @default(false) @map("is_featured")
+  displayOrder Int            @default(0) @map("display_order")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  items GameCollectionItem[]
+
+  @@index([isActive, displayOrder])
+  @@index([isFeatured])
+  @@map("game_collections")
+}
+
+model GameCollectionItem {
+  id           String @id @default(uuid(7)) @db.Uuid
+  collectionId String @map("collection_id") @db.Uuid
+  gameId       String @map("game_id") @db.Uuid
+  position     Int    @default(0)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  collection GameCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  game       Game           @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([collectionId, gameId])
+  @@index([gameId])
+  @@index([collectionId, position])
+  @@map("game_collection_items")
+}

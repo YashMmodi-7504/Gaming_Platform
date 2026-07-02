@@ -1,0 +1,369 @@
+// =============================================================================
+// Authentication & Identity
+// =============================================================================
+
+model User {
+  id               String       @id @default(uuid(7)) @db.Uuid
+  email            String       @unique
+  username         String       @unique
+  passwordHash     String?      @map("password_hash")
+  phoneNumber      String?      @unique @map("phone_number")
+  status           UserStatus   @default(PENDING)
+  authProvider     AuthProvider @default(LOCAL) @map("auth_provider")
+  providerId       String?      @map("provider_id")
+  emailVerified    Boolean      @default(false) @map("email_verified")
+  phoneVerified    Boolean      @default(false) @map("phone_verified")
+  twoFactorEnabled Boolean      @default(false) @map("two_factor_enabled")
+  referralCode     String?      @unique @map("referral_code")
+  lastLoginAt      DateTime?    @map("last_login_at")
+  lastLoginIp      String?      @map("last_login_ip")
+  failedLoginCount Int          @default(0) @map("failed_login_count")
+  lockedUntil      DateTime?    @map("locked_until")
+  loyaltyTierId    String?      @map("loyalty_tier_id") @db.Uuid
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  // ---- Authentication relations ----
+  roles                   UserRole[]
+  sessions                Session[]
+  refreshTokens           RefreshToken[]
+  devices                 Device[]
+  loginHistory            LoginHistory[]
+  securityEvents          SecurityEvent[]
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+  twoFactorMethods        TwoFactorAuth[]
+  apiKeys                 ApiKey[]
+
+  // ---- Profile relations ----
+  profile           UserProfile?
+  preferences       UserPreferences?
+  avatar            Avatar?
+  addresses         Address[]
+  kycVerifications  KycVerification[]
+  documents         Document[]
+  emergencyContacts EmergencyContact[]
+
+  // ---- Wallet relations ----
+  wallets            Wallet[]
+  walletTransactions WalletTransaction[]
+  paymentMethods     PaymentMethod[]
+  depositRequests    DepositRequest[]
+  withdrawalRequests WithdrawalRequest[]
+  refunds            Refund[]
+  bonusWallets       BonusWallet[]
+  rewardWallets      RewardWallet[]
+  lockedFunds        LockedFunds[]
+
+  // ---- Game catalog relations ----
+  gameLaunchHistory GameLaunchHistory[]
+  gameFavourites    GameFavourite[]
+  recentlyPlayed    RecentlyPlayed[]
+  gameRatings       GameRating[]
+  gameReviews       GameReview[]
+
+  // ---- Game session relations ----
+  gameSessions       GameSession[]
+  playerSessions     PlayerSession[]
+  gameResults        GameResult[]
+  playerStatistics   PlayerStatistics[]
+  leaderboardEntries LeaderboardEntry[]
+  userAchievements   UserAchievement[]
+  rewardClaims       RewardClaim[]
+
+  // ---- Promotions relations ----
+  couponRedemptions CouponRedemption[]
+  referralsMade     ReferralHistory[]  @relation("ReferralReferrer")
+  referralsReceived ReferralHistory[]  @relation("ReferralReferred")
+  referralRewards   ReferralReward[]
+  loyaltyPoints     LoyaltyPoints[]
+  loyaltyTier       LoyaltyTier?       @relation(fields: [loyaltyTierId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  campaignTargets   CampaignTarget[]
+
+  // ---- Notifications relations ----
+  notifications           Notification[]
+  notificationPreferences NotificationPreference[]
+  announcementReads       AnnouncementRead[]
+  messagesSent            InboxMessage[]           @relation("MessageSender")
+  messagesReceived        InboxMessage[]           @relation("MessageRecipient")
+
+  // ---- Analytics relations ----
+  events          Event[]
+  pageViews       PageView[]
+  userActivities  UserActivity[]
+  deviceAnalytics DeviceAnalytics[]
+
+  // ---- Admin / infrastructure relations ----
+  adminUser     AdminUser?
+  auditTrails   AuditTrail[]
+  apiUsages     ApiUsage[]
+  rateLimitLogs RateLimitLog[]
+
+  @@index([status])
+  @@index([authProvider, providerId])
+  @@index([loyaltyTierId])
+  @@index([createdAt])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+// ---- RBAC -------------------------------------------------------------------
+model Role {
+  id          String  @id @default(uuid(7)) @db.Uuid
+  name        String  @unique
+  slug        String  @unique
+  description String?
+  level       Int     @default(0)
+  isSystem    Boolean @default(false) @map("is_system")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  permissions RolePermission[]
+  users       UserRole[]
+
+  @@index([level])
+  @@map("roles")
+}
+
+model Permission {
+  id          String  @id @default(uuid(7)) @db.Uuid
+  name        String  @unique
+  slug        String  @unique
+  resource    String
+  action      String
+  description String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  roles RolePermission[]
+
+  @@unique([resource, action])
+  @@index([resource])
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String @id @default(uuid(7)) @db.Uuid
+  roleId       String @map("role_id") @db.Uuid
+  permissionId String @map("permission_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+model UserRole {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  roleId       String    @map("role_id") @db.Uuid
+  assignedById String?   @map("assigned_by_id") @db.Uuid
+  expiresAt    DateTime? @map("expires_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([userId, roleId])
+  @@index([roleId])
+  @@index([expiresAt])
+  @@map("user_roles")
+}
+
+// ---- Sessions & Tokens ------------------------------------------------------
+model Session {
+  id             String        @id @default(uuid(7)) @db.Uuid
+  userId         String        @map("user_id") @db.Uuid
+  deviceId       String?       @map("device_id") @db.Uuid
+  tokenHash      String        @unique @map("token_hash")
+  ipAddress      String?       @map("ip_address")
+  userAgent      String?       @map("user_agent")
+  status         SessionStatus @default(ACTIVE)
+  lastActivityAt DateTime?     @map("last_activity_at")
+  expiresAt      DateTime      @map("expires_at")
+  revokedAt      DateTime?     @map("revoked_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  device        Device?        @relation(fields: [deviceId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  refreshTokens RefreshToken[]
+
+  @@index([userId])
+  @@index([deviceId])
+  @@index([status, expiresAt])
+  @@map("sessions")
+}
+
+model RefreshToken {
+  id           String      @id @default(uuid(7)) @db.Uuid
+  userId       String      @map("user_id") @db.Uuid
+  sessionId    String?     @map("session_id") @db.Uuid
+  tokenHash    String      @unique @map("token_hash")
+  family       String      @db.Uuid
+  status       TokenStatus @default(ACTIVE)
+  replacedById String?     @map("replaced_by_id") @db.Uuid
+  expiresAt    DateTime    @map("expires_at")
+  revokedAt    DateTime?   @map("revoked_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  session Session? @relation(fields: [sessionId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([userId])
+  @@index([family])
+  @@index([status, expiresAt])
+  @@map("refresh_tokens")
+}
+
+model Device {
+  id          String     @id @default(uuid(7)) @db.Uuid
+  userId      String     @map("user_id") @db.Uuid
+  type        DeviceType @default(WEB)
+  name        String?
+  fingerprint String     @unique
+  os          String?
+  browser     String?
+  ipAddress   String?    @map("ip_address")
+  isTrusted   Boolean    @default(false) @map("is_trusted")
+  lastUsedAt  DateTime?  @map("last_used_at")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  sessions Session[]
+
+  @@index([userId])
+  @@index([isTrusted])
+  @@map("devices")
+}
+
+model LoginHistory {
+  id            String     @id @default(uuid(7)) @db.Uuid
+  userId        String     @map("user_id") @db.Uuid
+  ipAddress     String?    @map("ip_address")
+  userAgent     String?    @map("user_agent")
+  deviceType    DeviceType @default(WEB) @map("device_type")
+  success       Boolean    @default(true)
+  failureReason String?    @map("failure_reason")
+  countryCode   String?    @map("country_code")
+  city          String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([success])
+  @@index([ipAddress])
+  @@map("login_history")
+}
+
+model SecurityEvent {
+  id          String            @id @default(uuid(7)) @db.Uuid
+  userId      String?           @map("user_id") @db.Uuid
+  type        SecurityEventType
+  severity    SecuritySeverity  @default(INFO)
+  description String?
+  ipAddress   String?           @map("ip_address")
+  userAgent   String?           @map("user_agent")
+  metadata    Json?             @db.JsonB
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([type])
+  @@index([severity])
+  @@map("security_events")
+}
+
+model PasswordResetToken {
+  id        String      @id @default(uuid(7)) @db.Uuid
+  userId    String      @map("user_id") @db.Uuid
+  tokenHash String      @unique @map("token_hash")
+  status    TokenStatus @default(ACTIVE)
+  expiresAt DateTime    @map("expires_at")
+  usedAt    DateTime?   @map("used_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId])
+  @@index([status, expiresAt])
+  @@map("password_reset_tokens")
+}
+
+model EmailVerificationToken {
+  id         String      @id @default(uuid(7)) @db.Uuid
+  userId     String      @map("user_id") @db.Uuid
+  email      String
+  tokenHash  String      @unique @map("token_hash")
+  status     TokenStatus @default(ACTIVE)
+  expiresAt  DateTime    @map("expires_at")
+  verifiedAt DateTime?   @map("verified_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId])
+  @@index([status, expiresAt])
+  @@map("email_verification_tokens")
+}
+
+model TwoFactorAuth {
+  id          String          @id @default(uuid(7)) @db.Uuid
+  userId      String          @map("user_id") @db.Uuid
+  method      TwoFactorMethod
+  secret      String?
+  backupCodes String[]        @map("backup_codes")
+  isEnabled   Boolean         @default(false) @map("is_enabled")
+  verifiedAt  DateTime?       @map("verified_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([userId, method])
+  @@map("two_factor_auth")
+}
+
+model ApiKey {
+  id         String       @id @default(uuid(7)) @db.Uuid
+  userId     String       @map("user_id") @db.Uuid
+  name       String
+  keyHash    String       @unique @map("key_hash")
+  prefix     String       @unique
+  scopes     String[]
+  status     ApiKeyStatus @default(ACTIVE)
+  lastUsedAt DateTime?    @map("last_used_at")
+  expiresAt  DateTime?    @map("expires_at")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("api_keys")
+}

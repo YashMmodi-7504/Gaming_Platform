@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Offline · Gaming Platform</title>
+    <style>
+      html, body { margin: 0; height: 100%; font-family: system-ui, sans-serif; }
+      body {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 1rem; text-align: center; color: #1c1740;
+        background: radial-gradient(120% 90% at 50% -10%, # e9d5ff, #dbeafe 45%, #f4f6fc 100%);
+        background: radial-gradient(120% 90% at 50% -10%, #e9d5ff, #dbeafe 45%, #f4f6fc 100%);
+      }
+      .badge { width:84px;height:84px;border-radius:22px;display:grid;place-items:center;color:#fff;
+        background:linear-gradient(135deg,#7c3aed,#ec4899); box-shadow:0 20px 50px -18px rgba(124,58,237,.6); font-size:38px; }
+      h1 { font-size: 1.5rem; margin: 0; }
+      p { color: #5b567d; max-width: 22rem; margin: 0 1rem; }
+      button { margin-top:.5rem; padding:.6rem 1.4rem; border:0; border-radius:999px; cursor:pointer;
+        color:#fff; font-weight:700; background:linear-gradient(90deg,#7c3aed,#a855f7,#ec4899); }
+    </style>
+  </head>
+  <body>
+    <div class="badge">🎮</div>
+    <h1>You're offline</h1>
+    <p>The Gaming Universe needs a connection. Reconnect and we'll drop you right back in.</p>
+    <button onclick="location.reload()">Try again</button>
+  </body>
+</html>

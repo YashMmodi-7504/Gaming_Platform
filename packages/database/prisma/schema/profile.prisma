@@ -1,0 +1,168 @@
+// =============================================================================
+// User Profile, Preferences & KYC
+// =============================================================================
+
+model UserProfile {
+  id                   String    @id @default(uuid(7)) @db.Uuid
+  userId               String    @unique @map("user_id") @db.Uuid
+  firstName            String?   @map("first_name")
+  lastName             String?   @map("last_name")
+  displayName          String?   @map("display_name")
+  dateOfBirth          DateTime? @map("date_of_birth") @db.Date
+  gender               Gender?
+  bio                  String?   @db.Text
+  occupation           String?
+  nationalityCountryId String?   @map("nationality_country_id") @db.Uuid
+  profileCompleteness  Int       @default(0) @map("profile_completeness")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  nationality Country? @relation(fields: [nationalityCountryId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([nationalityCountryId])
+  @@map("user_profiles")
+}
+
+model UserPreferences {
+  id                 String  @id @default(uuid(7)) @db.Uuid
+  userId             String  @unique @map("user_id") @db.Uuid
+  languageId         String? @map("language_id") @db.Uuid
+  timezoneId         String? @map("timezone_id") @db.Uuid
+  currencyId         String? @map("currency_id") @db.Uuid
+  theme              String  @default("dark")
+  emailNotifications Boolean @default(true) @map("email_notifications")
+  smsNotifications   Boolean @default(false) @map("sms_notifications")
+  pushNotifications  Boolean @default(true) @map("push_notifications")
+  marketingConsent   Boolean @default(false) @map("marketing_consent")
+  metadata           Json?   @db.JsonB
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  language Language? @relation(fields: [languageId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  timezone Timezone? @relation(fields: [timezoneId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  currency Currency? @relation(fields: [currencyId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([languageId])
+  @@index([timezoneId])
+  @@index([currencyId])
+  @@map("user_preferences")
+}
+
+model Avatar {
+  id         String  @id @default(uuid(7)) @db.Uuid
+  userId     String  @unique @map("user_id") @db.Uuid
+  url        String
+  storageKey String? @map("storage_key")
+  source     String  @default("upload")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("avatars")
+}
+
+model Address {
+  id         String      @id @default(uuid(7)) @db.Uuid
+  userId     String      @map("user_id") @db.Uuid
+  type       AddressType @default(RESIDENTIAL)
+  line1      String
+  line2      String?
+  postalCode String?     @map("postal_code")
+  countryId  String      @map("country_id") @db.Uuid
+  stateId    String?     @map("state_id") @db.Uuid
+  cityId     String?     @map("city_id") @db.Uuid
+  cityName   String?     @map("city_name")
+  isDefault  Boolean     @default(false) @map("is_default")
+  isVerified Boolean     @default(false) @map("is_verified")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  country Country @relation(fields: [countryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  state   State?  @relation(fields: [stateId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  city    City?   @relation(fields: [cityId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([userId])
+  @@index([countryId])
+  @@index([stateId])
+  @@index([cityId])
+  @@map("addresses")
+}
+
+model KycVerification {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  level           KycLevel  @default(BASIC)
+  status          KycStatus @default(PENDING)
+  provider        String?
+  providerRef     String?   @map("provider_ref")
+  rejectionReason String?   @map("rejection_reason")
+  metadata        Json?     @db.JsonB
+  submittedAt     DateTime? @map("submitted_at")
+  reviewedAt      DateTime? @map("reviewed_at")
+  expiresAt       DateTime? @map("expires_at")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  documents Document[]
+
+  @@index([userId, status])
+  @@index([status, level])
+  @@map("kyc_verifications")
+}
+
+model Document {
+  id         String         @id @default(uuid(7)) @db.Uuid
+  userId     String         @map("user_id") @db.Uuid
+  kycId      String?        @map("kyc_id") @db.Uuid
+  type       DocumentType
+  status     DocumentStatus @default(PENDING)
+  fileUrl    String         @map("file_url")
+  fileName   String?        @map("file_name")
+  storageKey String?        @map("storage_key")
+  mimeType   String?        @map("mime_type")
+  reviewedAt DateTime?      @map("reviewed_at")
+  expiresAt  DateTime?      @map("expires_at")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  user User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  kyc  KycVerification? @relation(fields: [kycId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([userId])
+  @@index([kycId])
+  @@index([type, status])
+  @@map("documents")
+}
+
+model EmergencyContact {
+  id           String  @id @default(uuid(7)) @db.Uuid
+  userId       String  @map("user_id") @db.Uuid
+  name         String
+  relationship String?
+  phoneNumber  String  @map("phone_number")
+  email        String?
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId])
+  @@map("emergency_contacts")
+}

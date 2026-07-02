@@ -1,0 +1,47 @@
+# syntax=docker/dockerfile:1
+# =============================================================================
+# Backend (NestJS) — multi-stage build for the pnpm + Turborepo monorepo.
+# Build context MUST be the repository root.
+# =============================================================================
+
+FROM node:20-alpine AS base
+# tini = lightweight init for correct signal handling (SIGTERM → graceful
+# shutdown via Nest's enableShutdownHooks) and zombie reaping under PID 1.
+RUN apk add --no-cache libc6-compat openssl tini
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+ENV PNPM_HOME=/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+
+# ---- Prune the workspace down to just the backend and its dependencies ------
+FROM base AS pruner
+WORKDIR /app
+COPY . .
+RUN pnpm dlx turbo@^2 prune @gaming-platform/backend --docker
+
+# ---- Install dependencies and build ----------------------------------------
+FROM base AS builder
+WORKDIR /app
+ENV NODE_ENV=development
+# Lockfile + manifests first for better layer caching.
+COPY --from=pruner /app/out/json/ .
+RUN pnpm install --frozen-lockfile
+# Full source for the pruned scope.
+COPY --from=pruner /app/out/full/ .
+RUN pnpm exec turbo run build --filter=@gaming-platform/backend
+
+# ---- Runtime ----------------------------------------------------------------
+FROM base AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nestjs
+COPY --from=builder --chown=nestjs:nodejs /app .
+USER nestjs
+WORKDIR /app/apps/backend
+EXPOSE 4000
+
+# Container-level liveness probe (orchestrators add their own readiness probes).
+HEALTHCHECK --interval=30s --timeout=5s --start-period=25s --retries=3 \
+  CMD node -e "const p=process.env.BACKEND_PORT||4000,pre=process.env.API_PREFIX||'api',v=process.env.API_VERSION||'v1';require('http').get('http://127.0.0.1:'+p+'/'+pre+'/'+v+'/health/liveness',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
+
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["node", "dist/main.js"]

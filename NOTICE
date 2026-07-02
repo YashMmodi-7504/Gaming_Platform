@@ -1,0 +1,42 @@
+Gaming Platform
+Copyright (c) 2026 LogicRest AI. All rights reserved.
+
+This product is proprietary software (see LICENSE). It incorporates and depends
+upon third-party open-source components, each distributed under its own license.
+This NOTICE file is provided for attribution and does not modify the LICENSE.
+
+The principal third-party components and their licenses are listed below. This
+list is not exhaustive; the authoritative, complete set of dependencies and
+their licenses is defined by the lockfile (pnpm-lock.yaml) and each package's
+own LICENSE. A full machine-readable Software Bill of Materials (SBOM) is
+generated and attached to every released container image (see release.yml).
+
+Backend (apps/backend)
+  - NestJS .......................... MIT      (c) Kamil Mysliwiec
+  - Prisma / @prisma/client ......... Apache-2.0 (c) Prisma Data, Inc.
+  - Socket.IO ....................... MIT      (c) Guillermo Rauch
+  - ioredis ......................... MIT      (c) Zihua Li
+  - winston ......................... MIT      (c) Charlie Robbins & contributors
+  - helmet .......................... MIT      (c) Adam Baldwin & contributors
+  - zod ............................. MIT      (c) Colin McDonnell
+  - passport / jwt .................. MIT      (c) Jared Hanson & contributors
+  - class-validator / -transformer .. MIT      (c) TypeStack
+  - bcrypt / argon2 ................. MIT / MIT
+
+Frontend (apps/frontend)
+  - Next.js ......................... MIT      (c) Vercel, Inc.
+  - React / React-DOM ............... MIT      (c) Meta Platforms, Inc.
+  - @tanstack/react-query ........... MIT      (c) Tanner Linsley
+  - Tailwind CSS .................... MIT      (c) Tailwind Labs, Inc.
+  - zustand ......................... MIT      (c) Poimandres
+
+Tooling
+  - TypeScript ...................... Apache-2.0 (c) Microsoft Corporation
+  - Turborepo ....................... MIT      (c) Vercel, Inc.
+  - pnpm ............................ MIT      (c) Zoltan Kochan & contributors
+  - ESLint / Prettier ............... MIT
+  - Jest ............................ MIT      (c) Meta Platforms, Inc.
+
+Each component is the property of its respective owners and is used in
+accordance with its license. Full license texts are available within each
+package under node_modules/<package>/LICENSE and in the released SBOM.

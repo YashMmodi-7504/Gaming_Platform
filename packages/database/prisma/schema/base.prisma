@@ -1,0 +1,25 @@
+// =============================================================================
+// Gaming Platform — Prisma Schema (multi-file)
+// -----------------------------------------------------------------------------
+// Datasource + generator. Domain models live in sibling *.prisma files and are
+// merged by Prisma at validate/generate time.
+//
+// Conventions (enforced across every file):
+//   • UUIDv7 primary keys      id String @id @default(uuid(7)) @db.Uuid
+//   • camelCase Prisma fields, snake_case columns/tables via @map / @@map
+//   • Audit timestamps         createdAt / updatedAt
+//   • Soft delete              deletedAt (where an entity is user-facing data)
+//   • Money                    Decimal @db.Decimal(38, 18)
+//   • Structured data          Json @db.JsonB
+// =============================================================================
+
+generator client {
+  provider      = "prisma-client-js"
+  // `native` covers local dev; the musl target covers Alpine-based containers.
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}

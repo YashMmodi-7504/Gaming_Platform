@@ -1,0 +1,678 @@
+// =============================================================================
+// Enums — native PostgreSQL enum types shared across all domains.
+// =============================================================================
+
+// ---- Authentication & Users -------------------------------------------------
+enum UserStatus {
+  ACTIVE
+  PENDING
+  INACTIVE
+  SUSPENDED
+  BANNED
+  CLOSED
+
+  @@map("user_status")
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+  FACEBOOK
+  APPLE
+  TWITTER
+  STEAM
+
+  @@map("auth_provider")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+
+  @@map("gender")
+}
+
+enum TokenStatus {
+  ACTIVE
+  USED
+  EXPIRED
+  REVOKED
+
+  @@map("token_status")
+}
+
+enum SessionStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+
+  @@map("session_status")
+}
+
+enum DeviceType {
+  WEB
+  IOS
+  ANDROID
+  DESKTOP
+  TABLET
+  OTHER
+
+  @@map("device_type")
+}
+
+enum SecurityEventType {
+  LOGIN_SUCCESS
+  LOGIN_FAILURE
+  LOGOUT
+  PASSWORD_CHANGE
+  PASSWORD_RESET_REQUEST
+  PASSWORD_RESET_COMPLETE
+  EMAIL_CHANGE
+  EMAIL_VERIFIED
+  MFA_ENABLED
+  MFA_DISABLED
+  MFA_CHALLENGE
+  ACCOUNT_LOCKED
+  ACCOUNT_UNLOCKED
+  TOKEN_REFRESH
+  API_KEY_CREATED
+  API_KEY_REVOKED
+  SUSPICIOUS_ACTIVITY
+
+  @@map("security_event_type")
+}
+
+enum SecuritySeverity {
+  INFO
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+
+  @@map("security_severity")
+}
+
+enum TwoFactorMethod {
+  TOTP
+  SMS
+  EMAIL
+  BACKUP_CODE
+
+  @@map("two_factor_method")
+}
+
+enum ApiKeyStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+
+  @@map("api_key_status")
+}
+
+// ---- KYC / Profile ----------------------------------------------------------
+enum KycStatus {
+  NOT_STARTED
+  PENDING
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  EXPIRED
+
+  @@map("kyc_status")
+}
+
+enum KycLevel {
+  NONE
+  BASIC
+  INTERMEDIATE
+  ADVANCED
+
+  @@map("kyc_level")
+}
+
+enum DocumentType {
+  PASSPORT
+  NATIONAL_ID
+  DRIVERS_LICENSE
+  UTILITY_BILL
+  BANK_STATEMENT
+  PROOF_OF_ADDRESS
+  SELFIE
+  OTHER
+
+  @@map("document_type")
+}
+
+enum DocumentStatus {
+  PENDING
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  EXPIRED
+
+  @@map("document_status")
+}
+
+enum AddressType {
+  RESIDENTIAL
+  BILLING
+  SHIPPING
+  BUSINESS
+
+  @@map("address_type")
+}
+
+// ---- Wallet & Payments ------------------------------------------------------
+enum CurrencyType {
+  FIAT
+  CRYPTO
+
+  @@map("currency_type")
+}
+
+enum WalletType {
+  MAIN
+  BONUS
+  REWARD
+  LOCKED
+  TOURNAMENT
+  PROMOTIONAL
+  CASH
+  VIRTUAL
+
+  @@map("wallet_type")
+}
+
+enum WalletStatus {
+  ACTIVE
+  FROZEN
+  SUSPENDED
+  CLOSED
+
+  @@map("wallet_status")
+}
+
+enum LedgerDirection {
+  DEBIT
+  CREDIT
+
+  @@map("ledger_direction")
+}
+
+enum LedgerEntryStatus {
+  PENDING
+  POSTED
+  REVERSED
+
+  @@map("ledger_entry_status")
+}
+
+enum PaymentMethodType {
+  CARD
+  BANK_TRANSFER
+  EWALLET
+  CRYPTO
+  VOUCHER
+  MOBILE_MONEY
+
+  @@map("payment_method_type")
+}
+
+enum PaymentDirection {
+  INBOUND
+  OUTBOUND
+
+  @@map("payment_direction")
+}
+
+enum DepositStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  EXPIRED
+
+  @@map("deposit_status")
+}
+
+enum WithdrawalStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  PROCESSING
+  COMPLETED
+  REJECTED
+  CANCELLED
+  FAILED
+
+  @@map("withdrawal_status")
+}
+
+enum RefundStatus {
+  REQUESTED
+  PENDING
+  APPROVED
+  PROCESSING
+  COMPLETED
+  REJECTED
+  FAILED
+
+  @@map("refund_status")
+}
+
+enum LockedFundStatus {
+  LOCKED
+  RELEASED
+  FORFEITED
+
+  @@map("locked_fund_status")
+}
+
+// ---- Game Catalog -----------------------------------------------------------
+enum GameStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+  ARCHIVED
+  DEPRECATED
+
+  @@map("game_status")
+}
+
+enum GameVersionStatus {
+  DRAFT
+  RELEASED
+  ROLLED_BACK
+  DEPRECATED
+
+  @@map("game_version_status")
+}
+
+enum GameAssetType {
+  THUMBNAIL
+  BANNER
+  ICON
+  LOGO
+  BACKGROUND
+  VIDEO
+  SCREENSHOT
+  AUDIO
+
+  @@map("game_asset_type")
+}
+
+enum ProviderStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+
+  @@map("provider_status")
+}
+
+enum ReviewStatus {
+  PENDING
+  PUBLISHED
+  REJECTED
+  FLAGGED
+
+  @@map("review_status")
+}
+
+// ---- Game Sessions & Rewards ------------------------------------------------
+enum GameSessionStatus {
+  ACTIVE
+  COMPLETED
+  ABANDONED
+  TIMEOUT
+  ERROR
+
+  @@map("game_session_status")
+}
+
+enum GameOutcome {
+  WIN
+  LOSS
+  DRAW
+  PUSH
+  PENDING
+  VOID
+
+  @@map("game_outcome")
+}
+
+enum LeaderboardPeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+  SEASONAL
+  ALL_TIME
+
+  @@map("leaderboard_period")
+}
+
+enum AchievementType {
+  MILESTONE
+  PROGRESSION
+  CHALLENGE
+  SECRET
+  SEASONAL
+
+  @@map("achievement_type")
+}
+
+enum RewardType {
+  CASH
+  BONUS
+  FREE_SPINS
+  CASHBACK
+  POINTS
+  BADGE
+  PHYSICAL
+
+  @@map("reward_type")
+}
+
+enum RewardClaimStatus {
+  PENDING
+  CLAIMED
+  EXPIRED
+  CANCELLED
+
+  @@map("reward_claim_status")
+}
+
+// ---- Promotions -------------------------------------------------------------
+enum PromotionType {
+  DEPOSIT_BONUS
+  NO_DEPOSIT_BONUS
+  FREE_SPINS
+  CASHBACK
+  RELOAD
+  REFERRAL
+  LOYALTY
+  TOURNAMENT
+
+  @@map("promotion_type")
+}
+
+enum PromotionStatus {
+  DRAFT
+  SCHEDULED
+  ACTIVE
+  PAUSED
+  EXPIRED
+  ENDED
+
+  @@map("promotion_status")
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+  FREE_SPINS
+
+  @@map("discount_type")
+}
+
+enum CouponStatus {
+  ACTIVE
+  INACTIVE
+  EXPIRED
+  EXHAUSTED
+
+  @@map("coupon_status")
+}
+
+enum RedemptionStatus {
+  PENDING
+  APPLIED
+  REVERSED
+  EXPIRED
+
+  @@map("redemption_status")
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  RUNNING
+  PAUSED
+  COMPLETED
+  CANCELLED
+
+  @@map("campaign_status")
+}
+
+enum CampaignChannel {
+  EMAIL
+  SMS
+  PUSH
+  IN_APP
+  WEB
+
+  @@map("campaign_channel")
+}
+
+enum ReferralStatus {
+  PENDING
+  QUALIFIED
+  REWARDED
+  EXPIRED
+  CANCELLED
+
+  @@map("referral_status")
+}
+
+enum LoyaltyPointType {
+  EARNED
+  REDEEMED
+  EXPIRED
+  ADJUSTED
+
+  @@map("loyalty_point_type")
+}
+
+// ---- Notifications ----------------------------------------------------------
+enum NotificationType {
+  SYSTEM
+  TRANSACTION
+  PROMOTION
+  SECURITY
+  GAME
+  ACCOUNT
+  KYC
+
+  @@map("notification_type")
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  PUSH
+  SMS
+
+  @@map("notification_channel")
+}
+
+enum NotificationStatus {
+  PENDING
+  QUEUED
+  SENT
+  DELIVERED
+  READ
+  FAILED
+
+  @@map("notification_status")
+}
+
+enum AnnouncementAudience {
+  ALL
+  SEGMENT
+  ROLE
+  SINGLE_USER
+
+  @@map("announcement_audience")
+}
+
+enum MessageStatus {
+  UNREAD
+  READ
+  ARCHIVED
+  DELETED
+
+  @@map("message_status")
+}
+
+// ---- Content ----------------------------------------------------------------
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+  ARCHIVED
+
+  @@map("content_status")
+}
+
+enum BannerPosition {
+  HOME_TOP
+  HOME_MIDDLE
+  HOME_BOTTOM
+  SIDEBAR
+  FOOTER
+  POPUP
+  CATEGORY
+
+  @@map("banner_position")
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  AUDIO
+  DOCUMENT
+  ARCHIVE
+  OTHER
+
+  @@map("media_type")
+}
+
+// ---- Administration ---------------------------------------------------------
+enum AdminStatus {
+  ACTIVE
+  SUSPENDED
+  DISABLED
+
+  @@map("admin_status")
+}
+
+enum AuditAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  APPROVE
+  REJECT
+  EXPORT
+  IMPORT
+  EXECUTE
+
+  @@map("audit_action")
+}
+
+enum LogLevel {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+  FATAL
+
+  @@map("log_level")
+}
+
+enum SettingValueType {
+  STRING
+  NUMBER
+  BOOLEAN
+  JSON
+
+  @@map("setting_value_type")
+}
+
+enum MaintenanceStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+
+  @@map("maintenance_status")
+}
+
+// ---- Infrastructure ---------------------------------------------------------
+enum StorageProviderType {
+  S3
+  GCS
+  AZURE_BLOB
+  CLOUDINARY
+  LOCAL
+
+  @@map("storage_provider_type")
+}
+
+enum WebhookStatus {
+  ACTIVE
+  INACTIVE
+  FAILED
+
+  @@map("webhook_status")
+}
+
+enum DeliveryStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  RETRYING
+
+  @@map("delivery_status")
+}
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  RETRYING
+  CANCELLED
+
+  @@map("job_status")
+}
+
+enum ScheduledTaskStatus {
+  ACTIVE
+  PAUSED
+  DISABLED
+
+  @@map("scheduled_task_status")
+}
+
+// ---- Analytics --------------------------------------------------------------
+enum ActivityType {
+  LOGIN
+  LOGOUT
+  REGISTER
+  GAME_PLAY
+  DEPOSIT
+  WITHDRAWAL
+  PROFILE_UPDATE
+  BONUS_CLAIM
+  PAGE_VIEW
+  SEARCH
+  OTHER
+
+  @@map("activity_type")
+}

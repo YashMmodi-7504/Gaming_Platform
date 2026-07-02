@@ -1,0 +1,215 @@
+'use client';
+
+import { Button, cn } from '@gaming-platform/ui';
+import { motion } from 'framer-motion';
+import { useCallback, useRef, useState } from 'react';
+import { toast } from 'sonner';
+
+import { GameFx, type FxSignal } from '@/components/games/prototype/game-fx';
+import { seededRng } from '@/lib/deck';
+import { settleRound } from '@/lib/game-result';
+import { sound } from '@/lib/sound';
+import { useDemoWallet } from '@/stores/demo-wallet';
+import { useGameStat } from '@/stores/game-stats';
+
+const ROWS = 12;
+const BINS = ROWS + 1;
+// Symmetric Plinko-style multipliers (edges high, center low).
+const MULT = [16, 8, 4, 2, 1.2, 0.7, 0.4, 0.7, 1.2, 2, 4, 8, 16];
+const CHIPS = [100, 500, 1000, 5000];
+
+function binColor(m: number) {
+  if (m >= 8) return 'from-pink to-violet text-white';
+  if (m >= 2) return 'from-gold to-warning text-white';
+  if (m >= 1) return 'from-accent to-primary text-white';
+  return 'from-muted to-muted text-muted-foreground';
+}
+
+export function PlinkoGame() {
+  const balance = useDemoWallet((s) => s.balance);
+  const spend = useDemoWallet((s) => s.spend);
+  const stat = useGameStat('plinko');
+
+  const [bet, setBet] = useState(500);
+  const [dropping, setDropping] = useState(false);
+  const [ball, setBall] = useState<{ x: number; y: number } | null>(null);
+  const [landedBin, setLandedBin] = useState<number | null>(null);
+  const [result, setResult] = useState<{ mult: number; win: number } | null>(null);
+  const [fx, setFx] = useState<FxSignal>({ key: 0, type: null });
+  const timers = useRef<number[]>([]);
+  const fxKey = useRef(0);
+
+  const clear = () => {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+  };
+
+  const drop = useCallback(() => {
+    if (dropping) return;
+    const stake = Math.max(1, Math.floor(bet));
+    if (stake > balance) {
+      toast.error('Not enough demo coins — reload from the balance pill.');
+      return;
+    }
+    clear();
+    spend(stake);
+    setDropping(true);
+    setResult(null);
+    setLandedBin(null);
+
+    const rng = seededRng(Math.floor(performance.now() * 1000) % 2 ** 31);
+    const dirs: number[] = [];
+    let rights = 0;
+    for (let i = 0; i < ROWS; i++) {
+      const right = rng() > 0.5 ? 1 : 0;
+      rights += right;
+      dirs.push(right ? 1 : -1);
+    }
+    const bin = rights;
+    const binCenterX = ((bin + 0.5) / BINS) * 100;
+
+    // animate down the pegs
+    let x = 50;
+    setBall({ x: 50, y: 3 });
+    const step = 90;
+    for (let i = 0; i < ROWS; i++) {
+      const dir = dirs[i]!;
+      x += dir * (44 / ROWS);
+      const y = 3 + ((i + 1) / ROWS) * 78;
+      timers.current.push(
+        window.setTimeout(() => {
+          setBall({ x, y });
+          sound.play('diceBounce');
+        }, step * (i + 1)),
+      );
+    }
+    // land in bin
+    timers.current.push(
+      window.setTimeout(
+        () => {
+          setBall({ x: binCenterX, y: 92 });
+          setLandedBin(bin);
+          const mult = MULT[bin] ?? 1;
+          const win = Math.round(stake * mult);
+          const isWin = mult >= 1;
+          fxKey.current += 1;
+          if (isWin) setFx({ key: fxKey.current, type: 'win', amount: win - stake });
+          settleRound({ game: 'plinko', stake, win: isWin, multiplier: mult, label: `${mult}×`, value: mult });
+          setResult({ mult, win });
+          setDropping(false);
+        },
+        step * (ROWS + 1),
+      ),
+    );
+  }, [dropping, bet, balance, spend]);
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
+      {/* Board */}
+      <div className="card-premium relative overflow-hidden p-5">
+        <GameFx trigger={fx} />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-white to-accent/5" />
+        <div className="relative aspect-[4/5] w-full">
+          {/* pegs */}
+          {Array.from({ length: ROWS }).map((_, row) =>
+            Array.from({ length: row + 3 }).map((__, col) => {
+              const count = row + 3;
+              const x = ((col + 0.5) / count) * 100;
+              const y = 5 + (row / ROWS) * 78;
+              return (
+                <span
+                  key={`${row}-${col}`}
+                  className="absolute h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/40"
+                  style={{ left: `${x}%`, top: `${y}%` }}
+                />
+              );
+            }),
+          )}
+          {/* ball */}
+          {ball ? (
+            <motion.span
+              animate={{ left: `${ball.x}%`, top: `${ball.y}%` }}
+              transition={{ duration: 0.09, ease: 'easeIn' }}
+              className="absolute z-10 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-gold to-warning shadow-glow-gold"
+            />
+          ) : null}
+          {/* bins */}
+          <div className="absolute inset-x-0 bottom-0 flex gap-0.5 px-0.5">
+            {MULT.map((m, i) => (
+              <div
+                key={i}
+                className={cn(
+                  'flex-1 rounded-md bg-gradient-to-b py-1 text-center font-mono text-[10px] font-bold transition-transform',
+                  binColor(m),
+                  landedBin === i && 'scale-110 ring-2 ring-foreground/40',
+                )}
+              >
+                {m}×
+              </div>
+            ))}
+          </div>
+        </div>
+        {result ? (
+          <div className="relative mt-2 text-center font-display text-lg font-bold">
+            <span className={result.mult >= 1 ? 'text-emerald' : 'text-destructive'}>
+              {result.mult}× · {result.mult >= 1 ? `+${result.win.toLocaleString()}` : `-${(bet - result.win).toLocaleString()}`}
+            </span>
+          </div>
+        ) : null}
+      </div>
+
+      {/* Controls */}
+      <div className="space-y-4">
+        <div className="card-premium space-y-3 p-4">
+          <label className="text-xs font-semibold text-muted-foreground">
+            Bet amount
+            <div className="mt-1 flex items-center rounded-xl border border-black/10 bg-white/70 px-2">
+              <input
+                type="number"
+                min={1}
+                value={bet}
+                onChange={(e) => setBet(Math.max(1, Number(e.target.value)))}
+                disabled={dropping}
+                className="h-10 w-full bg-transparent font-mono text-sm outline-none"
+              />
+              <button onClick={() => setBet((b) => Math.max(1, Math.floor(b / 2)))} disabled={dropping} className="px-1 text-xs text-muted-foreground hover:text-foreground">½</button>
+              <button onClick={() => setBet((b) => b * 2)} disabled={dropping} className="px-1 text-xs text-muted-foreground hover:text-foreground">2×</button>
+            </div>
+          </label>
+          <div className="flex flex-wrap gap-1.5">
+            {CHIPS.map((v) => (
+              <button key={v} onClick={() => setBet(v)} disabled={dropping} className="rounded-lg bg-black/[0.04] px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary">
+                {v.toLocaleString()}
+              </button>
+            ))}
+          </div>
+          <Button variant="gradient" size="lg" className="w-full sheen" onClick={drop} disabled={dropping}>
+            {dropping ? 'Dropping…' : `Drop ball · ${bet.toLocaleString()}`}
+          </Button>
+        </div>
+
+        <div className="card-premium grid grid-cols-2 gap-3 p-4 text-center">
+          <div className="rounded-xl bg-black/[0.03] p-2">
+            <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Best ×</div>
+            <div className="mt-0.5 font-display text-lg font-bold tabular-nums">{stat.highest}×</div>
+          </div>
+          <div className="rounded-xl bg-black/[0.03] p-2">
+            <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Drops</div>
+            <div className="mt-0.5 font-display text-lg font-bold tabular-nums">{stat.rounds}</div>
+          </div>
+        </div>
+
+        <div className="card-premium p-4">
+          <p className="mb-2 font-display text-sm font-bold">Recent drops</p>
+          <div className="flex flex-wrap gap-1.5">
+            {stat.history.slice(0, 14).map((r) => (
+              <span key={r.id} className={cn('rounded-md px-1.5 py-0.5 font-mono text-[11px] font-bold', r.win ? 'bg-emerald/15 text-emerald' : 'bg-destructive/15 text-destructive')}>
+                {r.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
