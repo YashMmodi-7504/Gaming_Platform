@@ -216,7 +216,7 @@ export function RouletteGame() {
     <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
       {/* Wheel stage + result */}
       <div className="space-y-4">
-        <div className="card-premium relative flex aspect-square max-h-[440px] items-center justify-center overflow-hidden p-4">
+        <div className="card-premium relative flex aspect-square max-h-[440px] items-center justify-center overflow-hidden p-4 lg:max-h-[560px] xl:max-h-[640px]">
           <GameFx trigger={fx} />
           <div className="bg-grid absolute inset-0 opacity-30" />
 
@@ -225,7 +225,7 @@ export function RouletteGame() {
             <div className="h-0 w-0 border-x-[10px] border-t-[16px] border-x-transparent border-t-gold drop-shadow" />
           </div>
 
-          <div className="relative aspect-square w-full max-w-[380px]">
+          <div className="relative aspect-square w-full max-w-[380px] lg:max-w-[500px] xl:max-w-[580px]">
             {/* Wheel */}
             <div
               className="absolute inset-0 rounded-full shadow-glow"

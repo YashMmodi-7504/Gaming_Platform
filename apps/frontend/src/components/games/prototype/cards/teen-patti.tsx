@@ -386,7 +386,7 @@ function HandRow({
   return (
     <div
       className={cn(
-        'flex w-full max-w-sm items-center justify-between gap-3 rounded-2xl border-2 p-2.5 transition-colors',
+        'flex w-full max-w-sm items-center justify-between gap-3 rounded-2xl border-2 p-2.5 transition-colors sm:max-w-md lg:max-w-lg',
         winner ? 'border-gold bg-gold/10 shadow-glow' : 'border-transparent',
       )}
     >

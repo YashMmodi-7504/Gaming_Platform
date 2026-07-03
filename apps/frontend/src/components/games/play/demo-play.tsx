@@ -70,8 +70,9 @@ export function DemoPlay({ slug, title }: { slug: string; title: string }) {
           <Link href={`/games/${slug}`}>Details</Link>
         </Button>
       </header>
-      <main className="flex-1 overflow-auto p-4">
-        <div className="mx-auto max-w-4xl">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 sm:px-5 lg:px-6">
+        {/* Full-width immersive play surface — the board dominates, minimal margins. */}
+        <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1760px]">
           <Game />
         </div>
       </main>

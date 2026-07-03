@@ -30,7 +30,10 @@ interface PlayingCardProps {
 export function PlayingCard({ code, faceDown, index = 0, small }: PlayingCardProps) {
   const showBack = faceDown || !code;
   const card = code ? parse(code) : null;
-  const size = small ? 'h-14 w-10 text-sm' : 'h-20 w-14 text-lg';
+  // Larger, readable cards that scale up on bigger screens (layout sizing only).
+  const size = small
+    ? 'h-16 w-11 text-sm sm:h-20 sm:w-14 sm:text-base lg:h-24 lg:w-16 lg:text-lg'
+    : 'h-24 w-16 text-lg sm:h-28 sm:w-20 sm:text-xl lg:h-36 lg:w-24 lg:text-2xl';
 
   return (
     <motion.div
@@ -42,7 +45,7 @@ export function PlayingCard({ code, faceDown, index = 0, small }: PlayingCardPro
     >
       {showBack ? (
         <div className="flex h-full w-full items-center justify-center rounded-lg border border-primary/30 bg-gradient-to-br from-primary/30 via-accent/20 to-primary/30 shadow-md">
-          <span className="text-xl text-primary/70">◆</span>
+          <span className="text-xl text-primary/70 lg:text-3xl">◆</span>
         </div>
       ) : (
         <div
@@ -52,7 +55,7 @@ export function PlayingCard({ code, faceDown, index = 0, small }: PlayingCardPro
           )}
         >
           <span className="leading-none">{card?.joker ? 'JOKER' : card?.rank}</span>
-          <span className="self-center text-2xl leading-none">{card?.suit}</span>
+          <span className="self-center text-2xl leading-none sm:text-3xl lg:text-4xl">{card?.suit}</span>
           <span className="rotate-180 self-end leading-none">{card?.joker ? '' : card?.rank}</span>
         </div>
       )}

@@ -27,7 +27,7 @@ const SYMBOLS = [
 
 const ROWS = 3;
 const STRIP = 32; // symbols per reel strip
-const CELL = 76; // px per symbol cell
+const CELL = 92; // px per symbol cell
 const REELS = 3;
 const BETS = [5, 10, 25, 50, 100] as const;
 
@@ -170,7 +170,7 @@ export function SlotDemo({ slug, title }: SlotDemoProps) {
         </Button>
       </header>
 
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-6 p-4">
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center gap-6 p-4 lg:max-w-4xl">
         {/* Jackpot */}
         <div className="glass-strong flex items-center gap-3 rounded-2xl px-5 py-2.5">
           <Crown className="h-5 w-5 text-gold animate-glow-pulse" />
@@ -185,7 +185,7 @@ export function SlotDemo({ slug, title }: SlotDemoProps) {
           <div className="bg-grid pointer-events-none absolute inset-0 opacity-20" />
           <div
             className="relative mx-auto grid gap-3"
-            style={{ gridTemplateColumns: `repeat(${REELS}, 1fr)`, maxWidth: 420 }}
+            style={{ gridTemplateColumns: `repeat(${REELS}, 1fr)`, maxWidth: 560 }}
           >
             {strips.map((strip, r) => (
               <div
@@ -207,7 +207,7 @@ export function SlotDemo({ slug, title }: SlotDemoProps) {
                     <span
                       key={i}
                       className="flex shrink-0 items-center justify-center"
-                      style={{ height: CELL, fontSize: 40 }}
+                      style={{ height: CELL, fontSize: 52 }}
                     >
                       {SYMBOLS[s]!.char}
                     </span>
