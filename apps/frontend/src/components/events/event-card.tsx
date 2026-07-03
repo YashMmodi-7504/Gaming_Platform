@@ -53,7 +53,7 @@ export function EventCard({ event, index = 0 }: { event: PlatformEvent; index?: 
             <Gauge className="h-3 w-3" /> {event.difficulty}
           </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-black/[0.04] px-2 py-0.5 font-semibold text-emerald">
-            <Users className="h-3 w-3" /> <span className="tabular-nums">{event.players.toLocaleString()}</span>
+            <Users className="h-3 w-3" /> <span className="tabular-nums">{event.players.toLocaleString('en-US')}</span>
           </span>
         </div>
 

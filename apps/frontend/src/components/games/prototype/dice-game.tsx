@@ -264,7 +264,7 @@ export function DiceGame() {
               className={cn('mt-2 font-display text-lg font-bold', result.win ? 'text-emerald' : 'text-destructive')}
             >
               {result.win
-                ? `You won +${(result.payout - stake).toLocaleString()} · ${mult.toFixed(2)}×`
+                ? `You won +${(result.payout - stake).toLocaleString('en-US')} · ${mult.toFixed(2)}×`
                 : `Missed · rolled ${result.roll.toFixed(2)}`}
             </motion.p>
           ) : (
@@ -353,7 +353,7 @@ export function DiceGame() {
                 disabled={disabled}
                 className="mr-1.5 rounded-lg bg-black/[0.04] px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary disabled:opacity-40"
               >
-                {v.toLocaleString()}
+                {v.toLocaleString('en-US')}
               </button>
             ))}
           </div>
@@ -408,7 +408,7 @@ export function DiceGame() {
           <div className="grid grid-cols-3 gap-2 rounded-xl bg-black/[0.03] p-2 text-center">
             <Readout label="Chance" value={`${chance.toFixed(2)}%`} />
             <Readout label="Multiplier" value={`${mult.toFixed(2)}×`} />
-            <Readout label="Payout" value={potential.toLocaleString()} />
+            <Readout label="Payout" value={potential.toLocaleString('en-US')} />
           </div>
 
           {/* Roll buttons */}
@@ -420,7 +420,7 @@ export function DiceGame() {
               onClick={() => roll()}
               disabled={disabled}
             >
-              <Dice5 className="h-5 w-5" /> {rolling ? 'Rolling…' : `Roll · ${stake.toLocaleString()}`}
+              <Dice5 className="h-5 w-5" /> {rolling ? 'Rolling…' : `Roll · ${stake.toLocaleString('en-US')}`}
             </Button>
             <Button
               variant="glass"
@@ -462,7 +462,7 @@ export function DiceGame() {
           <Stat icon={<TrendingUp className="h-4 w-4 text-emerald" />} label="Highest" value={stat.highest.toFixed(2)} />
           <Stat icon={<Zap className="h-4 w-4 text-gold" />} label="Best streak" value={String(stat.bestStreak)} />
           <Stat label="Rounds" value={String(stat.rounds)} />
-          <Stat label="Biggest win" value={`+${stat.biggestWin.toLocaleString()}`} />
+          <Stat label="Biggest win" value={`+${stat.biggestWin.toLocaleString('en-US')}`} />
         </div>
 
         {/* history */}

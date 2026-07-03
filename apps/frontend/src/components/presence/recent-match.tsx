@@ -45,7 +45,7 @@ export function RecentMatch({ match, index = 0 }: { match: MatchRecord; index?: 
           </Badge>
         </div>
         <p className="truncate text-[11px] text-muted-foreground">
-          Stake <span className="font-mono tabular-nums text-foreground">${match.stake.toLocaleString()}</span>
+          Stake <span className="font-mono tabular-nums text-foreground">${match.stake.toLocaleString('en-US')}</span>
           {win ? (
             <>
               {' '}· <span className="font-mono tabular-nums text-accent">{match.multiplier.toFixed(2)}×</span>
@@ -62,7 +62,7 @@ export function RecentMatch({ match, index = 0 }: { match: MatchRecord; index?: 
             win ? 'text-emerald' : 'text-muted-foreground',
           )}
         >
-          {win ? `+$${match.payout.toLocaleString()}` : `−$${match.stake.toLocaleString()}`}
+          {win ? `+$${match.payout.toLocaleString('en-US')}` : `−$${match.stake.toLocaleString('en-US')}`}
         </span>
         <Button
           size="icon"

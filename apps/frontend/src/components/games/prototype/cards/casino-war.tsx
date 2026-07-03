@@ -88,7 +88,7 @@ export function CasinoWarGame() {
     if (win) {
       fxKeyRef.current += 1;
       setFx({ key: fxKeyRef.current, type: 'win', amount: net });
-      toast.success(`${wentToWar ? 'War won!' : 'You win!'} +${net.toLocaleString()}`);
+      toast.success(`${wentToWar ? 'War won!' : 'You win!'} +${net.toLocaleString('en-US')}`);
     } else {
       toast.error(outcome === 'dealer' ? 'Dealer takes it.' : 'Surrendered the war.');
     }
@@ -235,7 +235,7 @@ export function CasinoWarGame() {
               )}
             >
               {result.win ? <Trophy className="h-4 w-4" /> : <Zap className="h-4 w-4" />}
-              {result.win ? `You won +${result.net.toLocaleString()}` : `Lost ${result.net.toLocaleString()}`}
+              {result.win ? `You won +${result.net.toLocaleString('en-US')}` : `Lost ${result.net.toLocaleString('en-US')}`}
             </motion.div>
           ) : (
             <p className="font-display text-sm font-semibold text-emerald-700/70">
@@ -298,7 +298,7 @@ export function CasinoWarGame() {
                 disabled={busy}
                 className="rounded-lg bg-black/[0.04] px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary disabled:opacity-60"
               >
-                {v.toLocaleString()}
+                {v.toLocaleString('en-US')}
               </button>
             ))}
           </div>
@@ -306,7 +306,7 @@ export function CasinoWarGame() {
           {phase === 'war' ? (
             <div className="flex gap-2">
               <Button variant="gradient" size="lg" className="w-full sheen" onClick={goToWar}>
-                <Swords className="h-5 w-5" /> Go to War · +{stakeRef.current.toLocaleString()}
+                <Swords className="h-5 w-5" /> Go to War · +{stakeRef.current.toLocaleString('en-US')}
               </Button>
               <Button variant="glass" size="lg" onClick={surrender} title="Surrender">
                 Fold
@@ -321,7 +321,7 @@ export function CasinoWarGame() {
                 disabled={dealing}
                 onClick={() => deal()}
               >
-                <Swords className="h-5 w-5" /> Battle · {bet.toLocaleString()}
+                <Swords className="h-5 w-5" /> Battle · {bet.toLocaleString('en-US')}
               </Button>
               {phase === 'done' ? (
                 <Button variant="glass" size="lg" onClick={() => deal(seedRef.current)} title="Replay same round">
@@ -341,7 +341,7 @@ export function CasinoWarGame() {
           <Stat label="Highest" value={String(stat.highest)} />
           <Stat label="Best streak" value={String(stat.bestStreak)} />
           <Stat label="Rounds" value={String(stat.rounds)} />
-          <Stat label="Biggest win" value={`+${stat.biggestWin.toLocaleString()}`} />
+          <Stat label="Biggest win" value={`+${stat.biggestWin.toLocaleString('en-US')}`} />
         </div>
 
         <div className="card-premium p-4">

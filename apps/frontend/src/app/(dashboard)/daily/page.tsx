@@ -19,7 +19,7 @@ export default function DailyRewardsPage() {
     const reward = p.claimDaily();
     if (reward > 0) {
       sound.play('reward');
-      toast.success(`Day ${p.dailyStreak} claimed — +${reward.toLocaleString()} coins! 🎁`);
+      toast.success(`Day ${p.dailyStreak} claimed — +${reward.toLocaleString('en-US')} coins! 🎁`);
     } else {
       toast.info('Already claimed today — come back tomorrow!');
     }
@@ -43,7 +43,7 @@ export default function DailyRewardsPage() {
             </p>
           </div>
           <Button variant="gold" size="lg" className="sheen" onClick={claimToday} disabled={p.dailyClaimedToday}>
-            <Gift className="h-5 w-5" /> {p.dailyClaimedToday ? 'Claimed today' : `Claim +${(5000 + p.dailyStreak * 1000).toLocaleString()}`}
+            <Gift className="h-5 w-5" /> {p.dailyClaimedToday ? 'Claimed today' : `Claim +${(5000 + p.dailyStreak * 1000).toLocaleString('en-US')}`}
           </Button>
         </div>
       </section>
@@ -78,7 +78,7 @@ export default function DailyRewardsPage() {
                 >
                   {done ? <Check className="h-5 w-5" /> : <Coins className="h-5 w-5" />}
                 </span>
-                <span className="font-mono text-xs font-bold tabular-nums">{amt.toLocaleString()}</span>
+                <span className="font-mono text-xs font-bold tabular-nums">{amt.toLocaleString('en-US')}</span>
               </motion.div>
             );
           })}

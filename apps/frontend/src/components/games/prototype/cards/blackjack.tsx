@@ -248,7 +248,7 @@ export function BlackjackGame() {
           <div className="flex flex-wrap gap-1.5">
             {CHIPS.map((v) => (
               <button key={v} onClick={() => setBet(v)} disabled={inRound} className="rounded-lg bg-black/[0.04] px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary">
-                {v.toLocaleString()}
+                {v.toLocaleString('en-US')}
               </button>
             ))}
           </div>
@@ -262,7 +262,7 @@ export function BlackjackGame() {
           ) : (
             <div className="flex gap-2">
               <Button variant="gradient" size="lg" className="w-full sheen" onClick={() => deal()} disabled={phase === 'dealer'}>
-                {phase === 'done' ? 'Deal again' : 'Deal'} · {bet.toLocaleString()}
+                {phase === 'done' ? 'Deal again' : 'Deal'} · {bet.toLocaleString('en-US')}
               </Button>
               {phase === 'done' ? (
                 <Button variant="glass" size="lg" onClick={() => deal(seedRef.current)} title="Replay same shoe">↻</Button>
@@ -274,7 +274,7 @@ export function BlackjackGame() {
         <div className="card-premium grid grid-cols-2 gap-3 p-4 text-center">
           <Stat label="Best hand" value={String(stat.highest)} />
           <Stat label="Rounds" value={String(stat.rounds)} />
-          <Stat label="Biggest win" value={`+${stat.biggestWin.toLocaleString()}`} />
+          <Stat label="Biggest win" value={`+${stat.biggestWin.toLocaleString('en-US')}`} />
           <Stat label="Win streak" value={String(stat.bestStreak)} />
         </div>
 

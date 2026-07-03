@@ -100,7 +100,7 @@ export function GameCard({
             <div className="absolute bottom-2 left-2 z-10 flex items-center gap-1 rounded-full bg-black/35 px-2 py-0.5 text-[11px] font-semibold text-white backdrop-blur">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald" />
               <Users className="h-3 w-3" />
-              <span className="tabular-nums">{players.toLocaleString()}</span>
+              <span className="tabular-nums">{players.toLocaleString('en-US')}</span>
             </div>
           </div>
         </Link>

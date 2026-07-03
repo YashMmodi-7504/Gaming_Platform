@@ -80,7 +80,7 @@ function MissionCard({
         <div className="flex shrink-0 flex-col items-end gap-1">
           <span className="flex items-center gap-1 rounded-full bg-gold/10 px-2 py-0.5 font-mono text-xs font-bold tabular-nums text-gold">
             <Coins className="h-3 w-3" />
-            {mission.coins.toLocaleString()}
+            {mission.coins.toLocaleString('en-US')}
           </span>
           <span className="flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 font-mono text-xs font-bold tabular-nums text-accent">
             <Zap className="h-3 w-3" />
@@ -150,7 +150,7 @@ export default function MissionsPage() {
     sound.play('reward');
     setFx({ key: Date.now(), type: 'win', amount: result.coins });
     toast.success(
-      `${m.title} claimed — +${result.coins.toLocaleString()} coins & +${result.xp} XP! 🎉`,
+      `${m.title} claimed — +${result.coins.toLocaleString('en-US')} coins & +${result.xp} XP! 🎉`,
     );
   };
 

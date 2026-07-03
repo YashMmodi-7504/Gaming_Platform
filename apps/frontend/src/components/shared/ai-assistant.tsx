@@ -53,7 +53,7 @@ export function AiAssistant() {
     const claimable = [...missions.daily, ...missions.weekly].find((m) => !m.claimed && m.progress >= m.target);
     const nearly = [...missions.daily, ...missions.weekly].find((m) => !m.claimed && m.progress < m.target && m.target - m.progress <= 2);
     if (claimable) {
-      out.push({ icon: ListChecks, tone: 'text-emerald', text: `Mission "${claimable.title}" is complete — claim ${claimable.coins.toLocaleString()} coins.`, cta: 'Claim', href: '/missions' });
+      out.push({ icon: ListChecks, tone: 'text-emerald', text: `Mission "${claimable.title}" is complete — claim ${claimable.coins.toLocaleString('en-US')} coins.`, cta: 'Claim', href: '/missions' });
     } else if (nearly) {
       out.push({ icon: ListChecks, tone: 'text-primary', text: `You're ${nearly.target - nearly.progress} from finishing "${nearly.title}".`, cta: 'Play', href: '/missions' });
     }

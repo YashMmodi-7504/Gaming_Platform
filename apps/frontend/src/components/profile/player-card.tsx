@@ -578,7 +578,7 @@ export function PlayerCard({ className }: { className?: string }) {
           <div className="flex shrink-0 flex-col items-center gap-1 pb-1">
             <XpRing pct={xpPct} level={p.level} />
             <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
-              {p.xp.toLocaleString()} / {p.xpToNext.toLocaleString()} XP
+              {p.xp.toLocaleString('en-US')} / {p.xpToNext.toLocaleString('en-US')} XP
             </span>
           </div>
         </div>

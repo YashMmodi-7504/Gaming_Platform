@@ -45,7 +45,7 @@ export function GameFx({ trigger }: { trigger: FxSignal }) {
               transition={{ duration: 1.4, times: [0, 0.2, 0.7, 1] }}
               className="absolute left-1/2 top-1/3 -translate-x-1/2 font-display text-4xl font-bold text-gradient-gold drop-shadow"
             >
-              +{trigger.amount.toLocaleString()}
+              +{trigger.amount.toLocaleString('en-US')}
             </motion.div>
           ) : null}
           {/* confetti */}

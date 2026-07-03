@@ -159,7 +159,7 @@ export default function CrashLobbyPage() {
                       <p className="mt-0.5 text-xs text-muted-foreground">
                         up to{' '}
                         <span className="font-mono font-semibold text-foreground tabular-nums">
-                          {v.maxMultiplier.toLocaleString()}×
+                          {v.maxMultiplier.toLocaleString('en-US')}×
                         </span>{' '}
                         · edge {(v.houseEdge * 100).toFixed(1)}% · vol {v.volatility.toFixed(1)}
                       </p>
@@ -193,7 +193,7 @@ export default function CrashLobbyPage() {
                         {w.mult.toFixed(2)}×
                       </span>
                       <span className="block font-mono text-[11px] text-muted-foreground tabular-nums">
-                        ${w.payout.toLocaleString()}
+                        ${w.payout.toLocaleString('en-US')}
                       </span>
                     </span>
                   </li>

@@ -308,7 +308,7 @@ export default function ClansPage() {
                   <Star className="h-3.5 w-3.5 text-gold" /> Clan Level {clanLevel}
                 </span>
                 <span className="font-mono tabular-nums text-muted-foreground">
-                  <AnimatedNumber value={clanXp} /> / {clanXpToNext.toLocaleString()} XP
+                  <AnimatedNumber value={clanXp} /> / {clanXpToNext.toLocaleString('en-US')} XP
                 </span>
               </div>
               <div className="h-3 overflow-hidden rounded-full bg-muted/50">
@@ -361,7 +361,7 @@ export default function ClansPage() {
                     {m.name}
                   </p>
                   <p className="truncate text-[11px] text-muted-foreground">
-                    Level {m.level} · {m.contribution.toLocaleString()} pts
+                    Level {m.level} · {m.contribution.toLocaleString('en-US')} pts
                   </p>
                 </div>
                 <span
@@ -407,7 +407,7 @@ export default function ClansPage() {
                 </div>
                 <div>
                   <div className="mb-1 flex justify-between text-[11px] font-mono tabular-nums text-muted-foreground">
-                    <span>{m.current.toLocaleString()} / {m.goal.toLocaleString()}</span>
+                    <span>{m.current.toLocaleString('en-US')} / {m.goal.toLocaleString('en-US')}</span>
                     <span>{pct}%</span>
                   </div>
                   <div className="h-2.5 overflow-hidden rounded-full bg-muted/50">
@@ -520,7 +520,7 @@ export default function ClansPage() {
                 Level {c.level} · {c.members} members
               </p>
               <p className="inline-flex items-center gap-1 font-mono text-xs font-semibold tabular-nums text-primary">
-                <Zap className="h-3 w-3" /> {c.power.toLocaleString()} power
+                <Zap className="h-3 w-3" /> {c.power.toLocaleString('en-US')} power
               </p>
               <Button
                 size="sm"

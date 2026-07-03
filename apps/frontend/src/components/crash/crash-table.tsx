@@ -334,7 +334,7 @@ export function CrashTable({ variant, title }: { variant: string; title: string 
                           {w.mult.toFixed(2)}×
                         </span>
                         <span className="block font-mono text-[11px] text-muted-foreground tabular-nums">
-                          ${w.payout.toLocaleString()}
+                          ${w.payout.toLocaleString('en-US')}
                         </span>
                       </span>
                     </li>

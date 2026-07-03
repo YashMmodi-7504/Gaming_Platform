@@ -43,13 +43,13 @@ interface Category {
 }
 
 const CATEGORIES: Category[] = [
-  { id: 'xp', label: 'Top XP', icon: Star, accent: 'from-primary to-violet', unit: (v) => `${v.toLocaleString()} XP`, score: (p, b) => b * 42 + p.level * 900 },
-  { id: 'wins', label: 'Top Wins', icon: Trophy, accent: 'from-gold to-warning', unit: (v) => `${v.toLocaleString()} wins`, score: (p, b) => b + p.level * 4 },
-  { id: 'jackpot', label: 'Biggest Jackpot', icon: Gem, accent: 'from-pink to-violet', unit: (v) => `$${v.toLocaleString()}`, score: (_p, b) => b * 130 },
+  { id: 'xp', label: 'Top XP', icon: Star, accent: 'from-primary to-violet', unit: (v) => `${v.toLocaleString('en-US')} XP`, score: (p, b) => b * 42 + p.level * 900 },
+  { id: 'wins', label: 'Top Wins', icon: Trophy, accent: 'from-gold to-warning', unit: (v) => `${v.toLocaleString('en-US')} wins`, score: (p, b) => b + p.level * 4 },
+  { id: 'jackpot', label: 'Biggest Jackpot', icon: Gem, accent: 'from-pink to-violet', unit: (v) => `$${v.toLocaleString('en-US')}`, score: (_p, b) => b * 130 },
   { id: 'champ', label: 'Tournament Champions', icon: Crown, accent: 'from-gold via-warning to-pink', unit: (v) => `${v} titles`, score: (p, b) => (b % 40) + p.level },
   { id: 'level', label: 'Highest Level', icon: Zap, accent: 'from-accent to-primary', unit: (v) => `Level ${v}`, score: (p) => p.level * 1000 + hash(p.seed) % 1000 },
   { id: 'streak', label: 'Longest Streak', icon: Flame, accent: 'from-destructive to-warning', unit: (v) => `${v} in a row`, score: (_p, b) => (b % 60) + 3 },
-  { id: 'active', label: 'Most Active', icon: Activity, accent: 'from-emerald to-accent', unit: (v) => `${v.toLocaleString()} min`, score: (p, b) => b * 3 + p.level * 20 },
+  { id: 'active', label: 'Most Active', icon: Activity, accent: 'from-emerald to-accent', unit: (v) => `${v.toLocaleString('en-US')} min`, score: (p, b) => b * 3 + p.level * 20 },
 ];
 
 interface Ranked {

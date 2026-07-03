@@ -137,20 +137,20 @@ export function GameLiveBand({ game }: { game: DetailGame }) {
       <LiveTile
         icon={<Users className="h-5 w-5" />}
         label="Players online"
-        value={players.toLocaleString()}
+        value={players.toLocaleString('en-US')}
         tone="text-emerald"
         live
       />
       <LiveTile
         icon={<Activity className="h-5 w-5" />}
         label="Peak 24h"
-        value={peak.toLocaleString()}
+        value={peak.toLocaleString('en-US')}
         tone="text-accent"
       />
       <LiveTile
         icon={<Zap className="h-5 w-5" />}
         label="Rounds / min"
-        value={rounds.toLocaleString()}
+        value={rounds.toLocaleString('en-US')}
         tone="text-gold"
       />
       <div className="glass flex items-center gap-3 rounded-2xl px-4 py-3">
@@ -290,7 +290,7 @@ export function GameLeaderboard({ game }: { game: DetailGame }) {
             <span className="flex-1 truncate font-semibold">{handle(r.seed)}</span>
             {r.rank === 1 ? <Badge variant="gold">Champion</Badge> : null}
             <span className="font-mono text-sm font-bold tabular-nums text-primary">
-              {r.score.toLocaleString()}
+              {r.score.toLocaleString('en-US')}
             </span>
           </div>
         ))}

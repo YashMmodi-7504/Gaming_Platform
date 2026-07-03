@@ -67,7 +67,7 @@ const blackjackGen: Gen = (i) => {
 };
 const teenPattiGen: Gen = (i) => {
   const amt = pick([1240, 860, 3120, 540, 2150, 980, 4300, 1560], i);
-  return { label: pick(NAMES, i + 4), value: `+$${amt.toLocaleString()}`, tone: 'good' };
+  return { label: pick(NAMES, i + 4), value: `+$${amt.toLocaleString('en-US')}`, tone: 'good' };
 };
 const sportsGen: Gen = (i) => {
   const seq = ['LAK 2–1 SEA', 'ARS 3–0 EVE', 'BOS 110–104', 'PSG 1–1 LYO', 'NYK 98–95'];

@@ -30,7 +30,7 @@ const ITEMS: TickerItem[] = [
 ];
 
 function fmt(n: number): string {
-  return n.toLocaleString();
+  return n.toLocaleString('en-US');
 }
 
 function TickerEntry({ item }: { item: TickerItem }) {

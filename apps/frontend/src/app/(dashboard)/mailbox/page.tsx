@@ -213,7 +213,7 @@ export default function MailboxPage() {
     setMail((prev) => prev.map((x) => (x.id === m.id ? { ...x, claimed: true, unread: false } : x)));
     sound.play('reward');
     toast.success('Reward claimed!', {
-      description: [coins > 0 ? `+${coins.toLocaleString()} coins` : null, m.reward.item].filter(Boolean).join(' · '),
+      description: [coins > 0 ? `+${coins.toLocaleString('en-US')} coins` : null, m.reward.item].filter(Boolean).join(' · '),
     });
   }
 
@@ -228,7 +228,7 @@ export default function MailboxPage() {
     const ids = new Set(claimable.map((m) => m.id));
     setMail((prev) => prev.map((x) => (ids.has(x.id) ? { ...x, claimed: true, unread: false } : x)));
     sound.play('reward');
-    toast.success(`Claimed ${claimable.length} rewards`, { description: `+${totalCoins.toLocaleString()} coins added to your wallet` });
+    toast.success(`Claimed ${claimable.length} rewards`, { description: `+${totalCoins.toLocaleString('en-US')} coins added to your wallet` });
   }
 
   function archive(m: Mail) {
@@ -326,7 +326,7 @@ export default function MailboxPage() {
                         {m.reward ? (
                           <span className={cn('inline-flex items-center gap-1 text-[10px] font-semibold', m.claimed ? 'text-muted-foreground line-through' : meta.text)}>
                             <Coins className="h-3 w-3" />
-                            {m.reward.coins ? m.reward.coins.toLocaleString() : m.reward.item}
+                            {m.reward.coins ? m.reward.coins.toLocaleString('en-US') : m.reward.item}
                           </span>
                         ) : null}
                       </div>

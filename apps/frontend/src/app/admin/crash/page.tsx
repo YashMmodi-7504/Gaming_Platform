@@ -163,7 +163,7 @@ export default function AdminCrashPage() {
               <div className="min-w-0">
                 <p className="truncate font-medium">{v.name}</p>
                 <p className="truncate text-xs text-muted-foreground">
-                  {v.key} · up to {v.maxMultiplier.toLocaleString()}× · edge{' '}
+                  {v.key} · up to {v.maxMultiplier.toLocaleString('en-US')}× · edge{' '}
                   {(v.houseEdge * 100).toFixed(1)}% · vol {v.volatility.toFixed(1)} · limits{' '}
                   {v.limits.min}–{v.limits.max}
                 </p>

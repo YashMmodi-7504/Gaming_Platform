@@ -89,7 +89,7 @@ export function Lucky7Game() {
       if (win) {
         fxKeyRef.current += 1;
         setFx({ key: fxKeyRef.current, type: 'win', amount: net });
-        toast.success(`Card ${pip} — ${chosen.label} pays ${chosen.mult}× · +${net.toLocaleString()}`);
+        toast.success(`Card ${pip} — ${chosen.label} pays ${chosen.mult}× · +${net.toLocaleString('en-US')}`);
       } else {
         toast.error(`Card ${pip} landed ${outcome === 'seven' ? 'on 7' : outcome}. Better luck next deal.`);
       }
@@ -212,7 +212,7 @@ export function Lucky7Game() {
               )}
             >
               {result.win ? <Trophy className="h-4 w-4" /> : <Zap className="h-4 w-4" />}
-              {result.win ? `You won +${result.net.toLocaleString()}` : `Missed · ${result.net.toLocaleString()}`}
+              {result.win ? `You won +${result.net.toLocaleString('en-US')}` : `Missed · ${result.net.toLocaleString('en-US')}`}
             </motion.div>
           ) : (
             <p className="font-display text-sm font-semibold text-emerald-700/70">
@@ -305,7 +305,7 @@ export function Lucky7Game() {
                 disabled={dealing}
                 className="rounded-lg bg-black/[0.04] px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary disabled:opacity-60"
               >
-                {v.toLocaleString()}
+                {v.toLocaleString('en-US')}
               </button>
             ))}
           </div>
@@ -318,7 +318,7 @@ export function Lucky7Game() {
               disabled={dealing}
               onClick={() => deal()}
             >
-              <Sparkles className="h-5 w-5" /> Deal · {bet.toLocaleString()}
+              <Sparkles className="h-5 w-5" /> Deal · {bet.toLocaleString('en-US')}
             </Button>
             {phase === 'done' ? (
               <Button variant="glass" size="lg" onClick={() => deal(seedRef.current)} title="Replay same card">
@@ -337,7 +337,7 @@ export function Lucky7Game() {
           <Stat label="Highest pip" value={String(stat.highest)} />
           <Stat label="Best streak" value={String(stat.bestStreak)} />
           <Stat label="Rounds" value={String(stat.rounds)} />
-          <Stat label="Biggest win" value={`+${stat.biggestWin.toLocaleString()}`} />
+          <Stat label="Biggest win" value={`+${stat.biggestWin.toLocaleString('en-US')}`} />
         </div>
 
         <div className="card-premium p-4">

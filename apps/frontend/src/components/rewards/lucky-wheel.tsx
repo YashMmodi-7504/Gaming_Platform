@@ -59,7 +59,7 @@ export function LuckyWheel() {
       toast.success(
         prize.label === 'JACKPOT'
           ? '🎉 JACKPOT! +5,000 coins +500 XP'
-          : `You won ${prize.coins ? `${prize.coins.toLocaleString()} coins` : `${prize.xp} XP`}!`,
+          : `You won ${prize.coins ? `${prize.coins.toLocaleString('en-US')} coins` : `${prize.xp} XP`}!`,
       );
       setSpinning(false);
     }, 3600);

@@ -46,7 +46,7 @@ export function ViewerCounter({
         <span className="relative inline-flex h-2 w-2 rounded-full bg-destructive" />
       </span>
       <Eye className="h-3.5 w-3.5" aria-hidden />
-      <span className="tabular-nums">{count.toLocaleString()}</span>
+      <span className="tabular-nums">{count.toLocaleString('en-US')}</span>
       <span className="font-normal text-destructive/80">{label}</span>
     </span>
   );

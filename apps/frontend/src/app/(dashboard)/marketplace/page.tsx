@@ -163,7 +163,7 @@ export default function MarketplacePage() {
     if (ok) {
       sound.play('coin');
       toast.success(`Purchased ${item.name}!`, {
-        description: `${item.price.toLocaleString()} coins spent.`,
+        description: `${item.price.toLocaleString('en-US')} coins spent.`,
       });
     } else {
       toast.error('Not enough coins.', { description: 'Reload demo coins in the Store.' });
@@ -272,7 +272,7 @@ export default function MarketplacePage() {
                   </div>
                   <div className="flex items-center gap-1 font-bold text-gold">
                     <Coins className="h-4 w-4" />
-                    {item.price.toLocaleString()}
+                    {item.price.toLocaleString('en-US')}
                   </div>
                 </div>
               </motion.button>
@@ -311,7 +311,7 @@ export default function MarketplacePage() {
                   </span>
                   <span className="flex items-center gap-1 text-xs font-bold text-gold">
                     <Coins className="h-3 w-3" />
-                    {item.price.toLocaleString()}
+                    {item.price.toLocaleString('en-US')}
                   </span>
                 </div>
                 <div className="mt-2">
@@ -386,7 +386,7 @@ export default function MarketplacePage() {
                   <p className="truncate font-display text-sm font-bold">{item.name}</p>
                   <span className="flex shrink-0 items-center gap-1 text-xs font-bold text-gold">
                     <Coins className="h-3 w-3" />
-                    {item.price.toLocaleString()}
+                    {item.price.toLocaleString('en-US')}
                   </span>
                 </div>
                 <div className="mt-2">
@@ -435,7 +435,7 @@ export default function MarketplacePage() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold">{item.name}</p>
                     <p className="flex items-center gap-1 text-xs font-bold text-gold">
-                      <Coins className="h-3 w-3" /> {item.price.toLocaleString()}
+                      <Coins className="h-3 w-3" /> {item.price.toLocaleString('en-US')}
                     </p>
                   </div>
                   <button
@@ -509,7 +509,7 @@ export default function MarketplacePage() {
                         <p className="mt-2 truncate text-sm font-semibold">{item.name}</p>
                         <div className="mt-1 flex items-center justify-between">
                           <span className="flex items-center gap-1 text-xs font-bold text-gold">
-                            <Coins className="h-3 w-3" /> {item.price === 0 ? 'Free' : item.price.toLocaleString()}
+                            <Coins className="h-3 w-3" /> {item.price === 0 ? 'Free' : item.price.toLocaleString('en-US')}
                           </span>
                           {ownedIt ? (
                             equippable && !equipped ? (
@@ -618,7 +618,7 @@ function PulseBar({
       <div className="mb-1 flex items-center justify-between text-xs">
         <span className="text-muted-foreground">{label}</span>
         <span className="font-mono tabular-nums">
-          {value.toLocaleString()}
+          {value.toLocaleString('en-US')}
           {suffix ?? ''}
         </span>
       </div>
@@ -719,7 +719,7 @@ function PreviewModal({
 
         <div className="mt-3 flex items-center gap-2 text-lg font-bold text-gold">
           <Coins className="h-5 w-5" />
-          {item.price === 0 ? 'Free' : item.price.toLocaleString()}
+          {item.price === 0 ? 'Free' : item.price.toLocaleString('en-US')}
         </div>
 
         <div className="mt-5">
@@ -741,7 +741,7 @@ function PreviewModal({
             )
           ) : affordable ? (
             <Button variant="gradient" className="w-full sheen" onClick={onBuy}>
-              Buy for {item.price.toLocaleString()} coins
+              Buy for {item.price.toLocaleString('en-US')} coins
             </Button>
           ) : (
             <Button variant="glass" disabled className="w-full">

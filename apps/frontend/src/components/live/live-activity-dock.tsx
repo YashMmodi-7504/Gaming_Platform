@@ -169,7 +169,7 @@ export function LiveActivityDock() {
               <div className="flex items-center gap-2">
                 <span className="flex items-center gap-1 rounded-full bg-emerald/10 px-2 py-0.5 text-[10px] font-bold text-emerald ring-1 ring-inset ring-emerald/30">
                   <Activity className="h-3 w-3" />
-                  <span className="tabular-nums">{online.toLocaleString()}</span>
+                  <span className="tabular-nums">{online.toLocaleString('en-US')}</span>
                 </span>
                 <button
                   type="button"
@@ -204,7 +204,7 @@ export function LiveActivityDock() {
             exit={{ opacity: 0, x: 24 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             onClick={() => toggle(true)}
-            aria-label={`Show live activity — ${online.toLocaleString()} online`}
+            aria-label={`Show live activity — ${online.toLocaleString('en-US')} online`}
             className="glass-strong pointer-events-auto flex flex-col items-center gap-2 rounded-l-2xl border border-r-0 border-black/10 px-2 py-3 shadow-glow-sm transition-transform hover:-translate-x-0.5"
           >
             <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />

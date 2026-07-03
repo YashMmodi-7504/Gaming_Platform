@@ -262,7 +262,7 @@ export function LiveTournaments() {
                 </div>
                 <span className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Users className="h-3.5 w-3.5" />
-                  <span className="font-mono tabular-nums">{t.players.toLocaleString()}</span>
+                  <span className="font-mono tabular-nums">{t.players.toLocaleString('en-US')}</span>
                 </span>
               </div>
               <Button asChild variant="gradient" size="sm" className="relative mt-4 w-full">
@@ -416,7 +416,7 @@ export function VIPGames() {
                     <div>
                       <p className="text-muted-foreground">Min bet</p>
                       <p className="font-mono font-semibold tabular-nums text-gold">
-                        ${g.minBet.toLocaleString()}
+                        ${g.minBet.toLocaleString('en-US')}
                       </p>
                     </div>
                     <div className="text-right">

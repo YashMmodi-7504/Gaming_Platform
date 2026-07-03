@@ -148,7 +148,7 @@ export function TeenPattiGame() {
       if (win) {
         fxKeyRef.current += 1;
         setFx({ key: fxKeyRef.current, type: 'win', amount: net });
-        toast.success(`${playerRank.name}! +${net.toLocaleString()}`);
+        toast.success(`${playerRank.name}! +${net.toLocaleString('en-US')}`);
       } else {
         toast.error(cmp === 0 ? 'Tie — dealer edge.' : `Dealer's ${dealerRank.name} wins.`);
       }
@@ -246,8 +246,8 @@ export function TeenPattiGame() {
             >
               {result.win ? <Trophy className="h-4 w-4" /> : <Zap className="h-4 w-4" />}
               {result.win
-                ? `${result.playerRank.name} · +${result.net.toLocaleString()}`
-                : `Lost ${result.net.toLocaleString()}`}
+                ? `${result.playerRank.name} · +${result.net.toLocaleString('en-US')}`
+                : `Lost ${result.net.toLocaleString('en-US')}`}
             </motion.div>
           ) : (
             <p className="font-display text-sm font-semibold text-emerald-700/70">
@@ -310,7 +310,7 @@ export function TeenPattiGame() {
                 disabled={dealing}
                 className="rounded-lg bg-black/[0.04] px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary disabled:opacity-60"
               >
-                {v.toLocaleString()}
+                {v.toLocaleString('en-US')}
               </button>
             ))}
           </div>
@@ -323,7 +323,7 @@ export function TeenPattiGame() {
               disabled={dealing}
               onClick={() => play()}
             >
-              <Sparkles className="h-5 w-5" /> Deal · {bet.toLocaleString()}
+              <Sparkles className="h-5 w-5" /> Deal · {bet.toLocaleString('en-US')}
             </Button>
             {phase === 'done' ? (
               <Button variant="glass" size="lg" onClick={() => play(seedRef.current)} title="Replay same deal">
@@ -346,7 +346,7 @@ export function TeenPattiGame() {
           <Stat label="Best hand" value={HAND_NAMES[Math.max(0, Math.min(5, stat.highest - 1))] ?? '—'} />
           <Stat label="Best streak" value={String(stat.bestStreak)} />
           <Stat label="Rounds" value={String(stat.rounds)} />
-          <Stat label="Biggest win" value={`+${stat.biggestWin.toLocaleString()}`} />
+          <Stat label="Biggest win" value={`+${stat.biggestWin.toLocaleString('en-US')}`} />
         </div>
 
         <div className="card-premium p-4">

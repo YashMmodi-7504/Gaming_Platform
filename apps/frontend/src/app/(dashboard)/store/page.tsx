@@ -159,7 +159,7 @@ export default function StorePage() {
       setConfettiId(item.id);
       window.setTimeout(() => setConfettiId((c) => (c === item.id ? null : c)), 1100);
       toast.success(`Purchased ${item.name}!`, {
-        description: `${item.price.toLocaleString()} coins spent.`,
+        description: `${item.price.toLocaleString('en-US')} coins spent.`,
       });
     } else {
       toast.error('Not enough coins.', { description: 'Reload your demo balance and try again.' });
@@ -286,7 +286,7 @@ export default function StorePage() {
                 </div>
                 <div className="flex shrink-0 items-center gap-1 text-sm font-bold text-gold">
                   <Coins className="h-3.5 w-3.5" />
-                  {item.price === 0 ? 'Free' : item.price.toLocaleString()}
+                  {item.price === 0 ? 'Free' : item.price.toLocaleString('en-US')}
                 </div>
               </div>
 
@@ -407,7 +407,7 @@ function PreviewModal({
 
         <div className="mt-3 flex items-center gap-2 text-lg font-bold text-gold">
           <Coins className="h-5 w-5" />
-          {item.price === 0 ? 'Free' : item.price.toLocaleString()}
+          {item.price === 0 ? 'Free' : item.price.toLocaleString('en-US')}
         </div>
 
         <div className="mt-5">
@@ -429,7 +429,7 @@ function PreviewModal({
             )
           ) : affordable ? (
             <Button variant="gradient" className="w-full sheen" onClick={onBuy}>
-              Buy for {item.price.toLocaleString()} coins
+              Buy for {item.price.toLocaleString('en-US')} coins
             </Button>
           ) : (
             <Button variant="glass" disabled className="w-full">

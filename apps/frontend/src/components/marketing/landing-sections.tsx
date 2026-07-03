@@ -110,7 +110,7 @@ export function LiveWinners() {
                 <p className="text-xs text-muted-foreground">{w.game}</p>
               </div>
               <span className="font-mono text-sm font-bold text-emerald">
-                +${w.amount.toLocaleString()}
+                +${w.amount.toLocaleString('en-US')}
               </span>
             </div>
           ))}

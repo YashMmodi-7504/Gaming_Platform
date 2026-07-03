@@ -77,8 +77,8 @@ export function ReactionGame() {
         : reaction;
       const paid = win ? coins : Math.round(coins * 0.4);
       const desc = nextAttempts.length >= ATTEMPTS ? `Avg over ${ATTEMPTS}: ${avg}ms` : `Attempt ${nextAttempts.length}/${ATTEMPTS}`;
-      if (win) toast.success(`${reaction}ms · +${paid.toLocaleString()} coins`, { description: desc });
-      else toast.message(`${reaction}ms · +${paid.toLocaleString()} coins`, { description: desc });
+      if (win) toast.success(`${reaction}ms · +${paid.toLocaleString('en-US')} coins`, { description: desc });
+      else toast.message(`${reaction}ms · +${paid.toLocaleString('en-US')} coins`, { description: desc });
     },
     [],
   );
@@ -233,7 +233,7 @@ export function ReactionGame() {
           </p>
           <div className="rounded-xl bg-black/[0.03] p-3 text-center">
             <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Biggest win</p>
-            <p className="font-display text-lg font-bold text-gold">+{stat.biggestWin.toLocaleString()}</p>
+            <p className="font-display text-lg font-bold text-gold">+{stat.biggestWin.toLocaleString('en-US')}</p>
           </div>
         </div>
 

@@ -114,7 +114,7 @@ export function ColorMatchGame() {
       fxKey.current += 1;
       setFx({ key: fxKey.current, type: 'win', amount: coins });
       toast.success(`Score ${finalScore} · best combo ${bestComboRef.current}`, {
-        description: `+${coins.toLocaleString()} coins · +${xp} XP`,
+        description: `+${coins.toLocaleString('en-US')} coins · +${xp} XP`,
       });
     } else {
       toast(`Game over — score ${finalScore}`);
@@ -316,9 +316,9 @@ export function ColorMatchGame() {
         </div>
 
         <div className="card-premium grid grid-cols-2 gap-3 p-4 text-center">
-          <StatCell icon={<Trophy className="h-4 w-4 text-gold" />} label="Best score" value={Math.max(stat.highest, score).toLocaleString()} />
+          <StatCell icon={<Trophy className="h-4 w-4 text-gold" />} label="Best score" value={Math.max(stat.highest, score).toLocaleString('en-US')} />
           <StatCell icon={<Zap className="h-4 w-4 text-emerald" />} label="Rounds" value={String(stat.rounds)} />
-          <StatCell label="Biggest win" value={`+${stat.biggestWin.toLocaleString()}`} />
+          <StatCell label="Biggest win" value={`+${stat.biggestWin.toLocaleString('en-US')}`} />
           <StatCell label="Best streak" value={String(stat.bestStreak)} />
         </div>
 

@@ -200,8 +200,8 @@ export function DragonTigerGame() {
                   )}
                 >
                   {result.win
-                    ? `You won +${result.net.toLocaleString()}`
-                    : `${outcome?.winner === 'tie' ? 'Tie' : outcome?.winner === 'dragon' ? 'Dragon' : 'Tiger'} wins · ${result.net.toLocaleString()}`}
+                    ? `You won +${result.net.toLocaleString('en-US')}`
+                    : `${outcome?.winner === 'tie' ? 'Tie' : outcome?.winner === 'dragon' ? 'Dragon' : 'Tiger'} wins · ${result.net.toLocaleString('en-US')}`}
                 </motion.p>
               ) : phase === 'idle' ? (
                 <motion.p
@@ -287,7 +287,7 @@ export function DragonTigerGame() {
                 disabled={phase === 'dealing'}
                 className="rounded-lg bg-black/[0.04] px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
               >
-                {v.toLocaleString()}
+                {v.toLocaleString('en-US')}
               </button>
             ))}
           </div>
@@ -300,7 +300,7 @@ export function DragonTigerGame() {
               disabled={phase === 'dealing'}
               onClick={() => deal()}
             >
-              <Flame className="h-5 w-5" /> Deal · {bet.toLocaleString()}
+              <Flame className="h-5 w-5" /> Deal · {bet.toLocaleString('en-US')}
             </Button>
             {phase === 'result' ? (
               <Button
@@ -327,7 +327,7 @@ export function DragonTigerGame() {
             value={String(stat.bestStreak)}
           />
           <Stat label="Rounds" value={String(stat.rounds)} />
-          <Stat label="Biggest win" value={`+${stat.biggestWin.toLocaleString()}`} />
+          <Stat label="Biggest win" value={`+${stat.biggestWin.toLocaleString('en-US')}`} />
         </div>
 
         <div className="card-premium p-4">

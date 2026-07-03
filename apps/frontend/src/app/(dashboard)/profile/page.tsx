@@ -211,7 +211,7 @@ function CustomizationSection() {
                   <Button size="sm" variant="gold" className="w-full sheen" asChild>
                     <Link href="/store">
                       <Coins className="mr-1 h-3.5 w-3.5" />
-                      {item.price.toLocaleString()}
+                      {item.price.toLocaleString('en-US')}
                     </Link>
                   </Button>
                 )}
@@ -288,7 +288,7 @@ export default function ProfilePage() {
 
   const claim = () => {
     const reward = p.claimDaily();
-    if (reward > 0) toast.success(`Claimed ${reward.toLocaleString()} coins! 🎁`);
+    if (reward > 0) toast.success(`Claimed ${reward.toLocaleString('en-US')} coins! 🎁`);
     else toast.info('Daily reward already claimed — come back tomorrow.');
   };
 
@@ -342,7 +342,7 @@ export default function ProfilePage() {
               <div>
                 <h2 className="font-display text-lg font-bold">Daily reward</h2>
                 <p className="text-sm text-muted-foreground">
-                  Day {p.dailyStreak} streak · +{(5000 + p.dailyStreak * 1000).toLocaleString()} coins
+                  Day {p.dailyStreak} streak · +{(5000 + p.dailyStreak * 1000).toLocaleString('en-US')} coins
                 </p>
               </div>
             </div>

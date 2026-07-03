@@ -342,7 +342,7 @@ export function RouletteGame() {
                 result.win ? 'text-emerald' : 'text-destructive',
               )}
             >
-              {result.win ? `+${result.payout.toLocaleString()}` : result.payout.toLocaleString()}
+              {result.win ? `+${result.payout.toLocaleString('en-US')}` : result.payout.toLocaleString('en-US')}
             </span>
           ) : null}
         </div>
@@ -435,14 +435,14 @@ export function RouletteGame() {
                 disabled={spinning}
                 className="rounded-lg bg-black/[0.04] px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
               >
-                {v.toLocaleString()}
+                {v.toLocaleString('en-US')}
               </button>
             ))}
           </div>
 
           <div className="flex gap-2">
             <Button variant="gradient" size="lg" className="sheen w-full" onClick={() => spin()} disabled={spinning}>
-              <CircleDot className="h-5 w-5" /> {spinning ? 'Spinning…' : `Spin · ${bet.toLocaleString()}`}
+              <CircleDot className="h-5 w-5" /> {spinning ? 'Spinning…' : `Spin · ${bet.toLocaleString('en-US')}`}
             </Button>
             {result && !spinning ? (
               <Button variant="glass" size="lg" onClick={() => spin(seedRef.current)} title="Replay same spin">
@@ -523,7 +523,7 @@ export function RouletteGame() {
         {/* Stats */}
         <div className="card-premium grid grid-cols-3 gap-3 p-4 text-center">
           <Stat label="Rounds" value={String(stat.rounds)} />
-          <Stat icon={<Trophy className="h-4 w-4 text-gold" />} label="Biggest win" value={`+${stat.biggestWin.toLocaleString()}`} />
+          <Stat icon={<Trophy className="h-4 w-4 text-gold" />} label="Biggest win" value={`+${stat.biggestWin.toLocaleString('en-US')}`} />
           <Stat icon={<Zap className="h-4 w-4 text-emerald" />} label="Best streak" value={String(stat.bestStreak)} />
         </div>
       </div>

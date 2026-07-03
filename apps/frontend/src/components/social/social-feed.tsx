@@ -160,7 +160,7 @@ function buildFeed(): FeedItem[] {
         text: (
           <>
             <span className="font-semibold text-foreground">{f.name}</span> won a tournament and
-            banked <span className="font-semibold text-gold">${(5000 + (h % 45000)).toLocaleString()}</span>!
+            banked <span className="font-semibold text-gold">${(5000 + (h % 45000)).toLocaleString('en-US')}</span>!
           </>
         ),
         time: `${20 + i * 7}m ago`,
@@ -267,7 +267,7 @@ function FeedRow({ item, index }: { item: FeedItem; index: number }) {
             )}
           >
             <Heart className={cn('h-3.5 w-3.5 transition-transform', liked && 'scale-110 fill-current')} />
-            <span className="font-mono tabular-nums">{likes.toLocaleString()}</span>
+            <span className="font-mono tabular-nums">{likes.toLocaleString('en-US')}</span>
           </button>
           <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
             <MessageCircle className="h-3.5 w-3.5" /> Reply

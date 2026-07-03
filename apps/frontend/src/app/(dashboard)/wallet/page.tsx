@@ -150,7 +150,7 @@ export default function WalletPage() {
                     <Gift className="h-3.5 w-3.5 text-gold" />
                     {r.label}
                   </span>
-                  <span className="font-mono font-bold tabular-nums text-emerald">+{r.amount.toLocaleString()}</span>
+                  <span className="font-mono font-bold tabular-nums text-emerald">+{r.amount.toLocaleString('en-US')}</span>
                 </div>
               ))}
             </CardContent>
@@ -166,7 +166,7 @@ export default function WalletPage() {
                     <span className="truncate">{p.item}</span>
                     <RarityBadge rarity={p.rarity} />
                   </span>
-                  <span className="shrink-0 font-mono font-bold tabular-nums text-pink">−{p.amount.toLocaleString()}</span>
+                  <span className="shrink-0 font-mono font-bold tabular-nums text-pink">−{p.amount.toLocaleString('en-US')}</span>
                 </div>
               ))}
             </CardContent>
@@ -232,7 +232,7 @@ export default function WalletPage() {
                         <tr key={t.id} className="border-b border-black/5 transition-colors last:border-0 hover:bg-black/5">
                           <td className="px-4 py-3 font-medium">{t.type.replace(/_/g, ' ')}</td>
                           <td className="px-4 py-3 text-xs text-muted-foreground">
-                            {new Date(t.createdAt).toLocaleString()} · {t.reference}
+                            {new Date(t.createdAt).toLocaleString('en-US')} · {t.reference}
                           </td>
                           <td
                             className={cn(

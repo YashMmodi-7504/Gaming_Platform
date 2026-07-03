@@ -137,7 +137,7 @@ export function MemoryGame() {
       setFx({ key: fxKey.current, type: 'win', amount: coins });
       sound.play('achievement');
       toast.success(`Cleared in ${finalMoves} moves · ${seconds.toFixed(1)}s`, {
-        description: `+${coins.toLocaleString()} coins · +${xp} XP`,
+        description: `+${coins.toLocaleString('en-US')} coins · +${xp} XP`,
       });
     },
     [clearTimers],
@@ -307,9 +307,9 @@ export function MemoryGame() {
         </div>
 
         <div className="card-premium grid grid-cols-2 gap-3 p-4 text-center">
-          <StatCell icon={<Trophy className="h-4 w-4 text-gold" />} label="Best score" value={bestMoves.toLocaleString()} />
+          <StatCell icon={<Trophy className="h-4 w-4 text-gold" />} label="Best score" value={bestMoves.toLocaleString('en-US')} />
           <StatCell icon={<Zap className="h-4 w-4 text-emerald" />} label="Rounds" value={String(stat.rounds)} />
-          <StatCell label="Biggest win" value={`+${stat.biggestWin.toLocaleString()}`} />
+          <StatCell label="Biggest win" value={`+${stat.biggestWin.toLocaleString('en-US')}`} />
           <StatCell label="Best streak" value={String(stat.bestStreak)} />
         </div>
 

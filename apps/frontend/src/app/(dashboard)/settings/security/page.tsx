@@ -23,7 +23,7 @@ import { PageHeader } from '@/components/shared/page-header';
 import { authApi } from '@/lib/auth-api';
 
 function formatDate(value: string | null): string {
-  return value ? new Date(value).toLocaleString() : '—';
+  return value ? new Date(value).toLocaleString('en-US') : '—';
 }
 
 function ChangePasswordSection() {

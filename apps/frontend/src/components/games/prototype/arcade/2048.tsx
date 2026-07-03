@@ -220,18 +220,18 @@ export function Game2048() {
         stake: 0,
         win,
         winnings: win ? coins : 0,
-        label: `2048 · ${finalScore.toLocaleString()} pts`,
+        label: `2048 · ${finalScore.toLocaleString('en-US')} pts`,
         value: finalScore,
         xp,
       });
       if (win) {
         fxKey.current += 1;
         setFx({ key: fxKey.current, type: 'win', amount: coins });
-        toast.success(`Game over — +${coins.toLocaleString()} coins · +${xp} XP`, {
-          description: reachedWin ? 'You reached 2048!' : `Final score ${finalScore.toLocaleString()}`,
+        toast.success(`Game over — +${coins.toLocaleString('en-US')} coins · +${xp} XP`, {
+          description: reachedWin ? 'You reached 2048!' : `Final score ${finalScore.toLocaleString('en-US')}`,
         });
       } else {
-        toast(`Game over — score ${finalScore.toLocaleString()}`);
+        toast(`Game over — score ${finalScore.toLocaleString('en-US')}`);
       }
     },
     [],
@@ -329,7 +329,7 @@ export function Game2048() {
             <div className="rounded-xl bg-gold/10 px-3 py-1.5 text-center">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Best</p>
               <p className="font-display text-xl font-bold tabular-nums text-gold">
-                {Math.max(stat.highest, score).toLocaleString()}
+                {Math.max(stat.highest, score).toLocaleString('en-US')}
               </p>
             </div>
           </div>
@@ -395,7 +395,7 @@ export function Game2048() {
                   <>
                     <Sparkles className="h-10 w-10 text-primary" />
                     <p className="font-display text-2xl font-bold text-gradient">Game Over</p>
-                    <p className="font-mono text-sm text-muted-foreground">Score {score.toLocaleString()}</p>
+                    <p className="font-mono text-sm text-muted-foreground">Score {score.toLocaleString('en-US')}</p>
                     <Button variant="gradient" size="lg" className="sheen" onClick={reset}>
                       <RotateCcw className="h-5 w-5" /> New Game
                     </Button>
@@ -447,9 +447,9 @@ export function Game2048() {
         </div>
 
         <div className="card-premium grid grid-cols-2 gap-3 p-4 text-center">
-          <StatCell icon={<Trophy className="h-4 w-4 text-gold" />} label="Best score" value={Math.max(stat.highest, score).toLocaleString()} />
+          <StatCell icon={<Trophy className="h-4 w-4 text-gold" />} label="Best score" value={Math.max(stat.highest, score).toLocaleString('en-US')} />
           <StatCell icon={<Zap className="h-4 w-4 text-emerald" />} label="Rounds" value={String(stat.rounds)} />
-          <StatCell label="Biggest win" value={`+${stat.biggestWin.toLocaleString()}`} />
+          <StatCell label="Biggest win" value={`+${stat.biggestWin.toLocaleString('en-US')}`} />
           <StatCell label="Best streak" value={String(stat.bestStreak)} />
         </div>
 

@@ -152,7 +152,7 @@ export function PlinkoGame() {
         {result ? (
           <div className="relative mt-2 text-center font-display text-lg font-bold">
             <span className={result.mult >= 1 ? 'text-emerald' : 'text-destructive'}>
-              {result.mult}× · {result.mult >= 1 ? `+${result.win.toLocaleString()}` : `-${(bet - result.win).toLocaleString()}`}
+              {result.mult}× · {result.mult >= 1 ? `+${result.win.toLocaleString('en-US')}` : `-${(bet - result.win).toLocaleString('en-US')}`}
             </span>
           </div>
         ) : null}
@@ -179,12 +179,12 @@ export function PlinkoGame() {
           <div className="flex flex-wrap gap-1.5">
             {CHIPS.map((v) => (
               <button key={v} onClick={() => setBet(v)} disabled={dropping} className="rounded-lg bg-black/[0.04] px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary">
-                {v.toLocaleString()}
+                {v.toLocaleString('en-US')}
               </button>
             ))}
           </div>
           <Button variant="gradient" size="lg" className="w-full sheen" onClick={drop} disabled={dropping}>
-            {dropping ? 'Dropping…' : `Drop ball · ${bet.toLocaleString()}`}
+            {dropping ? 'Dropping…' : `Drop ball · ${bet.toLocaleString('en-US')}`}
           </Button>
         </div>
 

@@ -253,7 +253,7 @@ export function CrashGame() {
           )}
           {phase === 'crashed' ? (
             <p className={cn('mt-2 font-display text-lg font-bold', result?.win ? 'text-emerald' : 'text-destructive')}>
-              {result?.win ? `You won +${(result.payout - bet).toLocaleString()}` : `Busted at ${mult.toFixed(2)}×`}
+              {result?.win ? `You won +${(result.payout - bet).toLocaleString('en-US')}` : `Busted at ${mult.toFixed(2)}×`}
             </p>
           ) : null}
         </div>
@@ -310,12 +310,12 @@ export function CrashGame() {
 
           {running && cashedRef.current === null ? (
             <Button variant="gold" size="lg" className="w-full sheen text-base" onClick={cashOut}>
-              Cash Out {mult.toFixed(2)}× · +{Math.round(bet * mult).toLocaleString()}
+              Cash Out {mult.toFixed(2)}× · +{Math.round(bet * mult).toLocaleString('en-US')}
             </Button>
           ) : phase === 'idle' || phase === 'crashed' ? (
             <div className="flex gap-2">
               <Button variant="gradient" size="lg" className="w-full sheen" onClick={() => launch()}>
-                <Rocket className="h-5 w-5" /> Launch · {bet.toLocaleString()}
+                <Rocket className="h-5 w-5" /> Launch · {bet.toLocaleString('en-US')}
               </Button>
               {phase === 'crashed' ? (
                 <Button variant="glass" size="lg" onClick={() => launch(seedRef.current)} title="Replay same round">
@@ -335,7 +335,7 @@ export function CrashGame() {
               disabled={running || phase === 'countdown'}
               className="mr-1.5 rounded-lg bg-black/[0.04] px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
             >
-              {v.toLocaleString()}
+              {v.toLocaleString('en-US')}
             </button>
           ))}
         </div>
@@ -345,7 +345,7 @@ export function CrashGame() {
           <Stat icon={<TrendingUp className="h-4 w-4 text-emerald" />} label="Highest" value={`${stat.highest.toFixed(2)}×`} />
           <Stat icon={<Zap className="h-4 w-4 text-gold" />} label="Best streak" value={String(stat.bestStreak)} />
           <Stat label="Rounds" value={String(stat.rounds)} />
-          <Stat label="Biggest win" value={`+${stat.biggestWin.toLocaleString()}`} />
+          <Stat label="Biggest win" value={`+${stat.biggestWin.toLocaleString('en-US')}`} />
         </div>
 
         <div className="card-premium p-4">

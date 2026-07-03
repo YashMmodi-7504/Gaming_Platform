@@ -75,7 +75,7 @@ export default function MatchDetailsPage() {
                   <div className="sheen absolute inset-0" />
                   <div className="relative">
                     <div className="flex items-center justify-end">
-                      <Badge variant="secondary">{new Date(data.startTime).toLocaleString()}</Badge>
+                      <Badge variant="secondary">{new Date(data.startTime).toLocaleString('en-US')}</Badge>
                     </div>
 
                     <div className="mt-4 flex items-center justify-between gap-4">

@@ -35,7 +35,7 @@ export function MarketplaceHistory({ trades }: { trades: Trade[] }) {
             </p>
           </div>
           <span className="shrink-0 font-mono text-sm font-bold tabular-nums text-gold">
-            {t.price.toLocaleString()}
+            {t.price.toLocaleString('en-US')}
           </span>
         </motion.li>
       ))}
