@@ -388,13 +388,13 @@ export default function ProfilePage() {
 
       {/* Recent activity timeline + recent matches */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <section className="card-premium space-y-4 p-6">
+        <section className="card-premium min-w-0 space-y-4 p-6">
           <h2 className="flex items-center gap-2 font-display text-lg font-bold">
             <Zap className="h-5 w-5 text-violet" /> Recent Activity
           </h2>
           <PlayerTimeline seed={p.playerId} count={12} />
         </section>
-        <section className="card-premium space-y-4 p-6">
+        <section className="card-premium min-w-0 space-y-4 p-6">
           <h2 className="flex items-center gap-2 font-display text-lg font-bold">
             <Gamepad2 className="h-5 w-5 text-accent" /> Recent Matches
           </h2>

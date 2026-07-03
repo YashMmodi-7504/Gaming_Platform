@@ -37,7 +37,7 @@ export default function TournamentsPage() {
 
   return (
     <div className="relative space-y-6">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-aurora opacity-60" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-aurora opacity-20" />
 
       <PageHeader title="Tournaments" description="Compete for prize pools across every game." />
 

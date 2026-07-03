@@ -244,7 +244,7 @@ export default function MailboxPage() {
 
   return (
     <div className="relative space-y-6">
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-64 bg-aurora opacity-50" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-64 bg-aurora opacity-20" />
 
       <PageHeader
         title="Mailbox"

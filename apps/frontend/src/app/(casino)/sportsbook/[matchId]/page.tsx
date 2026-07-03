@@ -41,8 +41,8 @@ export default function MatchDetailsPage() {
   const away = data?.participants.find((p) => p.side === 'away') ?? data?.participants[1];
 
   return (
-    <div className="bg-aurora relative h-full overflow-auto">
-      <div className="pointer-events-none absolute inset-0 bg-grid opacity-20" />
+    <div className="relative h-full overflow-auto">
+      <div className="pointer-events-none absolute inset-0 bg-grid opacity-10" />
       <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-black/10 glass-strong px-4">
         <Button asChild variant="ghost" size="sm">
           <Link href="/sportsbook">

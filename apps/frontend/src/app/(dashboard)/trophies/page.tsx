@@ -170,7 +170,7 @@ export default function TrophyRoomPage() {
     <div className="relative space-y-8">
       {/* Ambient room backdrop */}
       <div className="pointer-events-none absolute inset-0 -z-10 bg-grid opacity-[0.4]" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-aurora opacity-60" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-aurora opacity-20" />
 
       <PageHeader
         title="Trophy Room"

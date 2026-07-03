@@ -15,7 +15,7 @@ export default function FeedPage() {
   return (
     <div className="relative space-y-8">
       <div className="bg-grid pointer-events-none absolute inset-0 -z-10 opacity-40" />
-      <div className="bg-aurora pointer-events-none absolute inset-0 -z-10 opacity-40" />
+      <div className="bg-aurora pointer-events-none absolute inset-0 -z-10 opacity-[0.15]" />
 
       {/* Header ------------------------------------------------------------ */}
       <section className="relative overflow-hidden rounded-3xl border border-black/10 glass-strong p-6 sm:p-8">

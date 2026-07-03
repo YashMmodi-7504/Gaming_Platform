@@ -95,7 +95,7 @@ export default function HallOfFamePage() {
 
   return (
     <div className="relative space-y-8">
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-aurora opacity-70" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-aurora opacity-[0.22]" />
       <div className="pointer-events-none absolute inset-0 -z-10 bg-grid opacity-[0.35]" />
 
       <PageHeader

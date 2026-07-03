@@ -137,7 +137,7 @@ export default function CommunityPage() {
   return (
     <div className="relative space-y-10">
       <div className="bg-grid pointer-events-none absolute inset-0 -z-10 opacity-40" />
-      <div className="bg-aurora pointer-events-none absolute inset-0 -z-10 opacity-40" />
+      <div className="bg-aurora pointer-events-none absolute inset-0 -z-10 opacity-[0.15]" />
 
       {/* 1. Header hero -------------------------------------------------- */}
       <HeroHeader />

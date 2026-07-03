@@ -9,7 +9,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
-      <main id="main-content" className="mx-auto w-full max-w-[1440px] flex-1 px-4 py-6 sm:px-6 md:py-8">
+      <main id="main-content" className="mx-auto w-full max-w-[1440px] flex-1 overflow-x-clip px-4 py-6 sm:px-6 md:py-8">
         {children}
       </main>
       <LiveActivityDock />

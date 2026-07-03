@@ -285,7 +285,7 @@ function BalanceHero({ wallet }: { wallet: WalletView }) {
   const numeric = Number(wallet.available);
   return (
     <div className="card-premium sheen relative overflow-hidden p-6 sm:p-8 animate-fade-up">
-      <div className="bg-aurora pointer-events-none absolute inset-0 opacity-40" />
+      <div className="bg-aurora pointer-events-none absolute inset-0 opacity-[0.15]" />
       <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-gradient-to-br from-gold to-warning opacity-20 blur-3xl animate-glow-pulse" />
       <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
