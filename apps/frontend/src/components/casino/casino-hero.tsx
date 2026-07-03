@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { GameCover } from '@/components/games/game-cover';
 import { AnimatedNumber } from '@/components/marketing/animated-number';
 import { casinoStats, recentWinners } from '@/lib/casino-demo';
-import { demoGames } from '@/lib/demo-games';
+import { demoGamesBySlugs } from '@/lib/demo-games';
 
 /* Deterministic floating-chip decoration (GPU transforms, reduced-motion aware). */
 const CHIPS = [
@@ -22,7 +22,8 @@ const CHIPS = [
 /** Immersive casino hero: featured game, daily jackpot, live stats, chips. */
 export function CasinoHero() {
   const stats = casinoStats();
-  const featured = demoGames('casino-hero', 1)[0]!;
+  // Always a casino title (never an arcade/non-casino game).
+  const featured = demoGamesBySlugs(['golden-pharaoh'], 'casino-hero')[0]!;
   const winners = recentWinners(5);
 
   return (

@@ -13,6 +13,7 @@ import {
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 
+import { DemoPlay } from '@/components/games/play/demo-play';
 import { GameCanvas } from '@/components/runtime/game-canvas';
 import { presetsFor } from '@/components/runtime/action-presets';
 import { useFullscreen } from '@/hooks/use-fullscreen';
@@ -22,6 +23,8 @@ interface RuntimeHarnessProps {
   pluginKey: string;
   gameId?: string;
   title: string;
+  /** Original game slug — lets the fallback pick the exact playable game. */
+  slug?: string;
 }
 
 function LatencyBadge({ latency }: { latency: number | null }) {
@@ -40,7 +43,7 @@ function LatencyBadge({ latency }: { latency: number | null }) {
   );
 }
 
-export function RuntimeHarness({ pluginKey, gameId, title }: RuntimeHarnessProps) {
+export function RuntimeHarness({ pluginKey, gameId, title, slug }: RuntimeHarnessProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { isFullscreen, toggle } = useFullscreen(containerRef);
   const [muted, setMuted] = useState(false);
@@ -64,6 +67,12 @@ export function RuntimeHarness({ pluginKey, gameId, title }: RuntimeHarnessProps
   }, [primary, runtime]);
 
   const loading = runtime.status === 'creating' || runtime.status === 'connecting';
+
+  // Runtime couldn't initialize (backend down / demo mode) — never dead-end with
+  // "Failed to start runtime"; hand off to the always-playable client runtime.
+  if (runtime.status === 'fallback' || runtime.status === 'error') {
+    return <DemoPlay slug={slug ?? pluginKey} title={title} />;
+  }
 
   return (
     <div ref={containerRef} className="flex h-full flex-col bg-black">
@@ -93,16 +102,6 @@ export function RuntimeHarness({ pluginKey, gameId, title }: RuntimeHarnessProps
       <main className="relative flex-1 overflow-hidden p-4">
         {runtime.status === 'unauthenticated' ? (
           <CenterMessage title="Sign in to play" action={<Link href="/login">Sign in</Link>} />
-        ) : runtime.status === 'error' ? (
-          <CenterMessage
-            title="Runtime error"
-            subtitle={runtime.error ?? undefined}
-            action={
-              <button onClick={() => window.location.reload()} className="text-primary underline">
-                Retry
-              </button>
-            }
-          />
         ) : (
           <>
             <GameCanvas

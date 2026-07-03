@@ -18,6 +18,7 @@ export type RuntimeStatus =
   | 'connecting'
   | 'ready'
   | 'reconnecting'
+  | 'fallback'
   | 'error';
 
 export interface RuntimeEventEntry {
@@ -60,7 +61,9 @@ export function useRuntime(pluginKey: string, gameId?: string): UseRuntimeResult
   useEffect(() => {
     if (!initialized) return;
     if (!token) {
-      setStatus('unauthenticated');
+      // No backend session available (demo mode / signed out): don't dead-end —
+      // hand off to the client fallback runtime so the game is still playable.
+      setStatus(clientConfig.demoMode ? 'fallback' : 'unauthenticated');
       return;
     }
 
@@ -107,8 +110,11 @@ export function useRuntime(pluginKey: string, gameId?: string): UseRuntimeResult
         });
         socket.on('connect_error', (err: Error) => {
           if (cancelled) return;
+          // Surface the reason to devs, but never dead-end the player — fall back
+          // to the client runtime instead of showing "Failed to start runtime".
+          console.warn('[runtime] websocket unavailable, using client fallback:', err.message);
           setError(err.message);
-          setStatus('error');
+          setStatus('fallback');
         });
 
         heartbeat = setInterval(() => {
@@ -116,8 +122,11 @@ export function useRuntime(pluginKey: string, gameId?: string): UseRuntimeResult
         }, 5000);
       } catch (e) {
         if (cancelled) return;
-        setError(e instanceof Error ? e.message : 'Failed to start runtime');
-        setStatus('error');
+        // The runtime session couldn't be created (backend down/unreachable).
+        // Log it, then fall back to the client runtime — the player still plays.
+        console.warn('[runtime] session unavailable, using client fallback:', e);
+        setError(e instanceof Error ? e.message : 'Runtime session unavailable');
+        setStatus('fallback');
       }
     };
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, cn } from '@gaming-platform/ui';
+import { Badge, Spinner, cn } from '@gaming-platform/ui';
 import {
   BookOpen,
   ChevronLeft,
@@ -14,8 +14,8 @@ import {
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { notFound, useParams } from 'next/navigation';
-import type { ComponentType } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { type ComponentType, useEffect } from 'react';
 
 import { AnimatedNumber } from '@/components/marketing/animated-number';
 import { playersOnline, prototypeBySlug } from '@/lib/prototype-games';
@@ -40,13 +40,27 @@ const GAMES: Record<string, ComponentType> = {
 const DIFF_TONE: Record<string, string> = { Easy: 'text-emerald', Medium: 'text-gold', Hard: 'text-destructive' };
 
 export default function PrototypeGamePage() {
+  const router = useRouter();
   const params = useParams();
   const slug = typeof params.slug === 'string' ? params.slug : Array.isArray(params.slug) ? params.slug[0] ?? '' : '';
   const game = prototypeBySlug(slug);
   const Game = GAMES[slug];
   const stat = useGameStat(slug);
 
-  if (!game || !Game) notFound();
+  // No dead ends: an unknown arcade slug routes to the always-valid detail page
+  // instead of a 404.
+  const missing = !game || !Game;
+  useEffect(() => {
+    if (missing) router.replace(`/games/${slug}`);
+  }, [missing, router, slug]);
+
+  if (missing) {
+    return (
+      <div className="flex h-80 items-center justify-center">
+        <Spinner size={32} />
+      </div>
+    );
+  }
 
   const players = playersOnline(slug);
   const related = game.related.map(prototypeBySlug).filter(Boolean);

@@ -1,17 +1,8 @@
 'use client';
 
-import { Spinner } from '@gaming-platform/ui';
-import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
 
-const CardTable = dynamic(() => import('@/components/card/card-table').then((m) => m.CardTable), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full items-center justify-center bg-gradient-to-b from-emerald-100 via-white to-emerald-50">
-      <Spinner size={32} />
-    </div>
-  ),
-});
+import { DemoPlay } from '@/components/games/play/demo-play';
 
 const TITLES: Record<string, string> = {
   'dragon-tiger': 'Dragon Tiger',
@@ -22,13 +13,19 @@ const TITLES: Record<string, string> = {
   'teen-patti': 'Teen Patti',
   poker: 'Poker',
   'texas-holdem': "Texas Hold'em",
+  'casino-war': 'Casino War',
 };
 
+/**
+ * Live-dealer table route. The old data-driven CardTable required a backend
+ * session; PPP-7 routes it through the same backend-free DemoPlay dispatcher so
+ * every table launches offline (no "Unable to start table").
+ */
 export default function CasinoTablePage() {
   const params = useParams<{ variant: string }>();
   const variant = params.variant;
   const title =
     TITLES[variant] ?? variant.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
-  return <CardTable variant={variant} title={title} />;
+  return <DemoPlay slug={variant} title={title} />;
 }

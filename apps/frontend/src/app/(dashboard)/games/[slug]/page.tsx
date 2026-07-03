@@ -26,7 +26,9 @@ import {
   GameScreenshots,
 } from '@/components/games/game-detail-extras';
 import { GameShelf } from '@/components/games/game-shelf';
+import { demoGameDetail, relatedDemoGames } from '@/lib/demo-games';
 import { gamesApi } from '@/lib/games-api';
+import type { GameDetail } from '@gaming-platform/types';
 import { useAuthStore } from '@/stores/auth-store';
 
 export default function GameDetailPage() {
@@ -36,30 +38,30 @@ export default function GameDetailPage() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [myRating, setMyRating] = useState(0);
 
-  const game = useQuery({ queryKey: ['game', slug], queryFn: () => gamesApi.detail(slug) });
-  const related = useQuery({ queryKey: ['game-related', slug], queryFn: () => gamesApi.related(slug) });
-  const reviews = useQuery({ queryKey: ['game-reviews', slug], queryFn: () => gamesApi.reviews(slug) });
+  // retry:false so a missing backend (demo mode) falls through to the registry
+  // fallback immediately — no multi-second spinner before the page renders.
+  const game = useQuery({ queryKey: ['game', slug], queryFn: () => gamesApi.detail(slug), retry: false });
+  const related = useQuery({ queryKey: ['game-related', slug], queryFn: () => gamesApi.related(slug), retry: false });
+  const reviews = useQuery({ queryKey: ['game-reviews', slug], queryFn: () => gamesApi.reviews(slug), retry: false });
+
+  // Demo-safe: /games/[slug] must NEVER fail. Resolve real backend data when
+  // present, otherwise fall back to the deterministic registry so every card
+  // opens a playable, fully-populated page (no "Game not found").
+  const g: GameDetail = game.data ?? demoGameDetail(slug);
+  const relatedGames =
+    related.data && related.data.length > 0 ? related.data : relatedDemoGames(slug, 12);
 
   const rate = useMutation({
-    mutationFn: (rating: number) => gamesApi.rate(game.data!.id, rating),
+    mutationFn: (rating: number) => gamesApi.rate(g.id, rating),
     onSuccess: () => toast.success('Thanks for rating!'),
     onError: (e: { message?: string }) => toast.error(e?.message ?? 'Unable to rate'),
   });
 
-  const launch = useMutation({
-    mutationFn: () => gamesApi.resolveLaunch(slug),
-    onSuccess: async (res) => {
-      if (!res.available) {
-        toast.error(`Unavailable: ${res.reason ?? 'restricted'}`);
-        return;
-      }
-      if (isAuthenticated && game.data) {
-        await gamesApi.recordPlay(game.data.id).catch(() => undefined);
-      }
-      router.push(`/play/${slug}`);
-    },
-    onError: (e: { message?: string }) => toast.error(e?.message ?? 'Unable to launch'),
-  });
+  /** Instant play — routes to the runtime (demo-safe, no backend required). */
+  const play = () => {
+    if (isAuthenticated) void gamesApi.recordPlay(g.id).catch(() => undefined);
+    router.push(`/play/${slug}`);
+  };
 
   if (game.isLoading) {
     return (
@@ -68,21 +70,6 @@ export default function GameDetailPage() {
       </div>
     );
   }
-  if (game.isError || !game.data) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
-        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary shadow-glow-sm">
-          <Gamepad2 className="h-8 w-8" />
-        </span>
-        <p className="font-display text-xl font-bold">Game not found</p>
-        <Button asChild variant="glass">
-          <Link href="/games">Back to games</Link>
-        </Button>
-      </div>
-    );
-  }
-
-  const g = game.data;
 
   return (
     <div className="space-y-10">
@@ -221,10 +208,10 @@ export default function GameDetailPage() {
                 variant="gradient"
                 size="xl"
                 className="sheen"
-                disabled={launch.isPending || g.maintenanceMode}
-                onClick={() => launch.mutate()}
+                disabled={g.maintenanceMode}
+                onClick={play}
               >
-                {launch.isPending ? <Spinner size={20} /> : <Play className="h-5 w-5 fill-current" />}
+                <Play className="h-5 w-5 fill-current" />
                 {g.maintenanceMode ? 'In maintenance' : 'Play now'}
               </Button>
 
@@ -269,8 +256,8 @@ export default function GameDetailPage() {
         <GameLeaderboard game={g} />
       </div>
 
-      {related.data && related.data.length > 0 ? (
-        <GameShelf title="You might also like" games={related.data} />
+      {relatedGames.length > 0 ? (
+        <GameShelf title="You might also like" games={relatedGames} />
       ) : null}
 
       {/* Reviews */}

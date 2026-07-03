@@ -9,7 +9,13 @@ import { Footer } from '@/components/layout/footer';
 import { MarketingHeader } from '@/components/layout/marketing-header';
 import { GameGrid } from '@/components/games/game-grid';
 import { GameGridSkeleton } from '@/components/games/game-card-skeleton';
+import { demoGames } from '@/lib/demo-games';
 import { gamesApi } from '@/lib/games-api';
+
+/** Prettify a slug into a title (e.g. "high-rollers" → "High Rollers"). */
+function titleize(slug: string): string {
+  return slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 export default function CollectionPage() {
   const params = useParams<{ slug: string }>();
@@ -51,12 +57,26 @@ export default function CollectionPage() {
             <GameGrid games={query.data.games.items} />
           </>
         ) : (
-          <div className="card-premium flex flex-col items-center justify-center gap-3 py-20 text-center">
-            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 text-accent shadow-glow-sm">
-              <Layers className="h-8 w-8" />
-            </span>
-            <p className="font-display text-lg font-semibold">Collection not found</p>
-          </div>
+          // Demo-safe: never a dead end — synthesize a playable collection.
+          <>
+            <section className="relative overflow-hidden rounded-3xl border border-black/10 p-8 sm:p-10">
+              <div className="bg-aurora absolute inset-0 opacity-60" />
+              <div className="bg-grid absolute inset-0 opacity-30" />
+              <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+              <div className="relative space-y-3">
+                <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-black/5 px-3 py-1 text-xs uppercase tracking-widest text-accent backdrop-blur">
+                  <Layers className="h-3.5 w-3.5" /> Collection
+                </div>
+                <h1 className="font-display text-4xl font-bold tracking-tight sm:text-5xl">
+                  <span className="text-gradient">{titleize(slug)}</span>
+                </h1>
+                <p className="max-w-2xl text-muted-foreground">
+                  A hand-picked {titleize(slug)} collection — play any title instantly in demo mode.
+                </p>
+              </div>
+            </section>
+            <GameGrid games={demoGames(`col-${slug}`, 12)} />
+          </>
         )}
       </main>
       <Footer />

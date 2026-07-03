@@ -9,6 +9,7 @@ import type { GameSortOption } from '@gaming-platform/types';
 
 import { GameCard } from '@/components/games/game-card';
 import { GameGridSkeleton } from '@/components/games/game-card-skeleton';
+import { demoSearch } from '@/lib/demo-games';
 import { gamesApi, type GameListParams } from '@/lib/games-api';
 
 const SORTS: { value: GameSortOption; label: string }[] = [
@@ -66,6 +67,13 @@ export function GamesDiscovery() {
   }, [query]);
 
   const games = query.data?.pages.flatMap((p) => p.items) ?? [];
+  // Demo fallback: when the backend is absent the registry powers search —
+  // casino games rank first (Objective 11). Instant, so no endless skeletons.
+  const demoResults = useMemo(
+    () => demoSearch({ search: debounced, category, provider, sort }),
+    [debounced, category, provider, sort],
+  );
+  const results = games.length > 0 ? games : demoResults;
 
   return (
     <div className="space-y-6">
@@ -108,9 +116,9 @@ export function GamesDiscovery() {
         </select>
       </div>
 
-      {query.isLoading ? (
+      {query.isLoading && results.length === 0 ? (
         <GameGridSkeleton count={18} />
-      ) : games.length === 0 ? (
+      ) : results.length === 0 ? (
         <div className="card-premium flex flex-col items-center justify-center gap-3 py-20 text-center">
           <span className="flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 text-accent shadow-glow-sm">
             <Gamepad2 className="h-8 w-8" />
@@ -120,7 +128,7 @@ export function GamesDiscovery() {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-          {games.map((game) => (
+          {results.map((game) => (
             <GameCard key={game.id} game={game} />
           ))}
         </div>
