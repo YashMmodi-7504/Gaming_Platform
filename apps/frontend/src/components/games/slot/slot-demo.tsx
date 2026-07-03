@@ -61,9 +61,13 @@ function buildStrip(slug: string, reel: number): number[] {
 interface SlotDemoProps {
   slug: string;
   title: string;
+  /** Back-nav targets (default to the Games library; casino passes /casino). */
+  lobbyHref?: string;
+  detailHref?: string;
 }
 
-export function SlotDemo({ slug, title }: SlotDemoProps) {
+export function SlotDemo({ slug, title, lobbyHref = '/games', detailHref }: SlotDemoProps) {
+  const backHref = detailHref ?? `${lobbyHref}/${slug}`;
   const strips = useMemo(() => Array.from({ length: REELS }, (_, r) => buildStrip(slug, r)), [slug]);
 
   // Start each reel showing a stable window (offset 1 → middle row = strip[1]).
@@ -157,7 +161,7 @@ export function SlotDemo({ slug, title }: SlotDemoProps) {
       {/* Header */}
       <header className="glass-strong flex h-14 shrink-0 items-center justify-between border-b border-border/60 px-4">
         <Button asChild variant="ghost" size="sm">
-          <Link href={`/games/${slug}`}>
+          <Link href={backHref}>
             <ChevronLeft className="h-4 w-4" /> Details
           </Link>
         </Button>
@@ -166,7 +170,7 @@ export function SlotDemo({ slug, title }: SlotDemoProps) {
           <Badge variant="secondary">Slot demo</Badge>
         </span>
         <Button asChild variant="ghost" size="sm">
-          <Link href="/games">Lobby</Link>
+          <Link href={lobbyHref}>Lobby</Link>
         </Button>
       </header>
 

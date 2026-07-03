@@ -213,7 +213,7 @@ export function RouletteGame() {
   const winColor = winning === null ? null : colorOf(winning);
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+    <div className="grid gap-4 lg:gap-6 lg:grid-cols-[2fr_1fr] xl:grid-cols-[2.3fr_1fr]">
       {/* Wheel stage + result */}
       <div className="space-y-4">
         <div className="card-premium relative flex aspect-square max-h-[440px] items-center justify-center overflow-hidden p-4 lg:max-h-[560px] xl:max-h-[640px]">

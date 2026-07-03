@@ -17,7 +17,16 @@ function seededInt(seed: string, min: number, max: number): number {
   return min + (h % (max - min));
 }
 
-export function GameCard({ game, priority }: { game: GameSummary; priority?: boolean }) {
+export function GameCard({
+  game,
+  priority,
+  hrefBase = '/games',
+}: {
+  game: GameSummary;
+  priority?: boolean;
+  /** Route prefix for the detail link — `/casino` keeps casino cards in-experience. */
+  hrefBase?: string;
+}) {
   const players = seededInt(game.id, 40, 2000);
   const jackpot = seededInt(`${game.id}j`, 5, 480) * 1000;
   const hasJackpot = seededInt(`${game.id}h`, 0, 100) > 64;
@@ -50,7 +59,7 @@ export function GameCard({ game, priority }: { game: GameSummary; priority?: boo
       {/* animated gradient border on hover */}
       <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-primary via-accent to-pink opacity-0 blur-[2px] transition-opacity duration-300 group-hover:opacity-70" />
       <div className="card-premium relative overflow-hidden">
-        <Link href={`/games/${game.slug}`} className="block">
+        <Link href={`${hrefBase}/${game.slug}`} className="block">
           <div className="relative aspect-[3/4] w-full overflow-hidden rounded-t-[calc(var(--radius)-1px)]">
             <GameCover
               src={game.thumbnailUrl}
@@ -102,7 +111,7 @@ export function GameCard({ game, priority }: { game: GameSummary; priority?: boo
         />
 
         <div className="space-y-1 p-3">
-          <Link href={`/games/${game.slug}`}>
+          <Link href={`${hrefBase}/${game.slug}`}>
             <p className="truncate font-display text-sm font-semibold transition-colors group-hover:text-primary">
               {game.name}
             </p>

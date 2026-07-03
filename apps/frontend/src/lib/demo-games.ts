@@ -266,6 +266,27 @@ export function isCasinoGame(g: GameSummary): boolean {
   return !NON_CASINO_CATEGORIES.has(c) && isCasinoCategory(c);
 }
 
+/** True when a slug is a casino title (used by the independent casino routes). */
+export function isCasinoSlug(slug: string): boolean {
+  const s = BY_SLUG.get(slug);
+  return !!s && CASINO_CATEGORIES.has(s.category.slug);
+}
+
+/**
+ * Registry view: every CASINO title only (cards/live/roulette/slots/crash/dice/
+ * instant). Casino components read this — never arcade/casual titles.
+ */
+export function casinoGames(): GameSummary[] {
+  return CATALOG.filter((s) => CASINO_CATEGORIES.has(s.category.slug)).map((s, i) =>
+    toSummary(s, i, 'casino-registry'),
+  );
+}
+
+/** Registry view: the COMPLETE game library (casino + arcade + casual). */
+export function gameLibrary(): GameSummary[] {
+  return CATALOG.map((s, i) => toSummary(s, i, 'library-registry'));
+}
+
 /** Build ordered summaries from an explicit slug list (skips unknown slugs). */
 export function demoGamesBySlugs(slugs: string[], key = 'casino'): GameSummary[] {
   const out: GameSummary[] = [];

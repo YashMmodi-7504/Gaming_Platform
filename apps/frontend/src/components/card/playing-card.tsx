@@ -30,10 +30,10 @@ interface PlayingCardProps {
 export function PlayingCard({ code, faceDown, index = 0, small }: PlayingCardProps) {
   const showBack = faceDown || !code;
   const card = code ? parse(code) : null;
-  // Larger, readable cards that scale up on bigger screens (layout sizing only).
+  // Large, readable cards that scale up on bigger screens (layout sizing only).
   const size = small
-    ? 'h-16 w-11 text-sm sm:h-20 sm:w-14 sm:text-base lg:h-24 lg:w-16 lg:text-lg'
-    : 'h-24 w-16 text-lg sm:h-28 sm:w-20 sm:text-xl lg:h-36 lg:w-24 lg:text-2xl';
+    ? 'h-20 w-14 text-sm sm:h-24 sm:w-16 sm:text-base lg:h-28 lg:w-20 lg:text-lg xl:h-32 xl:w-24'
+    : 'h-28 w-20 text-lg sm:h-32 sm:w-24 sm:text-xl lg:h-44 lg:w-32 lg:text-3xl xl:h-52 xl:w-36';
 
   return (
     <motion.div

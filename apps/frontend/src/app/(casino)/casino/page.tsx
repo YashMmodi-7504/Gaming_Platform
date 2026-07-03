@@ -74,14 +74,15 @@ export default function CasinoLobbyPage() {
             <JackpotStrip />
           </section>
 
-          {/* Casino-only shelves — tables first, slots after */}
+          {/* Casino-only shelves — tables first, slots after. Cards stay inside
+              the casino experience: /casino/[slug] (never /games). */}
           {SHELVES.map((s) => (
             <GameShelf
               key={s.key}
               title={s.title}
               icon={<s.icon className={cn('h-5 w-5', s.iconClass)} />}
               games={demoGamesBySlugs([...s.slugs], s.key)}
-              viewAllHref="/games"
+              hrefBase="/casino"
             />
           ))}
 

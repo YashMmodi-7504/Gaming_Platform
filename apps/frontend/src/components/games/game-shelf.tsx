@@ -14,10 +14,12 @@ interface GameShelfProps {
   games: GameSummary[] | undefined;
   loading?: boolean;
   viewAllHref?: string;
+  /** Route prefix for each card's detail link (e.g. `/casino`). */
+  hrefBase?: string;
 }
 
 /** Horizontally-scrolling row of game cards. */
-export function GameShelf({ title, icon, games, loading, viewAllHref }: GameShelfProps) {
+export function GameShelf({ title, icon, games, loading, viewAllHref, hrefBase }: GameShelfProps) {
   if (!loading && (!games || games.length === 0)) return null;
 
   return (
@@ -45,7 +47,7 @@ export function GameShelf({ title, icon, games, loading, viewAllHref }: GameShel
             ))
           : games?.map((game) => (
               <div key={game.id} className="w-40 shrink-0 snap-start sm:w-44">
-                <GameCard game={game} />
+                <GameCard game={game} hrefBase={hrefBase} />
               </div>
             ))}
       </Rail>

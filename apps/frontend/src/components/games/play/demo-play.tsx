@@ -40,12 +40,25 @@ const DiceGame = dynamic(() => import('@/components/games/prototype/dice-game').
 const RouletteGame = dynamic(() => import('@/components/games/prototype/roulette-game').then((m) => m.RouletteGame), { ssr: false, loading });
 const SlotDemo = dynamic(() => import('@/components/games/slot/slot-demo').then((m) => m.SlotDemo), { ssr: false, loading });
 
-export function DemoPlay({ slug, title }: { slug: string; title: string }) {
+export function DemoPlay({
+  slug,
+  title,
+  lobbyHref = '/games',
+  detailHref,
+}: {
+  slug: string;
+  title: string;
+  /** Where "Lobby" returns to — `/casino` keeps casino play in-experience. */
+  lobbyHref?: string;
+  /** Where "Details" links — defaults to the matching lobby's detail route. */
+  detailHref?: string;
+}) {
   const exp = demoExperienceFor(slug);
+  const dHref = detailHref ?? `${lobbyHref}/${slug}`;
 
   // The Slot demo ships its own full-screen chrome (header + Lobby link).
   if (exp.kind === 'slot') {
-    return <SlotDemo slug={slug} title={title} />;
+    return <SlotDemo slug={slug} title={title} lobbyHref={lobbyHref} detailHref={dHref} />;
   }
 
   const Game: ComponentType =
@@ -58,7 +71,7 @@ export function DemoPlay({ slug, title }: { slug: string; title: string }) {
     <div className="flex h-full flex-col bg-gradient-to-b from-primary/5 via-background to-background">
       <header className="glass-strong flex h-14 shrink-0 items-center justify-between border-b border-border/60 px-4">
         <Button asChild variant="ghost" size="sm">
-          <Link href="/casino">
+          <Link href={lobbyHref}>
             <ChevronLeft className="h-4 w-4" /> Lobby
           </Link>
         </Button>
@@ -67,12 +80,13 @@ export function DemoPlay({ slug, title }: { slug: string; title: string }) {
           <Badge variant="secondary">Demo</Badge>
         </span>
         <Button asChild variant="ghost" size="sm">
-          <Link href={`/games/${slug}`}>Details</Link>
+          <Link href={dHref}>Details</Link>
         </Button>
       </header>
       <main className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 sm:px-5 lg:px-6">
-        {/* Full-width immersive play surface — the board dominates, minimal margins. */}
-        <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1760px]">
+        {/* Full-width immersive play surface — board dominates, vertically centered
+            so there's no dead space under the table (scrolls if taller than view). */}
+        <div className="mx-auto flex min-h-full w-full max-w-[1700px] flex-col justify-center 2xl:max-w-[1850px]">
           <Game />
         </div>
       </main>

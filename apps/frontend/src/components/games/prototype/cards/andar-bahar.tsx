@@ -162,7 +162,7 @@ export function AndarBaharGame() {
   const winner = phase === 'result' ? outcome?.winner : undefined;
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
+    <div className="grid gap-4 lg:gap-6 lg:grid-cols-[2.2fr_1fr] xl:grid-cols-[2.5fr_1fr]">
       {/* Stage */}
       <div className="card-premium relative aspect-[16/10] overflow-hidden p-0">
         <GameFx trigger={fx} />

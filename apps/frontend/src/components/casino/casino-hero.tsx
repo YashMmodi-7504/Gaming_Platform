@@ -61,12 +61,12 @@ export function CasinoHero() {
 
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <Button asChild variant="gold" size="xl" className="sheen shadow-glow-gold">
-              <Link href={`/games/${featured.slug}`}>
+              <Link href={`/casino/${featured.slug}`}>
                 <Play className="h-5 w-5 fill-current" /> Play now
               </Link>
             </Button>
             <Button asChild variant="glass" size="xl">
-              <Link href="/games">
+              <Link href="/casino">
                 <History className="h-5 w-5" /> Continue playing
               </Link>
             </Button>

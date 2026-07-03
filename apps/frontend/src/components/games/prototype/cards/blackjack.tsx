@@ -176,7 +176,7 @@ export function BlackjackGame() {
   const inRound = phase === 'player' || phase === 'dealer';
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
+    <div className="grid gap-4 lg:gap-6 lg:grid-cols-[2.2fr_1fr] xl:grid-cols-[2.5fr_1fr]">
       {/* Table */}
       <div className="card-premium relative overflow-hidden p-5">
         <GameFx trigger={fx} />
