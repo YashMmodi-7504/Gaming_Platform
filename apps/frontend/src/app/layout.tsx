@@ -10,7 +10,6 @@ import { PwaRegister } from '@/components/monitoring/pwa-register';
 import { WebVitalsReporter } from '@/components/monitoring/web-vitals-reporter';
 import { AccessibilityMenu } from '@/components/shared/accessibility-menu';
 import { AiAssistant } from '@/components/shared/ai-assistant';
-import { ClickFx } from '@/components/shared/click-fx';
 import { SoundControl } from '@/components/shared/sound-control';
 import { clientConfig } from '@/lib/config';
 import { cn } from '@/lib/utils';
@@ -74,7 +73,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SoundControl />
           <AccessibilityMenu />
           <AiAssistant />
-          <ClickFx />
           <CinematicIntro />
           <OfflineIndicator />
           <WebVitalsReporter />

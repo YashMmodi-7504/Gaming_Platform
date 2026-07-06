@@ -24,7 +24,7 @@ export function SiteHeader() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-black/[0.07] bg-white/80 shadow-[0_6px_24px_-18px_hsl(230_50%_40%/0.35)] backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-black/[0.07] bg-white/85 shadow-[0_6px_24px_-18px_hsl(230_50%_40%/0.35)] backdrop-blur-md">
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
       <div className="mx-auto flex h-16 max-w-[1800px] items-center gap-1 px-3 sm:gap-2 sm:px-6">
         <div className="flex items-center lg:hidden">

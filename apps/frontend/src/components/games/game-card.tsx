@@ -1,10 +1,9 @@
 'use client';
 
 import { Badge, cn } from '@gaming-platform/ui';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Coins, Play, Star, Users } from 'lucide-react';
 import Link from 'next/link';
-import type { PointerEvent as ReactPointerEvent } from 'react';
 import type { GameSummary } from '@gaming-platform/types';
 
 import { FavoriteButton } from './favorite-button';
@@ -31,30 +30,14 @@ export function GameCard({
   const jackpot = seededInt(`${game.id}j`, 5, 480) * 1000;
   const hasJackpot = seededInt(`${game.id}h`, 0, 100) > 64;
 
-  // Mouse-follow 3D tilt with spring physics.
-  const px = useMotionValue(0.5);
-  const py = useMotionValue(0.5);
-  const rotateX = useSpring(useTransform(py, [0, 1], [9, -9]), { stiffness: 220, damping: 18 });
-  const rotateY = useSpring(useTransform(px, [0, 1], [-9, 9]), { stiffness: 220, damping: 18 });
-
-  const onMove = (e: ReactPointerEvent<HTMLDivElement>) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    px.set((e.clientX - r.left) / r.width);
-    py.set((e.clientY - r.top) / r.height);
-  };
-  const onLeave = () => {
-    px.set(0.5);
-    py.set(0.5);
-  };
-
+  // Subtle hover lift only (transform, GPU-cheap). No mouse-follow tilt — that
+  // fired pointermove on every card (incl. during touch-scroll) and forced a
+  // preserve-3d layer per card, which hurt scroll performance on mobile.
   return (
     <motion.div
-      onPointerMove={onMove}
-      onPointerLeave={onLeave}
-      whileHover={{ y: -8 }}
+      whileHover={{ y: -6 }}
       transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-      style={{ transformPerspective: 800, rotateX, rotateY }}
-      className="group relative [transform-style:preserve-3d]"
+      className="group relative"
     >
       {/* animated gradient border on hover */}
       <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-primary via-accent to-pink opacity-0 blur-[2px] transition-opacity duration-300 group-hover:opacity-70" />

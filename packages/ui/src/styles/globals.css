@@ -143,17 +143,19 @@
  * ------------------------------------------------------------------------- */
 @layer components {
   /* Frosted white glass */
+  /* Lighter backdrop blur (PPP-14): cheaper to repaint on scroll, especially on
+     mobile / sticky bars, while keeping the frosted-glass look. */
   .glass {
-    background-color: hsl(0 0% 100% / 0.65);
-    backdrop-filter: blur(16px) saturate(160%);
+    background-color: hsl(0 0% 100% / 0.7);
+    backdrop-filter: blur(10px) saturate(140%);
     border: 1px solid hsl(0 0% 100% / 0.7);
     box-shadow:
       0 8px 30px -12px hsl(230 50% 40% / 0.18),
       inset 0 1px 0 0 hsl(0 0% 100% / 0.6);
   }
   .glass-strong {
-    background-color: hsl(0 0% 100% / 0.82);
-    backdrop-filter: blur(22px) saturate(170%);
+    background-color: hsl(0 0% 100% / 0.86);
+    backdrop-filter: blur(12px) saturate(150%);
     border: 1px solid hsl(0 0% 100% / 0.8);
     box-shadow: 0 10px 36px -14px hsl(230 50% 40% / 0.22);
   }
