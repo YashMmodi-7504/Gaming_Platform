@@ -158,24 +158,27 @@
     box-shadow: 0 10px 36px -14px hsl(230 50% 40% / 0.22);
   }
 
-  /* Bright premium card: white with a soft gradient hairline + soft shadow */
+  /* Bright premium card: crisp white with a hairline ring + soft elevation.
+     Slightly stronger definition (PPP-13) so cards read clearly on the lighter
+     pastel page backgrounds — without darkening the card itself. */
   .card-premium {
     position: relative;
     border-radius: var(--radius);
     background:
-      linear-gradient(hsl(0 0% 100% / 0.92), hsl(0 0% 100% / 0.92)) padding-box,
-      linear-gradient(140deg, hsl(263 80% 70% / 0.35), hsl(190 80% 70% / 0.18) 45%, hsl(0 0% 100% / 0.1))
+      linear-gradient(hsl(0 0% 100% / 0.95), hsl(0 0% 100% / 0.95)) padding-box,
+      linear-gradient(140deg, hsl(263 70% 68% / 0.35), hsl(190 70% 68% / 0.16) 45%, hsl(0 0% 100% / 0.1))
         border-box;
     border: 1px solid transparent;
     box-shadow:
-      0 12px 34px -18px hsl(230 50% 40% / 0.28),
-      inset 0 1px 0 0 hsl(0 0% 100% / 0.7);
-    backdrop-filter: blur(6px);
+      0 0 0 1px hsl(230 30% 55% / 0.07),
+      0 14px 34px -18px hsl(230 50% 40% / 0.3),
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.75);
   }
   .card-premium:hover {
     box-shadow:
-      0 22px 44px -18px hsl(263 70% 55% / 0.35),
-      inset 0 1px 0 0 hsl(0 0% 100% / 0.8);
+      0 0 0 1px hsl(263 40% 60% / 0.12),
+      0 22px 44px -18px hsl(263 60% 55% / 0.32),
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.85);
   }
 
   /* Gradient + neon text */
@@ -192,17 +195,14 @@
     color: transparent;
   }
 
-  /* Animated colorful gradient fill */
+  /* Static, soft pastel wash (PPP-13 — no animation, calm premium tint). */
   .bg-aurora {
     background-image: linear-gradient(
       120deg,
-      hsl(263 85% 66%),
-      hsl(268 80% 66%),
-      hsl(190 90% 56%),
-      hsl(326 85% 68%)
+      hsl(263 60% 93%),
+      hsl(210 65% 94%) 50%,
+      hsl(326 55% 94%)
     );
-    background-size: 300% 300%;
-    animation: gradient-shift 8s ease infinite;
   }
 
   /* Subtle dotted grid overlay (light) */

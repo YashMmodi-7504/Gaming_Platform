@@ -1,60 +1,57 @@
-'use client';
-
-import { cn } from '@gaming-platform/ui';
-
 /**
- * Per-page background — minimal premium (PPP-11).
+ * Per-page background — static premium pastel (PPP-13).
  *
- * A soft pastel wash tinted per route, a whisper-faint grid, and at most two
- * very-low-opacity orbs. No busy decorative shapes: this keeps every non-home
- * page calm (premium-SaaS look) and cheap to paint — few nodes, one slow drift
- * animation, GPU transforms/opacity only, reduced-motion aware. The home page
- * keeps the vibrant CinematicBackground (mounted elsewhere).
+ * One clean, static, ultra-light pastel wash per section (95–98% lightness, very
+ * low saturation). No animation, no orbs, no floating decor — a calm SaaS-grade
+ * surface. Each route gets its own subtle colour identity while sharing the same
+ * softness. Fixed behind content; cheap to paint (no blur, no repaint loops).
  */
 export type BackgroundVariant =
+  | 'home'
   | 'casino'
+  | 'games'
+  | 'sports'
+  | 'leaderboard'
+  | 'vip'
+  | 'tournament'
+  | 'wallet'
+  | 'profile'
+  | 'community'
+  | 'promotions'
+  | 'rewards'
+  | 'settings'
   | 'crash'
   | 'dice'
-  | 'roulette'
-  | 'sports'
-  | 'racing'
-  | 'arcade'
-  | 'esports';
+  | 'roulette';
 
-/** Soft pastel base — high lightness, low saturation, settles to near-white. */
-const BASES: Record<BackgroundVariant, string> = {
-  casino: 'radial-gradient(115% 80% at 50% -12%, hsl(43 70% 96%), hsl(263 55% 97.5%) 45%, hsl(222 40% 99%) 100%)',
-  crash: 'radial-gradient(115% 80% at 50% -12%, hsl(263 60% 97%), hsl(210 65% 97.5%) 45%, hsl(222 40% 99%) 100%)',
-  dice: 'radial-gradient(115% 80% at 50% -12%, hsl(190 60% 96.5%), hsl(263 50% 97.5%) 50%, hsl(222 40% 99%) 100%)',
-  roulette: 'radial-gradient(115% 80% at 50% -12%, hsl(350 60% 97%), hsl(263 50% 97.5%) 45%, hsl(222 40% 99%) 100%)',
-  sports: 'radial-gradient(115% 80% at 50% -12%, hsl(152 50% 96.5%), hsl(210 60% 97.5%) 45%, hsl(222 40% 99%) 100%)',
-  racing: 'radial-gradient(115% 80% at 50% -12%, hsl(24 70% 96.5%), hsl(263 50% 97.5%) 45%, hsl(222 40% 99%) 100%)',
-  arcade: 'radial-gradient(115% 80% at 50% -12%, hsl(190 65% 96.5%), hsl(326 55% 97.5%) 50%, hsl(222 40% 99%) 100%)',
-  esports: 'radial-gradient(115% 80% at 50% -12%, hsl(268 60% 97%), hsl(43 60% 97%) 55%, hsl(222 40% 99%) 100%)',
-};
-
-/** One subtle accent tint per route (kept very low opacity). */
-const ACCENTS: Record<BackgroundVariant, string> = {
-  casino: 'bg-gold/10',
-  crash: 'bg-accent/10',
-  dice: 'bg-accent/10',
-  roulette: 'bg-destructive/[0.07]',
-  sports: 'bg-emerald/10',
-  racing: 'bg-warning/10',
-  arcade: 'bg-violet/10',
-  esports: 'bg-violet/10',
+/**
+ * `[hue, saturation]` per variant. Lightness is fixed high (96.5% → 99%) in the
+ * gradient below so every page stays in the same bright, elegant register.
+ */
+const TINTS: Record<BackgroundVariant, [number, number]> = {
+  home: [210, 60], // soft pastel blue
+  casino: [264, 48], // soft lavender
+  games: [156, 42], // soft mint
+  sports: [200, 58], // soft sky blue
+  leaderboard: [26, 62], // soft peach
+  vip: [45, 58], // gold cream
+  tournament: [276, 46], // lilac
+  wallet: [40, 30], // beige
+  profile: [216, 24], // grey blue
+  community: [182, 46], // aqua
+  promotions: [340, 52], // rose
+  rewards: [46, 30], // ivory
+  settings: [220, 12], // light grey
+  crash: [222, 55], // indigo-blue
+  dice: [186, 46], // teal
+  roulette: [348, 50], // rosy red
 };
 
 export function PageBackground({ variant }: { variant: BackgroundVariant }) {
+  const [h, s] = TINTS[variant];
+  // Subtle top→bottom wash: faint pastel tint settling to near-white. Static.
+  const background = `linear-gradient(180deg, hsl(${h} ${s}% 96.5%) 0%, hsl(${h} ${Math.max(s - 22, 14)}% 98.5%) 55%, hsl(${h} 30% 99.3%) 100%)`;
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      <div className="absolute inset-0" style={{ backgroundImage: BASES[variant] }} />
-      <div className="bg-grid absolute inset-0 opacity-[0.35] [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
-      {/* Two soft, slow orbs — the only motion. */}
-      <div className={cn('absolute -left-24 top-[-6%] h-96 w-96 rounded-full blur-[140px] animate-float-slow', ACCENTS[variant])} />
-      <div className={cn('absolute -right-24 bottom-[-8%] h-96 w-96 rounded-full blur-[140px] animate-float', 'bg-primary/[0.06]')} />
-      {/* Clean white fade at the very top so headers sit on calm ground. */}
-      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white/60 to-transparent" />
-    </div>
+    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10" style={{ background }} />
   );
 }

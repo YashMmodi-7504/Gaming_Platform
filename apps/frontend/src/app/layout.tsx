@@ -3,7 +3,6 @@ import '@/styles/globals.css';
 import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono, Space_Grotesk } from 'next/font/google';
 
-import { DynamicWorld } from '@/components/backgrounds/dynamic-world';
 import { RouteBackground } from '@/components/backgrounds/route-background';
 import { CinematicIntro } from '@/components/experience/cinematic-intro';
 import { OfflineIndicator } from '@/components/monitoring/offline-indicator';
@@ -71,7 +70,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         <AppProviders>
           <RouteBackground />
-          <DynamicWorld />
           {children}
           <SoundControl />
           <AccessibilityMenu />
