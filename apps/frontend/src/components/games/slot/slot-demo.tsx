@@ -157,7 +157,7 @@ export function SlotDemo({ slug, title, lobbyHref = '/games', detailHref }: Slot
   }, [spin]);
 
   return (
-    <div className="flex h-full flex-col bg-gradient-to-b from-primary/10 via-background to-background">
+    <div className="flex h-full flex-col">
       {/* Header */}
       <header className="glass-strong flex h-14 shrink-0 items-center justify-between border-b border-border/60 px-4">
         <Button asChild variant="ghost" size="sm">
@@ -194,7 +194,7 @@ export function SlotDemo({ slug, title, lobbyHref = '/games', detailHref }: Slot
             {strips.map((strip, r) => (
               <div
                 key={r}
-                className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-white/10 to-white/[0.03] ring-1 ring-white/10"
+                className="relative overflow-hidden rounded-2xl ring-1 ring-white/10"
                 style={{ height: ROWS * CELL }}
                 aria-hidden
               >

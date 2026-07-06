@@ -16,7 +16,7 @@ export default function DiceLobbyPage() {
   const variants = useQuery({ queryKey: ['dice-variants'], queryFn: diceApi.variants });
 
   return (
-    <div className="bg-grid h-full overflow-auto bg-gradient-to-b from-primary/5 via-background to-accent/5">
+    <div className="h-full overflow-auto">
       <header className="glass-strong sticky top-0 z-10 flex h-14 items-center justify-between border-b border-border/40 px-4">
         <Button asChild variant="ghost" size="sm">
           <Link href="/">

@@ -7,7 +7,7 @@ import { useParams } from 'next/navigation';
 const CrashTable = dynamic(() => import('@/components/crash/crash-table').then((m) => m.CrashTable), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full items-center justify-center bg-gradient-to-b from-primary/5 via-white to-accent/5">
+    <div className="flex h-full items-center justify-center">
       <Spinner size={32} />
     </div>
   ),

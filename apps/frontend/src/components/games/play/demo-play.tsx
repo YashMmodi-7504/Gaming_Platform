@@ -68,7 +68,7 @@ export function DemoPlay({
           : RouletteGame;
 
   return (
-    <div className="flex h-full flex-col bg-gradient-to-b from-primary/5 via-background to-background">
+    <div className="flex h-full flex-col">
       <header className="glass-strong flex h-14 shrink-0 items-center justify-between border-b border-border/60 px-4">
         <Button asChild variant="ghost" size="sm">
           <Link href={lobbyHref}>

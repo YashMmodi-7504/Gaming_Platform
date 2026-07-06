@@ -7,7 +7,7 @@ import { useParams } from 'next/navigation';
 const DiceTable = dynamic(() => import('@/components/dice/dice-table').then((m) => m.DiceTable), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full items-center justify-center bg-gradient-to-b from-emerald-50 to-white">
+    <div className="flex h-full items-center justify-center">
       <Spinner size={32} />
     </div>
   ),

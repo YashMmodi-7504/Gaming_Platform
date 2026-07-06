@@ -70,7 +70,7 @@ export default function RouletteLobbyPage() {
   const enabled = variants.data?.filter((v) => v.enabled) ?? [];
 
   return (
-    <div className="bg-grid h-full overflow-auto bg-gradient-to-b from-emerald-50 via-background to-accent/5">
+    <div className="h-full overflow-auto">
       <header className="glass-strong sticky top-0 z-10 flex h-14 items-center justify-between border-b border-border/40 px-4">
         <Button asChild variant="ghost" size="sm">
           <Link href="/">

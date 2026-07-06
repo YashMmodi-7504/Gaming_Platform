@@ -48,7 +48,7 @@ const DISCOVER: { label: string; href: string }[] = [
 
 export default function CasinoLobbyPage() {
   return (
-    <div className="bg-grid h-full overflow-auto bg-gradient-to-b from-gold/[0.06] via-background/70 to-background">
+    <div className="h-full overflow-auto">
       <header className="glass-strong sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border/60 px-4">
         <Button asChild variant="ghost" size="sm">
           <Link href="/">

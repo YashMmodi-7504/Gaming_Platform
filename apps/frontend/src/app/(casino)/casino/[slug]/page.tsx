@@ -42,7 +42,7 @@ export default function CasinoDetailPage() {
   const players = playersFor(g.id);
 
   return (
-    <div className="min-h-full bg-gradient-to-b from-gold/[0.06] via-background/70 to-background">
+    <div className="min-h-full">
       <header className="glass-strong sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border/60 px-4">
         <Button asChild variant="ghost" size="sm">
           <Link href="/casino">

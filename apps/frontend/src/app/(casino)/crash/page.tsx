@@ -31,7 +31,7 @@ export default function CrashLobbyPage() {
   const variants = useQuery({ queryKey: ['crash-variants'], queryFn: crashApi.variants });
 
   return (
-    <div className="h-full overflow-auto bg-gradient-to-b from-primary/5 via-white to-accent/5">
+    <div className="h-full overflow-auto">
       <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-border/60 glass px-4">
         <Button asChild variant="ghost" size="sm">
           <Link href="/">
