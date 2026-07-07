@@ -19,16 +19,16 @@ test.describe('Authentication', () => {
     await expect(page.getByRole('button', { name: /^Sign in$/i })).toBeVisible();
   });
 
-  test('demo login lands on home with an authenticated header', async ({ page }) => {
+  test('demo login lands on the dashboard with an authenticated header', async ({ page }) => {
     await demoLogin(page);
 
-    // On '/' after login.
-    await expect(page).toHaveURL(/\/$/, { timeout: VISIBLE_TIMEOUT });
+    // Phase 1.1: login redirects to /dashboard (the authenticated home).
+    await expect(page).toHaveURL(/\/dashboard$/, { timeout: VISIBLE_TIMEOUT });
 
     // Authenticated header shows the demo balance pill (Reload/Deposit) …
     await expect(authIndicator(page)).toBeVisible({ timeout: VISIBLE_TIMEOUT });
 
-    // … and the home hero is visible.
+    // … and the gaming-home hero is visible.
     await expect(
       page.getByRole('heading', { name: /Future of Online Gaming/i }),
     ).toBeVisible({ timeout: VISIBLE_TIMEOUT });
@@ -42,7 +42,44 @@ test.describe('Authentication', () => {
     await page.getByLabel('Password', { exact: true }).fill('supersecret');
     await page.getByRole('button', { name: /^Sign in$/i }).click();
 
-    await expect(page).toHaveURL(/\/$/, { timeout: VISIBLE_TIMEOUT });
+    await expect(page).toHaveURL(/\/dashboard$/, { timeout: VISIBLE_TIMEOUT });
     await expect(authIndicator(page)).toBeVisible({ timeout: VISIBLE_TIMEOUT });
+  });
+
+  test('guests are redirected to /login on protected routes', async ({ page }) => {
+    // Act as a true guest: undo the demo-session seed added by prep().
+    await page.addInitScript(() => {
+      try {
+        localStorage.removeItem('gp-demo-session');
+      } catch {
+        /* ignore */
+      }
+    });
+
+    for (const route of ['/casino', '/games', '/sportsbook', '/wallet', '/profile', '/dashboard']) {
+      await page.goto(route);
+      await expect(page, `guest ${route} → login`).toHaveURL(/\/login$/, {
+        timeout: VISIBLE_TIMEOUT,
+      });
+    }
+  });
+
+  test('the public landing shows no betting content', async ({ page }) => {
+    await page.addInitScript(() => {
+      try {
+        localStorage.removeItem('gp-demo-session');
+      } catch {
+        /* ignore */
+      }
+    });
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+
+    await expect(page).toHaveURL(/\/$/, { timeout: VISIBLE_TIMEOUT });
+    await expect(page.getByRole('link', { name: /Sign Up/i }).first()).toBeVisible({
+      timeout: VISIBLE_TIMEOUT,
+    });
+    // No casino/game detail links (no betting content) on the landing.
+    expect(await page.locator('a[href^="/casino/"], a[href^="/games/"]').count()).toBe(0);
   });
 });

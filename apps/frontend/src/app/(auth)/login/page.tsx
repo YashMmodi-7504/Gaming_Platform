@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 
 import { authApi } from '@/lib/auth-api';
 import { clientConfig } from '@/lib/config';
-import { createDemoSession } from '@/lib/demo-session';
+import { createDemoSession, persistDemoSession } from '@/lib/demo-session';
 import { useAuthStore } from '@/stores/auth-store';
 import { usePlayerProfile } from '@/stores/player-profile';
 
@@ -23,9 +23,10 @@ export default function LoginPage() {
   const enterDemo = (email: string) => {
     const { user, accessToken } = createDemoSession(email);
     setSession(user, accessToken);
+    persistDemoSession(email); // survive reloads (demo mode)
     usePlayerProfile.getState().setUsername(email.split('@')[0] || 'player');
     toast.success('Welcome, player! Your guest profile is ready.');
-    router.push('/');
+    router.push('/dashboard');
   };
 
   const [challengeToken, setChallengeToken] = useState<string | null>(null);
@@ -73,7 +74,7 @@ export default function LoginPage() {
       if (result.session) {
         setSession(result.session.user, result.session.tokens.accessToken);
         toast.success('Welcome back!');
-        router.push('/');
+        router.push('/dashboard');
       }
     } catch (error) {
       toast.error((error as { message?: string })?.message ?? 'Unable to sign in');
@@ -87,7 +88,7 @@ export default function LoginPage() {
       const session = await authApi.verifyTwoFactorLogin({ challengeToken, code: twoFactorCode });
       setSession(session.user, session.tokens.accessToken);
       toast.success('Welcome back!');
-      router.push('/');
+      router.push('/dashboard');
     } catch (error) {
       toast.error((error as { message?: string })?.message ?? 'Invalid code');
     } finally {

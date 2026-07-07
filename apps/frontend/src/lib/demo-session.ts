@@ -1,5 +1,16 @@
 import type { AuthUser } from '@/lib/auth-api';
 
+/** localStorage key that persists a demo session across reloads (demo mode only). */
+export const DEMO_SESSION_KEY = 'gp-demo-session';
+
+/** Persist / clear the demo session flag (client-only; safe no-op on the server). */
+export function persistDemoSession(email: string): void {
+  if (typeof window !== 'undefined') window.localStorage.setItem(DEMO_SESSION_KEY, email);
+}
+export function clearDemoSession(): void {
+  if (typeof window !== 'undefined') window.localStorage.removeItem(DEMO_SESSION_KEY);
+}
+
 /**
  * Builds a local Demo User + a clearly-fake dev token. Used ONLY when
  * `clientConfig.demoMode` is on (development / NEXT_PUBLIC_DEMO_MODE). This never

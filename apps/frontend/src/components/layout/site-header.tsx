@@ -1,7 +1,7 @@
 'use client';
 
 import { Button, cn } from '@gaming-platform/ui';
-import { Gift } from 'lucide-react';
+import { Gift, HelpCircle, Home, LogIn, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -9,26 +9,36 @@ import { MobileNav } from '@/components/layout/mobile-nav';
 import { BalancePill } from '@/components/shared/balance-pill';
 import { LevelPill } from '@/components/shared/level-pill';
 import { Logo } from '@/components/shared/logo';
-import { primaryNav } from '@/components/shared/navigation';
+import { type NavItem, primaryNav } from '@/components/shared/navigation';
 import { NotificationsMenu } from '@/components/shared/notifications-menu';
 import { SearchCommand } from '@/components/shared/search-command';
 import { UserMenu } from '@/components/shared/user-menu';
 import { useAuthStore } from '@/stores/auth-store';
 
+/** Guest (signed-out) navigation — marketing only, no betting content (Phase 1.1). */
+const GUEST_NAV: NavItem[] = [
+  { label: 'Home', href: '/', icon: Home },
+  { label: 'Login', href: '/login', icon: LogIn },
+  { label: 'Sign Up', href: '/signup', icon: UserPlus },
+  { label: 'Help', href: '/help', icon: HelpCircle },
+];
+
 /**
  * Premium gaming top bar shared by the marketing site and the authenticated
- * app. Sticky, glassy, light. Replaces the old enterprise sidebar for players.
+ * app. Sticky, glassy, light. The nav switches automatically after login:
+ * guests see Home/Login/Sign Up/Help; authenticated players see the full app.
  */
 export function SiteHeader() {
   const pathname = usePathname();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const navItems = isAuthenticated ? primaryNav : GUEST_NAV;
 
   return (
     <header className="sticky top-0 z-40 border-b border-black/[0.07] bg-white/85 shadow-[0_6px_24px_-18px_hsl(230_50%_40%/0.35)] backdrop-blur-md">
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
       <div className="mx-auto flex h-16 max-w-[1800px] items-center gap-1 px-3 sm:gap-2 sm:px-6">
         <div className="flex items-center lg:hidden">
-          <MobileNav items={primaryNav} />
+          <MobileNav items={navItems} />
         </div>
 
         <Logo />
@@ -36,10 +46,11 @@ export function SiteHeader() {
         {/*
           Single-row primary nav. No horizontal scroll: every item is always
           visible (icon-only below 1728px, icon+label on wide desktops), so a
-          1920px desktop shows the full labelled set with room to spare.
+          1920px desktop shows the full labelled set with room to spare. Guests
+          see the minimal marketing nav; authenticated players see the full app.
         */}
         <nav className="ml-2 hidden items-center gap-0.5 lg:flex min-[1728px]:ml-3 min-[1728px]:gap-1">
-          {primaryNav.map((item) => {
+          {navItems.map((item) => {
             const active =
               item.href === '/'
                 ? pathname === '/'
@@ -76,9 +87,9 @@ export function SiteHeader() {
         </nav>
 
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
-          <SearchCommand />
           {isAuthenticated ? (
             <>
+              <SearchCommand />
               <Button asChild variant="gold" size="sm" className="hidden md:inline-flex">
                 <Link href="/vip">
                   <Gift className="h-4 w-4" /> VIP
@@ -91,11 +102,12 @@ export function SiteHeader() {
             </>
           ) : (
             <>
-              <NotificationsMenu />
-              <Button asChild size="lg" variant="gradient" className="hidden sm:inline-flex">
-                <Link href="/register">Play now</Link>
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/login">Login</Link>
               </Button>
-              <UserMenu />
+              <Button asChild variant="gradient" size="sm">
+                <Link href="/signup">Sign Up</Link>
+              </Button>
             </>
           )}
         </div>

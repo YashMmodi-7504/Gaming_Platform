@@ -33,6 +33,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { authApi } from '@/lib/auth-api';
+import { clearDemoSession } from '@/lib/demo-session';
 import { useAuthStore } from '@/stores/auth-store';
 
 const GROUPS: { label: string; items: { href: string; label: string; icon: typeof User }[] }[] = [
@@ -84,6 +85,7 @@ export function UserMenu() {
     } catch {
       // Ignore — clear the local session regardless.
     } finally {
+      clearDemoSession(); // don't auto-restore the demo session on next load
       clearSession();
       router.push('/');
     }

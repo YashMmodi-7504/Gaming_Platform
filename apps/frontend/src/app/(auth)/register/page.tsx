@@ -10,7 +10,10 @@ import { toast } from 'sonner';
 
 import { PasswordStrengthMeter } from '@/components/auth/password-strength-meter';
 import { authApi } from '@/lib/auth-api';
+import { clientConfig } from '@/lib/config';
+import { createDemoSession, persistDemoSession } from '@/lib/demo-session';
 import { useAuthStore } from '@/stores/auth-store';
+import { usePlayerProfile } from '@/stores/player-profile';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -29,11 +32,22 @@ export default function RegisterPage() {
   const password = watch('password');
 
   const onSubmit = async (values: RegisterInput) => {
+    // Demo mode: create a local session (no backend) and enter the app.
+    if (clientConfig.demoMode && values.email.trim() && values.password.trim()) {
+      const { user, accessToken } = createDemoSession(values.email.trim());
+      setSession(user, accessToken);
+      persistDemoSession(values.email.trim());
+      usePlayerProfile.getState().setUsername(values.username || values.email.split('@')[0] || 'player');
+      toast.success('Account created — welcome!');
+      router.push('/dashboard');
+      return;
+    }
+
     try {
       const session = await authApi.register(values);
       setSession(session.user, session.tokens.accessToken);
       toast.success('Account created! Check your email to verify your address.');
-      router.push('/');
+      router.push('/dashboard');
     } catch (error) {
       toast.error((error as { message?: string })?.message ?? 'Unable to create account');
     }

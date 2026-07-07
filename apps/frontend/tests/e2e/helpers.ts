@@ -22,6 +22,9 @@ export async function prep(page: Page): Promise<void> {
     try {
       sessionStorage.setItem('gp-intro-seen', '1');
       localStorage.setItem('a11y-reduce', '1');
+      // Phase 1.1: protected routes require auth. Seed a persisted demo session
+      // so AuthInitializer restores it and the app treats the page as signed in.
+      localStorage.setItem('gp-demo-session', 'guest@player.gg');
     } catch {
       /* storage may be unavailable — ignore */
     }
@@ -42,10 +45,10 @@ export async function demoLogin(page: Page): Promise<void> {
   await expect(demoButton).toBeVisible({ timeout: VISIBLE_TIMEOUT });
   await demoButton.click();
 
-  // Lands on home. Soft-wait for it to settle — the strict auth assertion lives
-  // in auth.spec; here we only need the client session established so downstream
-  // page tests run against the authenticated app.
-  await page.waitForURL((url) => url.pathname === '/', { timeout: VISIBLE_TIMEOUT }).catch(() => {});
+  // Lands on the dashboard (Phase 1.1). Soft-wait for it to settle — the strict
+  // auth assertion lives in auth.spec; here we only need the client session
+  // established so downstream page tests run against the authenticated app.
+  await page.waitForURL((url) => url.pathname === '/dashboard', { timeout: VISIBLE_TIMEOUT }).catch(() => {});
   await authIndicator(page)
     .first()
     .waitFor({ state: 'visible', timeout: VISIBLE_TIMEOUT })

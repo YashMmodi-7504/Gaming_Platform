@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
 import { friends, liveEvents } from '@/lib/ecosystem-data';
+import { useAuthStore } from '@/stores/auth-store';
 import { useMissions } from '@/stores/missions';
 import { usePlayerProfile } from '@/stores/player-profile';
 
@@ -40,6 +41,8 @@ export function AiAssistant() {
   const profile = usePlayerProfile();
   const missions = useMissions();
   const reduce = useReducedMotion();
+  // Player-only feature — never on the public landing / auth pages (Phase 1.1).
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   useEffect(() => setMounted(true), []);
 
@@ -87,7 +90,7 @@ export function AiAssistant() {
     };
   }, [mounted, open, suggestions]);
 
-  if (!mounted) return null;
+  if (!mounted || !isAuthenticated) return null;
 
   return (
     <div className="fixed bottom-5 left-5 z-50 flex flex-col items-start gap-3">

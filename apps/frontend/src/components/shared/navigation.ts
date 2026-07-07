@@ -34,7 +34,7 @@ export type NavVariant = 'dashboard' | 'admin';
 
 /** Primary dashboard navigation. */
 export const dashboardNav: NavItem[] = [
-  { label: 'Home', href: '/', icon: LayoutDashboard },
+  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Discover', href: '/discover', icon: Sparkles },
   { label: 'Games', href: '/games', icon: Gamepad2 },
   { label: 'Arcade', href: '/arcade', icon: Cpu },
