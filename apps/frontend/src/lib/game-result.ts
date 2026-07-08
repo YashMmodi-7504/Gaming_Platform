@@ -42,6 +42,9 @@ export function settleRound(input: SettleInput): SettleResult {
 
   const net = win ? paid - stake : -stake;
 
+  // Bet-history ledger (Phase 1.3). recordBet ignores 0-stake skill rounds.
+  wallet.recordBet({ game, stake, win, net, multiplier: win && stake > 0 ? paid / stake : 0 });
+
   useGameStats.getState().record(game, {
     label,
     win,

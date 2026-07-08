@@ -96,11 +96,13 @@ export function DiceGame() {
         setFx({ key: fxKeyRef.current, type: 'win', amount: payout - s });
         sound.play('reward');
         record('dice', { label: roll.toFixed(2), win: true, payout: payout - s, value: roll });
+        useDemoWallet.getState().recordBet({ game: 'Dice', stake: s, win: true, net: payout - s, multiplier: m });
       } else {
         setResult({ win: false, payout: -s, roll });
         setFx({ key: fxKeyRef.current, type: 'lose' });
         sound.play('lose');
         record('dice', { label: roll.toFixed(2), win: false, payout: -s, value: roll });
+        useDemoWallet.getState().recordBet({ game: 'Dice', stake: s, win: false, net: -s, multiplier: 0 });
       }
     },
     [credit, record],

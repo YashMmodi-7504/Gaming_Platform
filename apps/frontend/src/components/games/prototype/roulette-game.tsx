@@ -113,10 +113,12 @@ export function RouletteGame() {
         setFx({ key: fxKeyRef.current, type: 'win', amount: net });
         sound.play('reward');
         record('roulette', { label: labelOf(n), win: true, payout: net, value: n });
+        useDemoWallet.getState().recordBet({ game: 'Roulette', stake, win: true, net, multiplier });
       } else {
         setResult({ win: false, payout: -stake, number: n });
         sound.play('lose');
         record('roulette', { label: labelOf(n), win: false, payout: -stake, value: n });
+        useDemoWallet.getState().recordBet({ game: 'Roulette', stake, win: false, net: -stake, multiplier: 0 });
       }
     },
     [selection, bet, multiplier, credit, record],

@@ -76,9 +76,11 @@ export function CrashGame() {
         setFx({ key: fxKeyRef.current, type: 'win', amount: payout - bet });
         sound.play('reward');
         record('crash', { label: `${cashed.toFixed(2)}×`, win: true, payout: payout - bet, value: cashed });
+        useDemoWallet.getState().recordBet({ game: 'Crash', stake: bet, win: true, net: payout - bet, multiplier: cashed });
       } else {
         setResult({ win: false, payout: -bet });
         record('crash', { label: `${finalMult.toFixed(2)}×`, win: false, payout: -bet, value: finalMult });
+        useDemoWallet.getState().recordBet({ game: 'Crash', stake: bet, win: false, net: -bet, multiplier: 0 });
       }
     },
     [bet, credit, record],

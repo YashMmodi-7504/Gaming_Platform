@@ -1,4 +1,5 @@
 import { HomeSections } from '@/components/games/home-sections';
+import { WalletSummary } from '@/components/wallet/wallet-summary';
 import { FloatingNotifications } from '@/components/live/floating-notifications';
 import { GlobalLiveFeed } from '@/components/live/global-live-feed';
 import { LiveNow } from '@/components/live/live-now';
@@ -31,6 +32,7 @@ export default function DashboardPage() {
     <>
       <div className="space-y-14 pb-4">
         <Hero />
+        <WalletSummary />
         <LiveTicker />
         <LiveNow />
         <BigWinners />
