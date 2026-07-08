@@ -20,15 +20,17 @@ import {
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
+import { fmtTime } from '@/lib/datetime';
 import { useDemoWallet } from '@/stores/demo-wallet';
 import { usePlayerProfile } from '@/stores/player-profile';
 
 /**
- * Premium player-home widgets (Phase 1.3.3 → 1.4). These make the Dashboard the
- * player's personal control center — distinct from the Promotions offer center.
- * All client-only + mounted-gated (they read the persisted wallet / in-memory
- * profile), so there is no hydration mismatch. They reuse the existing stores +
- * design system and never touch wallet/auth logic.
+ * Player-home widgets (Phase 1.3.3 → 1.4 → 1.3.4). The personal touches on the
+ * premium gaming Dashboard — greeting, quick actions and the bottom recent-
+ * activity / VIP cards. All client-only + mounted-gated (they read the persisted
+ * wallet / in-memory profile), so there is no hydration mismatch. They reuse the
+ * existing stores + design system and never touch wallet/auth logic. Offers live
+ * only on /promotions — nothing here is promotional.
  */
 
 function startOfToday(): number {
@@ -40,16 +42,13 @@ function startOfToday(): number {
 /* ------------------------------------------------------------------ hero */
 
 /**
- * Player hero (Objective 3) — greeting, Demo badge, VIP level, XP progress and
- * today's gaming summary. The headline of the personal control center.
+ * Welcome-back hero (target step 1) — greeting, Demo Account badge and today's
+ * gaming summary. VIP progress has its own card at the foot of the page, so this
+ * stays focused on identity + today's action.
  */
 export function PlayerHero() {
   const username = usePlayerProfile((s) => s.username);
   const level = usePlayerProfile((s) => s.level);
-  const xp = usePlayerProfile((s) => s.xp);
-  const xpToNext = usePlayerProfile((s) => s.xpToNext);
-  const seasonName = usePlayerProfile((s) => s.seasonName);
-  const seasonTier = usePlayerProfile((s) => s.seasonTier);
   const bets = useDemoWallet((s) => s.bets);
 
   const [mounted, setMounted] = useState(false);
@@ -71,13 +70,10 @@ export function PlayerHero() {
     return { rounds, wins, wagered, net };
   }, [bets]);
 
-  const pct = mounted && xpToNext > 0 ? Math.min(100, Math.round((xp / xpToNext) * 100)) : 0;
-
   return (
     <section className="card-premium relative overflow-hidden p-6 sm:p-8">
       <div className="bg-aurora pointer-events-none absolute inset-0 opacity-[0.12]" />
       <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-        {/* Identity + VIP */}
         <div className="flex items-start gap-4">
           <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet to-primary font-display text-xl font-bold text-white shadow-glow-sm">
             {mounted ? level : '—'}
@@ -92,34 +88,16 @@ export function PlayerHero() {
               </Badge>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              VIP Level {mounted ? level : '—'} · {seasonName} · Tier {mounted ? seasonTier : '—'}
+              Your gaming hub — jump back in, check today&apos;s action and keep playing.
             </p>
-            <div className="mt-3 w-full max-w-xs">
-              <div className="h-2 overflow-hidden rounded-full bg-black/5">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-violet via-primary to-violet shadow-glow-sm transition-[width] duration-500"
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
-              <p className="mt-1 font-mono text-[11px] tabular-nums text-muted-foreground">
-                {mounted ? `${xp.toLocaleString('en-US')} / ${xpToNext.toLocaleString('en-US')} XP` : '— XP'}
-              </p>
-            </div>
           </div>
         </div>
 
         {/* Today's gaming summary */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:w-auto">
           <TodayStat label="Rounds" value={mounted ? String(today.rounds) : '—'} />
-          <TodayStat
-            label="Wins"
-            value={mounted ? `${today.wins}/${today.rounds}` : '—'}
-            tone="text-emerald"
-          />
-          <TodayStat
-            label="Wagered"
-            value={mounted ? `₹${today.wagered.toLocaleString('en-US')}` : '—'}
-          />
+          <TodayStat label="Wins" value={mounted ? `${today.wins}/${today.rounds}` : '—'} tone="text-emerald" />
+          <TodayStat label="Wagered" value={mounted ? `₹${today.wagered.toLocaleString('en-US')}` : '—'} />
           <TodayStat
             label="Net today"
             value={mounted ? `${today.net >= 0 ? '+' : '−'}₹${Math.abs(today.net).toLocaleString('en-US')}` : '—'}
@@ -156,10 +134,7 @@ const ACTIONS: { label: string; href: string; icon: LucideIcon; tone: string }[]
   { label: 'Settings', href: '/settings', icon: Settings, tone: 'text-muted-foreground' },
 ];
 
-/**
- * Premium quick actions (Objective 2) — equal-size cards, premium hover,
- * responsive from 2 → 6 columns. Every href resolves to an existing route.
- */
+/** Premium quick actions — equal cards, premium hover, responsive 2 → 6 cols. */
 export function QuickActions() {
   return (
     <section className="space-y-3">
@@ -187,5 +162,147 @@ export function QuickActions() {
         ))}
       </div>
     </section>
+  );
+}
+
+/* --------------------------------------------------- bottom recent cards */
+
+/** Recent bets (target step 16) — reads the shared bet ledger. */
+export function RecentBetsCard() {
+  const bets = useDemoWallet((s) => s.bets);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const recent = bets.slice(0, 5);
+
+  return (
+    <div className="card-premium flex flex-col p-5">
+      <div className="mb-3 flex items-center justify-between">
+        <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+          <Dices className="h-4 w-4 text-primary" /> Recent bets
+        </span>
+        <Link href="/bets" className="text-xs font-semibold text-primary hover:underline">
+          View all
+        </Link>
+      </div>
+      {!mounted || recent.length === 0 ? (
+        <Empty text="No bets yet — play a game to get started." />
+      ) : (
+        <ul className="space-y-2.5">
+          {recent.map((b) => (
+            <li key={b.id} className="flex items-center gap-3">
+              <span className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold uppercase', b.win ? 'bg-emerald/10 text-emerald' : 'bg-destructive/10 text-destructive')}>
+                {b.win ? 'W' : 'L'}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-medium text-foreground">{b.game}</span>
+                <span className="block truncate font-mono text-[11px] text-muted-foreground">
+                  {b.roundId} · {fmtTime(b.ts)}
+                </span>
+              </span>
+              <span className={cn('shrink-0 font-mono text-sm font-bold tabular-nums', b.win ? 'text-emerald' : 'text-destructive')}>
+                {b.net >= 0 ? '+' : '−'}₹{Math.abs(b.net).toLocaleString('en-US')}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/** Recent transactions (target step 17) — reads the shared wallet ledger. */
+export function RecentTransactionsCard() {
+  const transactions = useDemoWallet((s) => s.transactions);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const recent = transactions.slice(0, 5);
+
+  return (
+    <div className="card-premium flex flex-col p-5">
+      <div className="mb-3 flex items-center justify-between">
+        <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+          <Receipt className="h-4 w-4 text-primary" /> Recent transactions
+        </span>
+        <Link href="/transactions" className="text-xs font-semibold text-primary hover:underline">
+          View all
+        </Link>
+      </div>
+      {!mounted || recent.length === 0 ? (
+        <Empty text="No transactions yet." />
+      ) : (
+        <ul className="space-y-2.5">
+          {recent.map((t) => (
+            <li key={t.id} className="flex items-center justify-between gap-2">
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-medium text-foreground">{t.label}</span>
+                <span className="block truncate font-mono text-[11px] text-muted-foreground">
+                  {t.ref} · {fmtTime(t.ts)}
+                </span>
+              </span>
+              <span className={cn('shrink-0 font-mono text-sm font-bold tabular-nums', t.amount > 0 ? 'text-emerald' : 'text-foreground')}>
+                {t.amount > 0 ? '+' : '−'}₹{Math.abs(t.amount).toLocaleString('en-US')}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/** VIP / level progress (target step 18) — reuses the in-memory player profile. */
+export function VipProgressCard() {
+  const level = usePlayerProfile((s) => s.level);
+  const xp = usePlayerProfile((s) => s.xp);
+  const xpToNext = usePlayerProfile((s) => s.xpToNext);
+  const seasonTier = usePlayerProfile((s) => s.seasonTier);
+  const seasonName = usePlayerProfile((s) => s.seasonName);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const pct = mounted && xpToNext > 0 ? Math.min(100, Math.round((xp / xpToNext) * 100)) : 0;
+
+  return (
+    <div className="card-premium relative flex flex-col overflow-hidden p-5">
+      <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-gradient-to-br from-violet to-primary opacity-20 blur-3xl" />
+      <div className="relative mb-3 flex items-center justify-between">
+        <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+          <Gem className="h-4 w-4 text-violet" /> VIP progress
+        </span>
+        <Link href="/vip" className="text-xs font-semibold text-violet hover:underline">
+          VIP lounge
+        </Link>
+      </div>
+      <div className="relative flex items-center gap-3">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet to-primary font-display text-lg font-bold text-white shadow-glow-sm">
+          {mounted ? level : '—'}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-display text-sm font-bold text-foreground">Level {mounted ? level : '—'}</p>
+          <p className="truncate text-[11px] text-muted-foreground">
+            {seasonName} · Tier {mounted ? seasonTier : '—'}
+          </p>
+        </div>
+      </div>
+      <div className="relative mt-4">
+        <div className="h-2.5 overflow-hidden rounded-full bg-black/5">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-violet via-primary to-violet shadow-glow-sm transition-[width] duration-500"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        <p className="mt-1.5 text-right font-mono text-[11px] tabular-nums text-muted-foreground">
+          {mounted ? `${xp.toLocaleString('en-US')} / ${xpToNext.toLocaleString('en-US')} XP` : '— XP'}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function Empty({ text }: { text: string }) {
+  return (
+    <div className="flex flex-1 items-center justify-center py-6 text-center text-sm text-muted-foreground">
+      {text}
+    </div>
   );
 }

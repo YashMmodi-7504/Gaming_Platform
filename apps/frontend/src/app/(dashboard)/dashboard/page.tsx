@@ -1,50 +1,42 @@
-import { AchievementsPanel } from '@/components/dashboard/dashboard-achievements';
-import { NotificationCenter, RecentActivity } from '@/components/dashboard/dashboard-activity';
-import { GamingShelves } from '@/components/dashboard/gaming-shelves';
+import { DashboardLobbyLazy } from '@/components/dashboard/dashboard-lobby-lazy';
 import { PlayerHero, QuickActions } from '@/components/dashboard/player-sections';
+import { Hero } from '@/components/marketing/hero';
 import { WalletSummary } from '@/components/wallet/wallet-summary';
 
 /**
- * Authenticated player HOME — the personal control center (Phase 1.4).
+ * Authenticated player HOME — the premium gaming hub (Phase 1.3.4).
  *
- * A server-rendered shell composes independent client widgets, each of which
- * hydrates and mounted-gates on its own, so the shell paints immediately and no
- * single widget blocks first paint. The heavy game-discovery block is lazy-loaded
- * (see GamingShelves). Marketing / offers live on /promotions, so this page is
- * strictly the player's activity hub.
+ * Restores the original rich, "alive" homepage (hero, live winners, jackpot,
+ * tournaments, providers, community feed, upcoming events) while keeping the
+ * Phase 1.x player widgets (welcome, wallet summary, quick actions, recent bets
+ * & transactions, VIP progress). ALL promotional content — welcome/reload/
+ * cashback/referral bonuses, daily reward, lucky wheel, mystery chest, promo
+ * grids + status filters — lives ONLY on /promotions, so the two pages read as
+ * clearly different experiences: Dashboard = Gaming Hub, Promotions = Offers.
  *
- * Hierarchy (Objective 1): Welcome → Wallet Summary → Quick Actions → Gaming
- * shelves (Continue / Recommended / Popular / Recently / Trending) → Sportsbook
- * → Recent Activity (transactions + bets + notifications) → VIP / Achievements.
- *
- * Reuses: WalletSummary, HomeSections + SportsHighlights (via GamingShelves),
- * the missions store, the player profile and the wallet ledger.
+ * A server-rendered shell (hero, wallet summary, quick actions) paints
+ * immediately; the heavy lobby is lazy-loaded (DashboardLobbyLazy) so it never
+ * blocks first paint. Every section reuses an existing component — reorganized,
+ * not rebuilt.
  */
 export default function DashboardPage() {
   return (
     <div className="space-y-12 pb-6">
-      {/* 1 — Identity + today */}
+      {/* 1 — Welcome back */}
       <PlayerHero />
 
-      {/* 2 — Wallet summary (balances + today's money + recent transactions) */}
+      {/* 2 — Hero banner */}
+      <Hero />
+
+      {/* 3 — Wallet summary */}
       <WalletSummary />
 
-      {/* 3 — Quick actions */}
+      {/* 4 — Quick actions */}
       <QuickActions />
 
-      {/* 4 — Gaming shelves + sportsbook (lazy, progressive) */}
-      <GamingShelves />
-
-      {/* 5 — Recent activity + notifications */}
-      <div className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
-        <RecentActivity />
-        <div className="lg:pt-11">
-          <NotificationCenter />
-        </div>
-      </div>
-
-      {/* 6 — Achievements, missions & progress */}
-      <AchievementsPanel />
+      {/* 5+ — Rich gaming lobby (lazy): shelves, providers, sportsbook, live
+          winners, jackpot, tournaments, community, upcoming, recent activity, VIP */}
+      <DashboardLobbyLazy />
     </div>
   );
 }
