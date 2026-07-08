@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@gaming-platform/ui';
-import { Check, ChevronDown, Clock, Search, Trophy } from 'lucide-react';
+import { Check, ChevronDown, Clock, Search } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { SportDefinition } from '@/lib/sports-api';
@@ -28,10 +28,19 @@ export function SportsSelect({
   sportList,
   sport,
   setSport,
+  counts,
+  liveSet,
+  totalCount,
 }: {
   sportList: SportDefinition[];
   sport: string | null;
   setSport: (key: string | null) => void;
+  /** Fixture count per sport key (upcoming + live). */
+  counts: Record<string, number>;
+  /** Sport keys that currently have live fixtures. */
+  liveSet: Set<string>;
+  /** Total fixtures across all sports (for the "All Sports" row). */
+  totalCount: number;
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -49,7 +58,9 @@ export function SportsSelect({
     [sportList],
   );
 
-  const currentLabel = options.find((o) => o.key === sport)?.label ?? 'Sports';
+  const currentOpt = options.find((o) => o.key === sport);
+  const currentLabel = currentOpt?.label ?? 'Sports';
+  const currentEmoji = sport ? currentOpt?.emoji ?? '🏅' : '🏆';
 
   const q = query.trim().toLowerCase();
   const visible = useMemo(() => {
@@ -118,17 +129,19 @@ export function SportsSelect({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={`Sport filter, currently ${currentLabel}`}
-        className="flex min-h-[44px] items-center gap-2 rounded-full border border-white/10 bg-[#1A2238] px-4 text-sm font-bold text-white shadow-[0_6px_20px_-8px_rgba(15,23,42,0.55)] outline-none transition-colors hover:bg-[#222c46] focus-visible:ring-2 focus-visible:ring-primary/60"
+        className="flex min-h-[44px] w-[200px] items-center justify-between gap-2 rounded-full border border-white/10 bg-[#1A2238] px-4 text-sm font-bold text-white shadow-[0_6px_20px_-8px_rgba(15,23,42,0.55)] outline-none transition-colors hover:bg-[#222c46] focus-visible:ring-2 focus-visible:ring-primary/60"
       >
-        <Trophy className="h-4 w-4 shrink-0 text-accent" />
-        <span className="max-w-[9rem] truncate">{currentLabel}</span>
+        <span className="flex min-w-0 items-center gap-2">
+          <span aria-hidden className="text-base leading-none">{currentEmoji}</span>
+          <span className="truncate">{currentLabel}</span>
+        </span>
         <ChevronDown className={cn('h-4 w-4 shrink-0 text-white/70 transition-transform duration-150', open && 'rotate-180')} />
       </button>
 
       {open ? (
         <div
           onKeyDown={onKeyDown}
-          className="animate-fade-in absolute left-0 top-[calc(100%+8px)] z-50 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-black/10 bg-white shadow-elevated"
+          className="animate-dropdown-in absolute left-0 top-[calc(100%+8px)] z-50 w-[min(20rem,calc(100vw-2rem))] origin-top overflow-hidden rounded-2xl border border-black/10 bg-white shadow-elevated"
         >
           <div className="flex items-center gap-2 border-b border-black/[0.06] px-3 py-2.5">
             <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -181,10 +194,20 @@ export function SportsSelect({
                       )}
                     >
                       <span className="flex min-w-0 items-center gap-2.5">
-                        <span aria-hidden>{o.emoji}</span>
+                        <span aria-hidden className="text-base leading-none">{o.emoji}</span>
                         <span className="truncate">{o.label}</span>
+                        {o.key && liveSet.has(o.key) ? (
+                          <span className="flex shrink-0 items-center gap-1 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-destructive">
+                            <span className="h-1 w-1 animate-pulse rounded-full bg-destructive" /> Live
+                          </span>
+                        ) : null}
                       </span>
-                      {selected ? <Check className="h-4 w-4 shrink-0 text-primary" /> : null}
+                      <span className="flex shrink-0 items-center gap-2">
+                        <span className="font-mono text-xs tabular-nums text-muted-foreground">
+                          {o.key === null ? totalCount : counts[o.key] ?? 0}
+                        </span>
+                        {selected ? <Check className="h-4 w-4 text-primary" /> : null}
+                      </span>
                     </button>
                   </div>
                 );

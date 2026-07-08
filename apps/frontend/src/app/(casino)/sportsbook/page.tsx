@@ -4,7 +4,7 @@ import { Badge, Button, Spinner, cn } from '@gaming-platform/ui';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft, Flame, Radio, Trophy } from 'lucide-react';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { AnimatedNumber } from '@/components/marketing/animated-number';
 import { BetSlip } from '@/components/sports/bet-slip';
@@ -23,6 +23,16 @@ export default function SportsbookPage() {
   const [tab, setTab] = useState<Tab>('upcoming');
   // Stable per-mount reference time so mock fixtures don't jitter across renders.
   const [now] = useState(() => Date.now());
+
+  // Persist the selected sport across refreshes (client-only; presentation).
+  useEffect(() => {
+    const saved = window.localStorage.getItem('sb-sport');
+    if (saved) setSport(saved);
+  }, []);
+  useEffect(() => {
+    if (sport) window.localStorage.setItem('sb-sport', sport);
+    else window.localStorage.removeItem('sb-sport');
+  }, [sport]);
 
   const sports = useQuery({ queryKey: ['sb-sports'], queryFn: sportsApi.sports });
   const matches = useQuery({
@@ -54,6 +64,16 @@ export default function SportsbookPage() {
 
   // For the lobby header stats / "Live Now" strip we always know what's live.
   const allLive = useMemo(() => mockMatches({ status: 'live', now }), [now]);
+
+  // Per-sport fixture counts + live flags for the Sports dropdown (presentation).
+  const allUpcoming = useMemo(() => mockMatches({ status: 'scheduled', now }), [now]);
+  const fixtureCounts = useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const m of [...allUpcoming, ...allLive]) c[m.sportKey] = (c[m.sportKey] ?? 0) + 1;
+    return c;
+  }, [allUpcoming, allLive]);
+  const liveSet = useMemo(() => new Set(allLive.map((m) => m.sportKey)), [allLive]);
+  const totalFixtures = allUpcoming.length + allLive.length;
   const liveStripe = (matches.data && matches.data.some((m) => m.status === 'live'))
     ? matches.data.filter((m) => m.status === 'live')
     : tab === 'live'
@@ -114,9 +134,17 @@ export default function SportsbookPage() {
           </div>
 
           {/* Sport navigation — one premium searchable dropdown on every device
-              (replaces the horizontal sport-chip bar). */}
-          <div className="flex items-center">
-            <SportsSelect sportList={sportList} sport={sport} setSport={setSport} />
+              (replaces the horizontal sport-chip bar). Sticky under the header on
+              mobile so it stays reachable while scrolling the feed. */}
+          <div className="flex items-center max-md:sticky max-md:top-14 max-md:z-30 max-md:-mx-4 max-md:bg-background/90 max-md:px-4 max-md:py-2 max-md:backdrop-blur">
+            <SportsSelect
+              sportList={sportList}
+              sport={sport}
+              setSport={setSport}
+              counts={fixtureCounts}
+              liveSet={liveSet}
+              totalCount={totalFixtures}
+            />
           </div>
 
           {/* Tabs */}
@@ -236,9 +264,22 @@ export default function SportsbookPage() {
               </section>
             </div>
           ) : (
-            <p className="py-12 text-center text-sm text-muted-foreground">
-              No {tab} matches{sport ? ' for this sport' : ''}.
-            </p>
+            <div className="card-premium flex flex-col items-center justify-center gap-3 px-6 py-14 text-center">
+              <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-accent/15 text-accent">
+                <Trophy className="h-8 w-8" />
+              </span>
+              <div>
+                <p className="font-display text-base font-bold text-foreground">No matches available</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {sport ? 'No fixtures for this sport right now.' : `No ${tab} matches right now — check back soon.`}
+                </p>
+              </div>
+              {sport ? (
+                <Button variant="gradient" size="sm" className="sheen mt-1" onClick={() => setSport(null)}>
+                  View All Sports
+                </Button>
+              ) : null}
+            </div>
           )}
         </div>
 
