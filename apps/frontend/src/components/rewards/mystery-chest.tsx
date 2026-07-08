@@ -22,7 +22,7 @@ const LOOT = [
 const SEQ = [0, 3, 1, 5, 2, 4];
 
 export function MysteryChest() {
-  const credit = useDemoWallet((s) => s.credit);
+  const bonus = useDemoWallet((s) => s.bonus);
   const addXp = usePlayerProfile((s) => s.addXp);
   const [opening, setOpening] = useState(false);
   const [reveal, setReveal] = useState<string | null>(null);
@@ -38,7 +38,7 @@ export function MysteryChest() {
     window.setTimeout(() => {
       const loot = LOOT[SEQ[count.current % SEQ.length]!]!;
       count.current += 1;
-      if (loot.coins) credit(loot.coins);
+      if (loot.coins) bonus(loot.coins, { label: 'Mystery Chest', source: 'mystery-chest' });
       if (loot.xp) addXp(loot.xp);
       fxKey.current += 1;
       setFx({ key: fxKey.current, type: 'win', amount: loot.coins || loot.xp });

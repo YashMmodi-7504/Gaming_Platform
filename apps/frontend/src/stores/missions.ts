@@ -71,7 +71,7 @@ export const useMissions = create<MissionState>((set, get) => ({
     const all = [...get().daily, ...get().weekly];
     const m = all.find((x) => x.id === id);
     if (!m || m.claimed || m.progress < m.target) return null;
-    useDemoWallet.getState().credit(m.coins);
+    useDemoWallet.getState().bonus(m.coins, { label: `Mission: ${m.title}`, source: 'mission' });
     usePlayerProfile.getState().addXp(m.xp);
     set((s) => ({
       daily: s.daily.map((x) => (x.id === id ? { ...x, claimed: true } : x)),

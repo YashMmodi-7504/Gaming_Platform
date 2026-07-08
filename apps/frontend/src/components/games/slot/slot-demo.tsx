@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AnimatedNumber } from '@/components/marketing/animated-number';
+import { settleRound } from '@/lib/game-result';
+import { useDemoWallet } from '@/stores/demo-wallet';
 
 /**
  * Premium, presentation-only slot / instant-win demo.
@@ -13,7 +15,12 @@ import { AnimatedNumber } from '@/components/marketing/animated-number';
  * Fully client-side — no backend, no `Math.random()` / `Date.now()`. Outcomes
  * come from a seeded PRNG (mulberry32) advanced one step per spin, so the reel
  * strips are stable across SSR/CSR (no hydration drift) and every session is
- * reproducible. Respects reduced-motion. Coins/jackpot are demo-only.
+ * reproducible. Respects reduced-motion.
+ *
+ * Uses the shared demo wallet (Phase 1.3.1) — every spin `spend()`s the bet and
+ * settles through `settleRound()`, so the slot behaves exactly like the card /
+ * crash / dice / roulette games: one wallet, auto bet + win transactions, and a
+ * bet-history entry per round. The jackpot pool is a cosmetic demo counter.
  */
 
 const SYMBOLS = [
@@ -73,7 +80,8 @@ export function SlotDemo({ slug, title, lobbyHref = '/games', detailHref }: Slot
   // Start each reel showing a stable window (offset 1 → middle row = strip[1]).
   const [offsets, setOffsets] = useState<number[]>(() => strips.map(() => 1));
   const [spinning, setSpinning] = useState(false);
-  const [coins, setCoins] = useState(5000);
+  const balance = useDemoWallet((s) => s.balance);
+  const spend = useDemoWallet((s) => s.spend);
   const [betIndex, setBetIndex] = useState(1);
   const [jackpot, setJackpot] = useState(() => 25_000 + (fnv(slug) % 50_000));
   const [lastWin, setLastWin] = useState<number | null>(null);
@@ -87,14 +95,13 @@ export function SlotDemo({ slug, title, lobbyHref = '/games', detailHref }: Slot
 
   const spin = useCallback(() => {
     if (spinning) return;
-    if (coins < bet) {
-      setMessage('Not enough demo coins — resetting balance');
-      setCoins(5000);
+    if (balance < bet) {
+      setMessage('Not enough balance — deposit or lower your bet');
       return;
     }
     setSpinning(true);
     setLastWin(null);
-    setCoins((c) => c - bet);
+    spend(bet); // deduct the stake from the shared wallet (records a Bet txn)
     setMessage('Spinning…');
 
     // Deterministic target per reel from a per-spin seed.
@@ -110,6 +117,7 @@ export function SlotDemo({ slug, title, lobbyHref = '/games', detailHref }: Slot
       const results = targets.map((o, r) => strips[r]![(o + 1) % STRIP]!);
       const [a, b, c] = results as [number, number, number];
       let win = 0;
+      let label = 'No win';
       if (a === b && b === c) {
         win = SYMBOLS[a]!.pay * bet;
         if (SYMBOLS[a]!.char === '7️⃣') {
@@ -117,20 +125,23 @@ export function SlotDemo({ slug, title, lobbyHref = '/games', detailHref }: Slot
           win += jackpot;
           setJackpot(25_000 + (fnv(`${slug}${spinCount.current}`) % 50_000));
           setMessage(`🎉 JACKPOT — ${SYMBOLS[a]!.label} × ${REELS}!`);
+          label = 'Jackpot!';
         } else {
           setMessage(`Win! Three ${SYMBOLS[a]!.label}s`);
+          label = `Three ${SYMBOLS[a]!.label}s`;
         }
       } else if (a === b || b === c || a === c) {
         win = Math.round(bet * 1.5);
         setMessage('Nice — a matching pair');
+        label = 'Matching pair';
       } else {
         setMessage('No win — spin again');
       }
       setJackpot((j) => j + Math.round(bet * 0.25));
-      if (win > 0) {
-        setCoins((prev) => prev + win);
-        setLastWin(win);
-      }
+      if (win > 0) setLastWin(win);
+      // Credit winnings + record the Win txn, bet history, XP, stats and SFX —
+      // exactly like every other casino game. Stake was already spent above.
+      settleRound({ game: title, stake: bet, win: win > 0, winnings: win, label });
       setSpinning(false);
     };
 
@@ -140,7 +151,7 @@ export function SlotDemo({ slug, title, lobbyHref = '/games', detailHref }: Slot
       // Let the CSS reel transition play, then resolve.
       window.setTimeout(settle, 1150);
     }
-  }, [bet, coins, jackpot, reduced, slug, spinning, strips]);
+  }, [bet, balance, spend, jackpot, reduced, slug, spinning, strips, title]);
 
   // Space to spin.
   useEffect(() => {
@@ -251,7 +262,7 @@ export function SlotDemo({ slug, title, lobbyHref = '/games', detailHref }: Slot
             <div>
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Balance</p>
               <p className="font-mono text-lg font-bold tabular-nums text-foreground">
-                <AnimatedNumber value={coins} />
+                ₹<AnimatedNumber value={balance} />
               </p>
             </div>
           </div>
@@ -292,7 +303,7 @@ export function SlotDemo({ slug, title, lobbyHref = '/games', detailHref }: Slot
         </div>
 
         <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Volume2 className="h-3.5 w-3.5" /> Press Space to spin · Demo coins only · 18+
+          <Volume2 className="h-3.5 w-3.5" /> Press Space to spin · Demo wallet · 18+
         </p>
       </main>
     </div>

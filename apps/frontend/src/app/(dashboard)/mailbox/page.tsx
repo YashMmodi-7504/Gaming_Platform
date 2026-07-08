@@ -209,7 +209,7 @@ export default function MailboxPage() {
   function claim(m: Mail) {
     if (!m.reward || m.claimed) return;
     const coins = m.reward.coins ?? 0;
-    if (coins > 0) useDemoWallet.getState().credit(coins);
+    if (coins > 0) useDemoWallet.getState().bonus(coins, { label: 'Mailbox reward', source: 'mailbox' });
     setMail((prev) => prev.map((x) => (x.id === m.id ? { ...x, claimed: true, unread: false } : x)));
     sound.play('reward');
     toast.success('Reward claimed!', {
@@ -224,7 +224,7 @@ export default function MailboxPage() {
       return;
     }
     const totalCoins = claimable.reduce((sum, m) => sum + (m.reward?.coins ?? 0), 0);
-    if (totalCoins > 0) useDemoWallet.getState().credit(totalCoins);
+    if (totalCoins > 0) useDemoWallet.getState().bonus(totalCoins, { label: 'Mailbox rewards', source: 'mailbox' });
     const ids = new Set(claimable.map((m) => m.id));
     setMail((prev) => prev.map((x) => (ids.has(x.id) ? { ...x, claimed: true, unread: false } : x)));
     sound.play('reward');

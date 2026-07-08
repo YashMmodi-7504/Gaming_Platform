@@ -18,7 +18,7 @@ const CHIPS = [100, 500, 1000, 5000];
 export function BlackjackGame() {
   const balance = useDemoWallet((s) => s.balance);
   const spend = useDemoWallet((s) => s.spend);
-  const credit = useDemoWallet((s) => s.credit);
+  const refund = useDemoWallet((s) => s.refund);
   const stat = useGameStat('blackjack');
 
   const [phase, setPhase] = useState<Phase>('bet');
@@ -74,7 +74,7 @@ export function BlackjackGame() {
         setFx({ key: fxKey.current, type: 'win', amount: Math.round(wager * mult - wager) });
         settleRound({ game: 'blackjack', stake: wager, win: true, multiplier: mult, label: p.blackjack ? 'Blackjack!' : `Win ${p.total}`, value: p.total });
       } else if (tone === 'push') {
-        credit(wager); // return stake
+        refund(wager, { label: 'Blackjack push', source: 'blackjack' }); // return stake
         useGameStats.getState().record('blackjack', { label: 'Push', win: false, payout: 0, value: p.total });
         sound.play('notify');
       } else {
@@ -83,7 +83,7 @@ export function BlackjackGame() {
       setResult({ text, tone });
       setPhase('done');
     },
-    [wager, credit],
+    [wager, refund],
   );
 
   const dealerPlay = useCallback(

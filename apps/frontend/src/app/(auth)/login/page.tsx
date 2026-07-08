@@ -13,7 +13,11 @@ import { authApi } from '@/lib/auth-api';
 import { clientConfig } from '@/lib/config';
 import { createDemoSession, persistDemoSession } from '@/lib/demo-session';
 import { useAuthStore } from '@/stores/auth-store';
+import { useDemoWallet } from '@/stores/demo-wallet';
 import { usePlayerProfile } from '@/stores/player-profile';
+
+/** One-time demo starter grant, credited as a Bonus on guest sign-in. */
+const WELCOME_BONUS = 10_000;
 
 export default function LoginPage() {
   const router = useRouter();
@@ -25,6 +29,12 @@ export default function LoginPage() {
     setSession(user, accessToken);
     persistDemoSession(email); // survive reloads (demo mode)
     usePlayerProfile.getState().setUsername(email.split('@')[0] || 'player');
+    // Welcome Bonus — new demo sessions start at ₹0; grant a starter bonus once
+    // (logout resets the wallet, so each fresh guest session gets exactly one).
+    const wallet = useDemoWallet.getState();
+    if (wallet.balance === 0 && wallet.txnSeq === 0) {
+      wallet.bonus(WELCOME_BONUS, { label: 'Welcome Bonus', source: 'welcome' });
+    }
     toast.success('Welcome, player! Your guest profile is ready.');
     router.push('/dashboard');
   };

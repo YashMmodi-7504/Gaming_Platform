@@ -63,6 +63,7 @@ import {
   THEMES,
   TITLES,
 } from '@/lib/cosmetics';
+import { useDemoWallet } from '@/stores/demo-wallet';
 import { usePlayerProfile } from '@/stores/player-profile';
 
 const ICONS: Record<string, LucideIcon> = {
@@ -285,6 +286,7 @@ function StatusEditor() {
 
 export default function ProfilePage() {
   const p = usePlayerProfile();
+  const walletBalance = useDemoWallet((s) => s.balance);
 
   const claim = () => {
     const reward = p.claimDaily();
@@ -318,10 +320,10 @@ export default function ProfilePage() {
           <Coins className="h-6 w-6 text-gold" />
           <div>
             <div className="font-display text-xl font-bold tabular-nums">
-              <AnimatedNumber value={p.coins} />
+              ₹<AnimatedNumber value={walletBalance} />
             </div>
             <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
-              Demo coins
+              Wallet balance
             </div>
           </div>
         </div>

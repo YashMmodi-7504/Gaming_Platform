@@ -37,6 +37,8 @@ export interface Transaction {
   ts: number;
   status: 'completed';
   label: string;
+  /** Optional origin of the movement (e.g. 'daily', 'blackjack') — bonus/refund. */
+  note?: string;
 }
 
 export interface BetRecord {
@@ -85,6 +87,10 @@ interface DemoWalletState {
   spend: (amount: number) => void;
   /** Winnings / credit — records a `win` transaction. */
   credit: (amount: number) => void;
+  /** Promotional credit (daily reward, welcome, wheel…) — records a `bonus` txn. */
+  bonus: (amount: number, opts?: { label?: string; source?: string }) => void;
+  /** Return funds for a cancelled/invalid round — records a `refund` txn. */
+  refund: (amount: number, opts?: { label?: string; source?: string }) => void;
   /** Record a bet in the bet-history ledger (called by game settle logic). */
   recordBet: (bet: {
     game: string;
@@ -108,6 +114,7 @@ export const useDemoWallet = create<DemoWalletState>()(
         type: TxnType,
         amount: number,
         balanceAfter: number,
+        opts?: { label?: string; note?: string },
       ): Pick<DemoWalletState, 'txnSeq' | 'transactions'> => {
         const seq = s.txnSeq + 1;
         const txn: Transaction = {
@@ -118,7 +125,8 @@ export const useDemoWallet = create<DemoWalletState>()(
           balanceAfter,
           ts: Date.now(),
           status: 'completed',
-          label: TXN_LABEL[type],
+          label: opts?.label ?? TXN_LABEL[type],
+          ...(opts?.note ? { note: opts.note } : {}),
         };
         return { txnSeq: seq, transactions: [txn, ...s.transactions].slice(0, MAX_LEDGER) };
       };
@@ -191,6 +199,28 @@ export const useDemoWallet = create<DemoWalletState>()(
             return { balance, ...withTxn(s, 'win', amt, balance) };
           }),
 
+        bonus: (amount, opts) =>
+          set((s) => {
+            const amt = Math.max(0, Math.floor(amount));
+            if (amt <= 0) return s;
+            const balance = s.balance + amt;
+            return {
+              balance,
+              ...withTxn(s, 'bonus', amt, balance, { label: opts?.label, note: opts?.source }),
+            };
+          }),
+
+        refund: (amount, opts) =>
+          set((s) => {
+            const amt = Math.max(0, Math.floor(amount));
+            if (amt <= 0) return s;
+            const balance = s.balance + amt;
+            return {
+              balance,
+              ...withTxn(s, 'refund', amt, balance, { label: opts?.label, note: opts?.source }),
+            };
+          }),
+
         recordBet: (bet) =>
           set((s) => {
             const stake = Math.max(0, Math.round(bet.stake));
@@ -210,7 +240,18 @@ export const useDemoWallet = create<DemoWalletState>()(
             return { betSeq: seq, bets: [record, ...s.bets].slice(0, MAX_LEDGER) };
           }),
 
-        reload: () => set({ balance: DEMO_RELOAD }),
+        reload: () =>
+          set((s) => {
+            // Top up to the demo baseline, recording it as a Bonus so every
+            // balance change still flows through the ledger (never a bare set).
+            const top = Math.max(0, DEMO_RELOAD - s.balance);
+            if (top <= 0) return s;
+            const balance = s.balance + top;
+            return {
+              balance,
+              ...withTxn(s, 'bonus', top, balance, { label: 'Demo Reload', note: 'reload' }),
+            };
+          }),
 
         reset: () =>
           set({ balance: 0, vault: 0, transactions: [], bets: [], txnSeq: 0, betSeq: 0 }),

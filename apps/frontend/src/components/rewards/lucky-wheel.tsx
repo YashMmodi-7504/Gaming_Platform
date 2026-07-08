@@ -32,7 +32,7 @@ const SEG = 360 / PRIZES.length;
 const SEQUENCE = [2, 5, 0, 7, 3, 1, 6, 4];
 
 export function LuckyWheel() {
-  const credit = useDemoWallet((s) => s.credit);
+  const bonus = useDemoWallet((s) => s.bonus);
   const addXp = usePlayerProfile((s) => s.addXp);
   const [rotation, setRotation] = useState(0);
   const [spinning, setSpinning] = useState(false);
@@ -51,7 +51,7 @@ export function LuckyWheel() {
     setRotation((r) => Math.floor(r / 360) * 360 + target);
     window.setTimeout(() => {
       const prize = PRIZES[idx]!;
-      if (prize.coins) credit(prize.coins);
+      if (prize.coins) bonus(prize.coins, { label: 'Lucky Wheel', source: 'lucky-wheel' });
       if (prize.xp) addXp(prize.xp);
       sound.play(prize.label === 'JACKPOT' ? 'jackpot' : 'reward');
       fxKey.current += 1;

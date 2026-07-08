@@ -40,7 +40,6 @@ export interface PlayerProfile {
   level: number;
   xp: number;
   xpToNext: number;
-  coins: number;
   dailyStreak: number;
   dailyClaimedToday: boolean;
   seasonTier: number;
@@ -105,7 +104,6 @@ export const usePlayerProfile = create<PlayerProfile>((set, get) => ({
   level: 24,
   xp: 3820,
   xpToNext: 6000,
-  coins: 100_000,
   dailyStreak: 4,
   dailyClaimedToday: false,
   seasonTier: 37,
@@ -155,7 +153,9 @@ export const usePlayerProfile = create<PlayerProfile>((set, get) => ({
   claimDaily: () => {
     if (get().dailyClaimedToday) return 0;
     const reward = 5000 + get().dailyStreak * 1000;
-    set((s) => ({ dailyClaimedToday: true, dailyStreak: s.dailyStreak + 1, coins: s.coins + reward }));
+    // Credit the shared wallet as a Bonus — single source of truth (Phase 1.3.1).
+    useDemoWallet.getState().bonus(reward, { label: 'Daily Reward', source: 'daily' });
+    set((s) => ({ dailyClaimedToday: true, dailyStreak: s.dailyStreak + 1 }));
     return reward;
   },
 
