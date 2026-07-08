@@ -2,17 +2,17 @@
 
 import { Badge, Button, Spinner, cn } from '@gaming-platform/ui';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronLeft, Flame, Radio, Sparkles, Trophy } from 'lucide-react';
+import { ChevronLeft, Flame, Radio, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
 import { AnimatedNumber } from '@/components/marketing/animated-number';
 import { BetSlip } from '@/components/sports/bet-slip';
 import { ResponsiveMatchCard as MatchCard } from '@/components/sports/mobile-match-card';
-import { SportsbookFilter } from '@/components/sports/sportsbook-filter';
+import { SportsSelect } from '@/components/sports/sports-select';
 import type { Match, SportDefinition } from '@/lib/sports-api';
 import { sportsApi } from '@/lib/sports-api';
-import { MOCK_SPORTS, SPORT_EMOJI, mockMatches } from '@/lib/sports-mock';
+import { MOCK_SPORTS, mockMatches } from '@/lib/sports-mock';
 import { useAuthStore } from '@/stores/auth-store';
 
 type Tab = 'live' | 'upcoming' | 'mybets';
@@ -113,43 +113,10 @@ export default function SportsbookPage() {
             </div>
           </div>
 
-          {/* Advanced-filter dropdown + quick-access sport chips */}
-          <div className="flex items-center gap-2">
-            <SportsbookFilter
-              sportList={sportList}
-              sport={sport}
-              setSport={setSport}
-              tab={tab}
-              setTab={setTab}
-            />
-            <div className="flex min-w-0 gap-2 overflow-x-auto pb-1">
-            <button
-              onClick={() => setSport(null)}
-              className={cn(
-                'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all max-md:min-h-[40px] max-md:px-4',
-                sport === null
-                  ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-glow-sm'
-                  : 'glass text-foreground hover:border-accent/50',
-              )}
-            >
-              <Sparkles className="h-3.5 w-3.5" /> All
-            </button>
-            {sportList.map((s) => (
-              <button
-                key={s.key}
-                onClick={() => setSport(s.key)}
-                className={cn(
-                  'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all max-md:min-h-[40px] max-md:px-4',
-                  sport === s.key
-                    ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-glow-sm'
-                    : 'glass text-foreground hover:border-accent/50',
-                )}
-              >
-                <span aria-hidden>{SPORT_EMOJI[s.key] ?? '🏆'}</span>
-                {s.name}
-              </button>
-            ))}
-            </div>
+          {/* Sport navigation — one premium searchable dropdown on every device
+              (replaces the horizontal sport-chip bar). */}
+          <div className="flex items-center">
+            <SportsSelect sportList={sportList} sport={sport} setSport={setSport} />
           </div>
 
           {/* Tabs */}
