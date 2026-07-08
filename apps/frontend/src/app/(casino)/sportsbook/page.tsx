@@ -63,7 +63,7 @@ export default function SportsbookPage() {
   const rest = liveMatches.slice(2);
 
   return (
-    <div className="relative h-full overflow-auto">
+    <div className="relative h-full overflow-y-auto overflow-x-hidden">
       <div className="pointer-events-none absolute inset-0 bg-grid opacity-10" />
       <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-black/10 glass-strong px-4">
         <Button asChild variant="ghost" size="sm">
@@ -221,7 +221,7 @@ export default function SportsbookPage() {
                     </span>
                     <Badge variant="hot">{liveStripe.length}</Badge>
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid gap-3 md:grid-cols-2">
                     {liveStripe.slice(0, 4).map((m) => (
                       <MatchCard key={m.id} match={m} />
                     ))}
@@ -238,7 +238,7 @@ export default function SportsbookPage() {
                     </span>
                     <Badge variant="featured">Featured</Badge>
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid gap-3 md:grid-cols-2">
                     {featured.map((m) => (
                       <MatchCard key={m.id} match={m} featured />
                     ))}
@@ -251,7 +251,7 @@ export default function SportsbookPage() {
                 <p className="mb-2 font-display text-sm font-bold text-foreground">
                   {tab === 'live' ? 'In-Play' : 'Upcoming'}
                 </p>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 md:grid-cols-2">
                   {(featured.length > 0 ? rest : liveMatches).map((m) => (
                     <MatchCard key={m.id} match={m} />
                   ))}
