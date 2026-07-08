@@ -197,7 +197,7 @@ export function MatchCard({ match, featured = false }: { match: Match; featured?
 
       <Link
         href={`/sportsbook/${match.id}`}
-        className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-accent transition-colors hover:text-accent/80 hover:underline"
+        className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-accent transition-colors hover:text-accent/80 hover:underline max-md:min-h-[44px] max-md:py-2"
       >
         All {match.markets.length} markets →
       </Link>

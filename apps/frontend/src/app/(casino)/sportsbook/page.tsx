@@ -117,7 +117,7 @@ export default function SportsbookPage() {
             <button
               onClick={() => setSport(null)}
               className={cn(
-                'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all',
+                'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all max-md:min-h-[40px] max-md:px-4',
                 sport === null
                   ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-glow-sm'
                   : 'glass text-foreground hover:border-accent/50',
@@ -130,7 +130,7 @@ export default function SportsbookPage() {
                 key={s.key}
                 onClick={() => setSport(s.key)}
                 className={cn(
-                  'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all',
+                  'flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all max-md:min-h-[40px] max-md:px-4',
                   sport === s.key
                     ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-glow-sm'
                     : 'glass text-foreground hover:border-accent/50',
@@ -149,7 +149,7 @@ export default function SportsbookPage() {
                 key={t}
                 onClick={() => setTab(t)}
                 className={cn(
-                  'flex-1 rounded-lg px-3 py-2 text-sm font-semibold capitalize transition-all',
+                  'flex-1 rounded-lg px-3 py-2 text-sm font-semibold capitalize transition-all max-md:min-h-[44px]',
                   tab === t
                     ? 'bg-gradient-to-r from-primary to-violet text-primary-foreground shadow-glow-sm'
                     : 'text-muted-foreground hover:text-foreground',

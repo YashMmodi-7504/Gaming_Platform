@@ -126,11 +126,11 @@ export function MobileDrawer() {
 
         <nav className="flex-1 overflow-y-auto overscroll-contain px-3 py-4" aria-label="All sections">
           {GROUPS.map((group) => (
-            <div key={group.title} className="mb-4 last:mb-0">
-              <p className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <div key={group.title} className="mb-5 last:mb-0">
+              <p className="px-3 pb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground/80">
                 {group.title}
               </p>
-              <ul className="space-y-0.5">
+              <ul className="space-y-1">
                 {group.items.map((item) => {
                   const active =
                     pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -142,9 +142,9 @@ export function MobileDrawer() {
                         onClick={() => setOpen(false)}
                         aria-current={active ? 'page' : undefined}
                         className={cn(
-                          'flex min-h-[44px] items-center gap-3 rounded-xl px-3 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50',
+                          'relative flex min-h-[44px] items-center gap-3 rounded-xl px-3 text-[15px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50',
                           active
-                            ? 'bg-primary/10 text-primary'
+                            ? 'bg-primary/10 font-semibold text-primary before:absolute before:left-0 before:top-1/2 before:h-5 before:w-1 before:-translate-y-1/2 before:rounded-r-full before:bg-primary'
                             : 'text-foreground hover:bg-black/[0.04]',
                         )}
                       >
