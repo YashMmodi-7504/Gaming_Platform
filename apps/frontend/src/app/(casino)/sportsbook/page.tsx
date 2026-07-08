@@ -8,7 +8,7 @@ import { useMemo, useState } from 'react';
 
 import { AnimatedNumber } from '@/components/marketing/animated-number';
 import { BetSlip } from '@/components/sports/bet-slip';
-import { MatchCard } from '@/components/sports/match-card';
+import { ResponsiveMatchCard as MatchCard } from '@/components/sports/mobile-match-card';
 import type { Match, SportDefinition } from '@/lib/sports-api';
 import { sportsApi } from '@/lib/sports-api';
 import { MOCK_SPORTS, SPORT_EMOJI, mockMatches } from '@/lib/sports-mock';

@@ -11,21 +11,43 @@ import { GlobalLiveFeed } from '@/components/live/global-live-feed';
 import { LiveNow } from '@/components/live/live-now';
 import { JackpotBanner, LiveWinners, TournamentSpotlight } from '@/components/marketing/landing-sections';
 import { LiveTournaments, SportsHighlights, UpcomingEvents } from '@/components/marketing/lobby-sections';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 
 /**
- * The rich lower half of the premium gaming Dashboard (Phase 1.3.4).
+ * The rich lower half of the premium gaming Dashboard (Phase 1.3.4 → 1.5.2).
  *
- * Restores the original lobby experience by REUSING the existing marketing /
- * lobby / live components — game shelves, providers, sportsbook, live winners,
- * jackpot, tournaments, community feed and upcoming events — then the player's
- * own recent activity + VIP progress. NOTHING here is promotional: welcome /
- * reload / cashback / referral bonuses, daily-reward / lucky-wheel / mystery-
- * chest cards and promo status filters live ONLY on /promotions.
+ * Desktop keeps the full, rich lobby (game shelves, providers, sportsbook, live
+ * winners, jackpot, tournaments, community feed, upcoming events) — unchanged.
+ * On MOBILE it renders a dedicated LEAN vertical dashboard: game shelves (as
+ * adaptive grids), sports highlights + live games (as full-width vertical
+ * cards) and the player's recent activity — dropping the horizontal-scroll
+ * marketing rails so the phone experience is fully vertical and native.
  *
- * Loaded lazily by the dashboard shell (see dashboard-lobby-lazy) so it never
- * blocks first paint. Order follows the Phase 1.3.4 target structure.
+ * Nothing here is promotional (offers live only on /promotions). Loaded lazily
+ * by the dashboard shell so it never blocks first paint.
  */
 export function DashboardLobby() {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <div className="space-y-8">
+        {/* Continue Playing · Popular · Trending · Recommended (adaptive grids) */}
+        <HomeSections />
+        {/* Sports highlights — full-width vertical cards */}
+        <SportsHighlights />
+        {/* Live games — full-width vertical cards */}
+        <LiveNow />
+        {/* Player activity — stacks vertically */}
+        <div className="space-y-4">
+          <RecentBetsCard />
+          <RecentTransactionsCard />
+          <VipProgressCard />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-12">
       {/* Continue Playing · Featured Casino · Trending · Popular · Recommended · Recently */}

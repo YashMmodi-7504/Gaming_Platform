@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { AnimatedNumber } from './animated-number';
 import { SectionHeading } from './landing-sections';
 
@@ -316,18 +317,11 @@ function Crest({ name, index }: { name: string; index: number }) {
 }
 
 export function SportsHighlights() {
-  return (
-    <section className="space-y-4">
-      <SectionHeading
-        icon={<Flame className="h-5 w-5 text-accent" />}
-        title="Sports highlights"
-        action={{ label: 'All sports', href: '/sportsbook' }}
-      />
-      <ScrollRow>
-        {MATCHES.map((m, i) => (
-          <motion.div key={m.home + m.away + i} {...fadeUp(i)} className="w-80 shrink-0 snap-start">
-            <Link href="/sportsbook" className="group block h-full">
-              <div className="card-premium sheen flex h-full flex-col p-5">
+  const isMobile = useIsMobile();
+  const cards = MATCHES.map((m, i) => {
+    const inner = (
+      <Link href="/sportsbook" className="group block h-full">
+        <div className="card-premium sheen flex h-full flex-col p-5">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     {m.league}
@@ -356,16 +350,35 @@ export function SportsHighlights() {
                     )}
                   </div>
                 </div>
-                <div className="mt-4 flex gap-2">
-                  <OddsChip label="1" value={m.oddsHome} />
-                  <OddsChip label="X" value={m.oddsDraw} />
-                  <OddsChip label="2" value={m.oddsAway} />
-                </div>
-              </div>
-            </Link>
-          </motion.div>
-        ))}
-      </ScrollRow>
+        <div className="mt-4 flex gap-2">
+          <OddsChip label="1" value={m.oddsHome} />
+          <OddsChip label="X" value={m.oddsDraw} />
+          <OddsChip label="2" value={m.oddsAway} />
+        </div>
+        </div>
+      </Link>
+    );
+    // Mobile: full-width vertical card (one per row, no motion/scroll).
+    // Desktop: the original animated fixed-width rail item (unchanged).
+    return isMobile ? (
+      <div key={m.home + m.away + i} className="w-full">
+        {inner}
+      </div>
+    ) : (
+      <motion.div key={m.home + m.away + i} {...fadeUp(i)} className="w-80 shrink-0 snap-start">
+        {inner}
+      </motion.div>
+    );
+  });
+
+  return (
+    <section className="space-y-4">
+      <SectionHeading
+        icon={<Flame className="h-5 w-5 text-accent" />}
+        title="Sports highlights"
+        action={{ label: 'All sports', href: '/sportsbook' }}
+      />
+      {isMobile ? <div className="space-y-3">{cards}</div> : <ScrollRow>{cards}</ScrollRow>}
     </section>
   );
 }

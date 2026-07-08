@@ -5,6 +5,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import type { GameSummary } from '@gaming-platform/types';
 
+import { useIsMobile } from '@/hooks/use-is-mobile';
 import { GameCard } from './game-card';
 import { GameCardSkeleton } from './game-card-skeleton';
 
@@ -24,6 +25,7 @@ interface GameShelfProps {
  * and cards fill the available width (Phase 1.5).
  */
 export function GameShelf({ title, icon, games, loading, viewAllHref, hrefBase }: GameShelfProps) {
+  const isMobile = useIsMobile();
   if (!loading && (!games || games.length === 0)) return null;
 
   return (
@@ -36,22 +38,24 @@ export function GameShelf({ title, icon, games, loading, viewAllHref, hrefBase }
         {viewAllHref ? (
           <Link
             href={viewAllHref}
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-accent"
+            className="py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-accent max-md:min-h-[44px]"
           >
             View all →
           </Link>
         ) : null}
       </div>
-      {/* Mobile (< md): 2-column grid — no sideways scroll, cards fill width. */}
-      <div className="grid grid-cols-2 gap-3 md:hidden">
-        {loading
-          ? Array.from({ length: 4 }).map((_, i) => <GameCardSkeleton key={i} />)
-          : games?.map((game) => <GameCard key={game.id} game={game} hrefBase={hrefBase} />)}
-      </div>
 
-      {/* Desktop/tablet: horizontal rail (unchanged). The hidden rail's lazy
-          images never load on mobile, so there is no duplicate image fetch. */}
-      <div className="hidden md:block">
+      {isMobile ? (
+        /* Mobile: adaptive grid — auto-fills 2 columns while cards stay ≥ 150px,
+           dropping to 1 column on the narrowest phones so cards are never tiny.
+           Only this tree mounts on mobile — no hidden desktop rail. */
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3">
+          {loading
+            ? Array.from({ length: 4 }).map((_, i) => <GameCardSkeleton key={i} />)
+            : games?.map((game) => <GameCard key={game.id} game={game} hrefBase={hrefBase} />)}
+        </div>
+      ) : (
+        /* Desktop/tablet: horizontal rail (unchanged). */
         <Rail label={title} trackClassName="-mx-1 px-1">
           {loading
             ? Array.from({ length: 6 }).map((_, i) => (
@@ -65,7 +69,7 @@ export function GameShelf({ title, icon, games, loading, viewAllHref, hrefBase }
                 </div>
               ))}
         </Rail>
-      </div>
+      )}
     </section>
   );
 }

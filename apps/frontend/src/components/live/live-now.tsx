@@ -17,6 +17,7 @@ import Link from 'next/link';
 
 import { AnimatedNumber } from '@/components/marketing/animated-number';
 import { SectionHeading } from '@/components/marketing/landing-sections';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 
 interface LiveGame {
   name: string;
@@ -53,22 +54,20 @@ export function LiveNow() {
         title="Live Now"
         action={{ label: 'All games', href: '/casino' }}
       />
-      <div className="-mx-1 flex snap-x gap-4 overflow-x-auto px-1 pb-3">
-        {LIVE_GAMES.map((g, i) => {
-          const Icon = g.icon;
-          return (
-            <motion.div
-              key={g.name + i}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.05 }}
-              className="w-60 shrink-0 snap-start"
-            >
-              <Link href={g.href} className="group block">
-                <div className="card-premium sheen overflow-hidden p-0">
-                  {/* animated banner */}
-                  <div className={cn('relative h-24 bg-gradient-to-br', g.gradient)}>
+      <LiveGamesContainer />
+    </section>
+  );
+}
+
+function LiveGamesContainer() {
+  const isMobile = useIsMobile();
+  const cards = LIVE_GAMES.map((g, i) => {
+    const Icon = g.icon;
+    const inner = (
+      <Link href={g.href} className="group block">
+        <div className="card-premium sheen overflow-hidden p-0">
+          {/* animated banner — taller on mobile for a bigger thumbnail */}
+          <div className={cn('relative bg-gradient-to-br max-md:h-32 md:h-24', g.gradient)}>
                     <div className="bg-grid absolute inset-0 opacity-30" />
                     <div className="absolute right-3 top-3 rounded-full bg-white/25 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white backdrop-blur">
                       ● Live
@@ -94,16 +93,35 @@ export function LiveNow() {
                         </p>
                       </div>
                     </div>
-                    <Button variant="gradient" size="sm" className="w-full">
-                      Play
-                    </Button>
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
-          );
-        })}
+            <Button variant="gradient" size="sm" className="w-full max-md:min-h-[44px]">
+              Play
+            </Button>
+          </div>
+        </div>
+      </Link>
+    );
+    // Mobile: full-width vertical card. Desktop: original animated rail item.
+    return isMobile ? (
+      <div key={g.name + i} className="w-full">
+        {inner}
       </div>
-    </section>
+    ) : (
+      <motion.div
+        key={g.name + i}
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.4, delay: i * 0.05 }}
+        className="w-60 shrink-0 snap-start"
+      >
+        {inner}
+      </motion.div>
+    );
+  });
+
+  return isMobile ? (
+    <div className="space-y-4">{cards}</div>
+  ) : (
+    <div className="-mx-1 flex snap-x gap-4 overflow-x-auto px-1 pb-3">{cards}</div>
   );
 }
