@@ -17,27 +17,33 @@ import { usePlayerProfile } from '@/stores/player-profile';
 export function AuthInitializer() {
   useEffect(() => {
     let active = true;
+    const store = useAuthStore.getState();
+
+    // Demo fast-path: a persisted demo session is authoritative and available
+    // synchronously in localStorage (set at guest login, cleared on logout).
+    // Restore it immediately so the guarded shell paints on the first commit
+    // instead of blocking behind a doomed backend /auth/refresh round-trip
+    // (which has no backend in demo mode and only fails after a network
+    // timeout). Real sessions — no demo flag — still refresh via the backend.
+    const demoEmail =
+      clientConfig.demoMode && typeof window !== 'undefined'
+        ? window.localStorage.getItem(DEMO_SESSION_KEY)
+        : null;
+    if (demoEmail) {
+      const { user, accessToken } = createDemoSession(demoEmail);
+      store.setSession(user, accessToken);
+      usePlayerProfile.getState().setUsername(demoEmail.split('@')[0] || 'player');
+      return;
+    }
+
     void (async () => {
-      const store = useAuthStore.getState();
       try {
         const tokens = await authApi.refresh();
         store.setAccessToken(tokens.accessToken);
         const user = await authApi.me();
         if (active) store.setSession(user, tokens.accessToken);
       } catch {
-        if (!active) return;
-        // No backend session. Restore a persisted demo session if present.
-        const email =
-          clientConfig.demoMode && typeof window !== 'undefined'
-            ? window.localStorage.getItem(DEMO_SESSION_KEY)
-            : null;
-        if (email) {
-          const { user, accessToken } = createDemoSession(email);
-          store.setSession(user, accessToken);
-          usePlayerProfile.getState().setUsername(email.split('@')[0] || 'player');
-        } else {
-          store.setInitialized(true);
-        }
+        if (active) store.setInitialized(true);
       }
     })();
     return () => {
