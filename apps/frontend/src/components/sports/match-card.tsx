@@ -34,7 +34,7 @@ export function OddsButton({ match, market, selection }: { match: Match; market:
         })
       }
       className={cn(
-        'group/odds flex min-w-0 flex-1 flex-col items-center rounded-xl border px-2 py-2 transition-all duration-200',
+        'group/odds flex min-w-0 flex-1 flex-col items-center justify-center rounded-xl border px-2 py-2 transition-all duration-200 max-md:min-h-[44px]',
         disabled
           ? 'cursor-not-allowed border-black/5 bg-black/5 opacity-50'
           : has

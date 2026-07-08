@@ -16,7 +16,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <main id="main-content" className="mx-auto w-full max-w-[1440px] flex-1 overflow-x-clip px-4 py-6 max-md:pb-24 sm:px-6 md:py-8">
         {children}
       </main>
-      <LiveActivityDock />
+      {/* Floating live dock is desktop+ only on mobile (declutters thumb zone). */}
+      <div className="hidden md:block">
+        <LiveActivityDock />
+      </div>
       <BottomNav />
     </div>
     </AuthGuard>

@@ -70,9 +70,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AppProviders>
           <RouteBackground />
           {children}
-          <SoundControl />
-          <AccessibilityMenu />
-          <AiAssistant />
+          {/* Floating assistants/controls are desktop+ only — on mobile they
+              overlap the bottom navigation and clutter the thumb zone (1.5). */}
+          <div className="hidden md:block">
+            <SoundControl />
+            <AccessibilityMenu />
+            <AiAssistant />
+          </div>
           <CinematicIntro />
           <OfflineIndicator />
           <WebVitalsReporter />

@@ -5,6 +5,7 @@ import { Gift, HelpCircle, Home, LogIn, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { MobileDrawer } from '@/components/layout/mobile-drawer';
 import { MobileNav } from '@/components/layout/mobile-nav';
 import { BalancePill } from '@/components/shared/balance-pill';
 import { LevelPill } from '@/components/shared/level-pill';
@@ -37,8 +38,14 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-black/[0.07] bg-white/85 shadow-[0_6px_24px_-18px_hsl(230_50%_40%/0.35)] backdrop-blur-md">
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
       <div className="mx-auto flex h-16 max-w-[1800px] items-center gap-1 px-3 sm:gap-2 sm:px-6">
-        {/* Hamburger: tablet only (768–1023px). Hidden on mobile — the fixed
-            bottom nav is the mobile navigation. Hidden on desktop (full top nav). */}
+        {/* Mobile (< md): grouped full-section drawer for authenticated players. */}
+        {isAuthenticated ? (
+          <div className="flex items-center md:hidden">
+            <MobileDrawer />
+          </div>
+        ) : null}
+
+        {/* Hamburger: tablet only (768–1023px). Hidden on desktop (full top nav). */}
         <div className="hidden items-center md:flex lg:hidden">
           <MobileNav items={navItems} />
         </div>
