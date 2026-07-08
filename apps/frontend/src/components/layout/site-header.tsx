@@ -37,7 +37,9 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-black/[0.07] bg-white/85 shadow-[0_6px_24px_-18px_hsl(230_50%_40%/0.35)] backdrop-blur-md">
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
       <div className="mx-auto flex h-16 max-w-[1800px] items-center gap-1 px-3 sm:gap-2 sm:px-6">
-        <div className="flex items-center lg:hidden">
+        {/* Hamburger: tablet only (768–1023px). Hidden on mobile — the fixed
+            bottom nav is the mobile navigation. Hidden on desktop (full top nav). */}
+        <div className="hidden items-center md:flex lg:hidden">
           <MobileNav items={navItems} />
         </div>
 
@@ -89,15 +91,19 @@ export function SiteHeader() {
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
           {isAuthenticated ? (
             <>
-              <SearchCommand />
-              <Button asChild variant="gold" size="sm" className="hidden md:inline-flex">
-                <Link href="/vip">
-                  <Gift className="h-4 w-4" /> VIP
-                </Link>
-              </Button>
-              <LevelPill />
-              <BalancePill />
-              <NotificationsMenu />
+              {/* On mobile only the profile avatar shows (Stake-style). Search,
+                  VIP, pills and notifications appear from tablet up (md+). */}
+              <div className="hidden items-center gap-1 sm:gap-2 md:flex">
+                <SearchCommand />
+                <Button asChild variant="gold" size="sm">
+                  <Link href="/vip">
+                    <Gift className="h-4 w-4" /> VIP
+                  </Link>
+                </Button>
+                <LevelPill />
+                <BalancePill />
+                <NotificationsMenu />
+              </div>
               <UserMenu />
             </>
           ) : (

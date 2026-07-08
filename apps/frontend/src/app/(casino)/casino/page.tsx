@@ -63,11 +63,14 @@ export default function CasinoLobbyPage() {
 
       <main className="mx-auto max-w-6xl px-4 py-8">
         <div className="space-y-10">
-          {/* Immersive hero */}
-          <CasinoHero />
+          {/* Immersive hero — hidden on mobile so play starts immediately; the
+              full game grid below stays fully reachable (Phase 1.4.1). */}
+          <div className="max-md:hidden">
+            <CasinoHero />
+          </div>
 
           {/* Live jackpots */}
-          <section className="space-y-3">
+          <section className="space-y-3 max-md:!mt-0">
             <h2 className="flex items-center gap-2 font-display text-xl font-bold tracking-tight text-foreground">
               <Crown className="h-5 w-5 text-gold" /> Live Jackpots
             </h2>

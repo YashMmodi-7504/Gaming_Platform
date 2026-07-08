@@ -31,7 +31,7 @@ export default function DiceLobbyPage() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-8">
-        <div className="mb-6">
+        <div className="mb-6 max-md:hidden">
           <h1 className="font-display text-3xl font-bold tracking-tight">
             <span className="text-gradient">Dice Tables</span>
           </h1>

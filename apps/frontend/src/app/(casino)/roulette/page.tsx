@@ -85,7 +85,7 @@ export default function RouletteLobbyPage() {
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-8">
-        <div className="mb-6">
+        <div className="mb-6 max-md:hidden">
           <h1 className="font-display text-3xl font-bold tracking-tight">
             <span className="text-gradient">Roulette Tables</span>
           </h1>

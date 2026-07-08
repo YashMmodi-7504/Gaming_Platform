@@ -1,4 +1,5 @@
 import { AuthGuard } from '@/components/auth/auth-guard';
+import { BottomNav } from '@/components/layout/bottom-nav';
 import { LiveActivityDock } from '@/components/live/live-activity-dock';
 import { SiteHeader } from '@/components/layout/site-header';
 
@@ -12,10 +13,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <AuthGuard>
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
-      <main id="main-content" className="mx-auto w-full max-w-[1440px] flex-1 overflow-x-clip px-4 py-6 sm:px-6 md:py-8">
+      <main id="main-content" className="mx-auto w-full max-w-[1440px] flex-1 overflow-x-clip px-4 py-6 max-md:pb-24 sm:px-6 md:py-8">
         {children}
       </main>
       <LiveActivityDock />
+      <BottomNav />
     </div>
     </AuthGuard>
   );

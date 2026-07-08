@@ -48,8 +48,8 @@ export default function CrashLobbyPage() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-8">
-        {/* Featured banner */}
-        <div className="card-premium sheen relative mb-8 overflow-hidden p-6 sm:p-8">
+        {/* Featured banner — hidden on mobile so play starts immediately (1.4.1) */}
+        <div className="card-premium sheen relative mb-8 overflow-hidden p-6 max-md:hidden sm:p-8">
           <div className="bg-grid pointer-events-none absolute inset-0 opacity-40" />
           <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="max-w-xl">
