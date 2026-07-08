@@ -25,8 +25,11 @@ export default function DashboardPage() {
       {/* 1 — Welcome back */}
       <PlayerHero />
 
-      {/* 2 — Hero banner */}
-      <Hero />
+      {/* 2 — Hero banner (desktop/tablet only — mobile prioritizes gameplay
+          over marketing; PlayerHero already welcomes the player). */}
+      <div className="max-md:hidden">
+        <Hero />
+      </div>
 
       {/* 3 — Wallet summary */}
       <WalletSummary />

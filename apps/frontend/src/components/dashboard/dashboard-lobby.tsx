@@ -34,10 +34,10 @@ export function DashboardLobby() {
       <div className="space-y-8">
         {/* Continue Playing · Popular · Trending · Recommended (adaptive grids) */}
         <HomeSections />
-        {/* Sports highlights — full-width vertical cards */}
-        <SportsHighlights />
         {/* Live games — full-width vertical cards */}
         <LiveNow />
+        {/* Sports highlights — full-width vertical cards */}
+        <SportsHighlights />
         {/* Player activity — stacks vertically */}
         <div className="space-y-4">
           <RecentBetsCard />
