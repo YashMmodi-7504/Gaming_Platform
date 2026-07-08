@@ -9,6 +9,7 @@ import { useMemo, useState } from 'react';
 import { AnimatedNumber } from '@/components/marketing/animated-number';
 import { BetSlip } from '@/components/sports/bet-slip';
 import { ResponsiveMatchCard as MatchCard } from '@/components/sports/mobile-match-card';
+import { SportsbookFilter } from '@/components/sports/sportsbook-filter';
 import type { Match, SportDefinition } from '@/lib/sports-api';
 import { sportsApi } from '@/lib/sports-api';
 import { MOCK_SPORTS, SPORT_EMOJI, mockMatches } from '@/lib/sports-mock';
@@ -77,16 +78,16 @@ export default function SportsbookPage() {
         <div className="w-24" />
       </header>
 
-      <main className="relative mx-auto grid w-full min-w-0 max-w-[1600px] gap-6 px-4 py-6 max-md:max-w-none sm:px-6 lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_380px]">
-        <div className="min-w-0 space-y-5">
-          {/* Hero banner */}
-          <div className="card-premium relative overflow-hidden rounded-2xl p-5">
+      <main className="relative mx-auto grid w-full min-w-0 max-w-[1600px] gap-6 px-4 py-6 max-md:max-w-none max-md:gap-4 max-md:py-4 sm:px-6 lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_380px]">
+        <div className="min-w-0 space-y-5 max-md:space-y-3">
+          {/* Hero banner — compact on mobile so betting starts faster */}
+          <div className="card-premium relative overflow-hidden rounded-2xl p-5 max-md:p-4">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/25 via-violet/10 to-accent/15" />
             <div className="sheen pointer-events-none absolute inset-0" />
-            <div className="relative flex flex-wrap items-end justify-between gap-4">
+            <div className="relative flex flex-wrap items-end justify-between gap-4 max-md:gap-2">
               <div>
-                <h1 className="font-display text-2xl font-extrabold text-gradient">Live Sports Betting</h1>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <h1 className="font-display text-2xl font-extrabold text-gradient max-md:text-xl">Live Sports Betting</h1>
+                <p className="mt-1 text-sm text-muted-foreground max-md:hidden">
                   Football, cricket, tennis, NBA, kabaddi, esports & more — in-play and pre-match.
                 </p>
               </div>
@@ -112,8 +113,16 @@ export default function SportsbookPage() {
             </div>
           </div>
 
-          {/* Sport filter pills */}
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          {/* Advanced-filter dropdown + quick-access sport chips */}
+          <div className="flex items-center gap-2">
+            <SportsbookFilter
+              sportList={sportList}
+              sport={sport}
+              setSport={setSport}
+              tab={tab}
+              setTab={setTab}
+            />
+            <div className="flex min-w-0 gap-2 overflow-x-auto pb-1">
             <button
               onClick={() => setSport(null)}
               className={cn(
@@ -140,6 +149,7 @@ export default function SportsbookPage() {
                 {s.name}
               </button>
             ))}
+            </div>
           </div>
 
           {/* Tabs */}
