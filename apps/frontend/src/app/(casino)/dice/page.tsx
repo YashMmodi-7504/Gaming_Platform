@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { DiceStatsPanel } from '@/components/games/live/dice-stats-panel';
 import { GameLivePanel } from '@/components/games/live/game-live-panel';
 import { DiceGame } from '@/components/games/prototype/dice-game';
+import { BetGate } from '@/components/wallet/bet-gate';
 import { DiceStage } from '@/components/games/stage/dice-stage';
 import { GameHudStrip } from '@/components/games/stage/game-hud-strip';
 import { diceApi } from '@/lib/dice-api';
@@ -50,7 +51,9 @@ export default function DiceLobbyPage() {
             </div>
             <GameHudStrip seed="dice" />
             <DiceStage>
-              <DiceGame />
+              <BetGate>
+                <DiceGame />
+              </BetGate>
             </DiceStage>
           </section>
           <aside className="space-y-4 lg:col-span-1">

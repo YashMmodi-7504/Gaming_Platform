@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { GameLivePanel } from '@/components/games/live/game-live-panel';
 import { CrashGame } from '@/components/games/prototype/crash-game';
 import { CrashStage } from '@/components/games/stage/crash-stage';
+import { BetGate } from '@/components/wallet/bet-gate';
 import { GameHudStrip } from '@/components/games/stage/game-hud-strip';
 import { AnimatedNumber } from '@/components/marketing/animated-number';
 import { crashApi } from '@/lib/crash-api';
@@ -100,7 +101,9 @@ export default function CrashLobbyPage() {
             </div>
             <GameHudStrip seed="crash" />
             <CrashStage>
-              <CrashGame />
+              <BetGate>
+                <CrashGame />
+              </BetGate>
             </CrashStage>
           </section>
           <aside className="space-y-4 lg:col-span-1">

@@ -25,6 +25,8 @@ export async function prep(page: Page): Promise<void> {
       // Phase 1.1: protected routes require auth. Seed a persisted demo session
       // so AuthInitializer restores it and the app treats the page as signed in.
       localStorage.setItem('gp-demo-session', 'guest@player.gg');
+      // Phase 1.2: fund the demo wallet so gameplay tests can place bets.
+      localStorage.setItem('gp-wallet', JSON.stringify({ state: { balance: 100000 }, version: 0 }));
     } catch {
       /* storage may be unavailable — ignore */
     }
@@ -56,14 +58,11 @@ export async function demoLogin(page: Page): Promise<void> {
 }
 
 /**
- * A locator that is only present when the header is in its authenticated state.
- * The demo balance pill uses a "Reload demo coins" button; if that is not found
- * we fall back to the user-menu avatar trigger (the `.slice(0,2)` initials).
+ * A locator that is only present when the header is in its authenticated state:
+ * the wallet balance chip (Phase 1.2). Unique via its aria-label.
  */
 export function authIndicator(page: Page) {
-  return page
-    .getByRole('button', { name: /Reload demo coins/i })
-    .or(page.getByRole('button', { name: /Deposit/i }));
+  return page.getByLabel('Wallet balance');
 }
 
 /** The floating accessibility toggle (bottom-right, aria-labelled). */

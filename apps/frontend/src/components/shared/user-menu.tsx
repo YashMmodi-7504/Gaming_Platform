@@ -35,6 +35,7 @@ import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/auth-api';
 import { clearDemoSession } from '@/lib/demo-session';
 import { useAuthStore } from '@/stores/auth-store';
+import { useDemoWallet } from '@/stores/demo-wallet';
 
 const GROUPS: { label: string; items: { href: string; label: string; icon: typeof User }[] }[] = [
   {
@@ -86,6 +87,7 @@ export function UserMenu() {
       // Ignore — clear the local session regardless.
     } finally {
       clearDemoSession(); // don't auto-restore the demo session on next load
+      useDemoWallet.getState().reset(); // new session starts at ₹0
       clearSession();
       router.push('/');
     }

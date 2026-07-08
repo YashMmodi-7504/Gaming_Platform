@@ -1,5 +1,7 @@
 import {
   Activity,
+  ArrowDownToLine,
+  ArrowUpFromLine,
   BarChart3,
   CircleDot,
   Cpu,
@@ -48,6 +50,8 @@ export const dashboardNav: NavItem[] = [
   { label: 'Rewards', href: '/rewards', icon: Gift },
   { label: 'Favorites', href: '/favorites', icon: Heart },
   { label: 'Wallet', href: '/wallet', icon: Wallet },
+  { label: 'Deposit', href: '/deposit', icon: ArrowDownToLine },
+  { label: 'Withdraw', href: '/withdraw', icon: ArrowUpFromLine },
   { label: 'History', href: '/transactions', icon: History },
   { label: 'Settings', href: '/settings', icon: Settings },
 ];

@@ -6,7 +6,9 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import type { ComponentType } from 'react';
 
+import { DepositRequired } from '@/components/wallet/bet-gate';
 import { type CardProto, demoExperienceFor } from '@/lib/demo-games';
+import { useDemoWallet } from '@/stores/demo-wallet';
 
 /**
  * Backend-free play dispatcher.
@@ -55,6 +57,39 @@ export function DemoPlay({
 }) {
   const exp = demoExperienceFor(slug);
   const dHref = detailHref ?? `${lobbyHref}/${slug}`;
+  const balance = useDemoWallet((s) => s.balance);
+
+  const header = (
+    <header className="glass-strong flex h-14 shrink-0 items-center justify-between border-b border-border/60 px-4">
+      <Button asChild variant="ghost" size="sm">
+        <Link href={lobbyHref}>
+          <ChevronLeft className="h-4 w-4" /> Lobby
+        </Link>
+      </Button>
+      <span className="flex items-center gap-2 font-display font-semibold text-foreground">
+        {title}
+        <Badge variant="secondary">Demo</Badge>
+      </span>
+      <Button asChild variant="ghost" size="sm">
+        <Link href={dHref}>Details</Link>
+      </Button>
+    </header>
+  );
+
+  // Betting is disabled with an empty wallet — prompt a deposit (Phase 1.2).
+  // Browsing the lobby/detail is unaffected.
+  if (balance <= 0) {
+    return (
+      <div className="flex h-full flex-col">
+        {header}
+        <main className="flex-1 overflow-y-auto px-3 py-6 sm:px-5">
+          <div className="mx-auto w-full max-w-2xl py-8">
+            <DepositRequired />
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   // The Slot demo ships its own full-screen chrome (header + Lobby link).
   if (exp.kind === 'slot') {
@@ -69,20 +104,7 @@ export function DemoPlay({
 
   return (
     <div className="flex h-full flex-col">
-      <header className="glass-strong flex h-14 shrink-0 items-center justify-between border-b border-border/60 px-4">
-        <Button asChild variant="ghost" size="sm">
-          <Link href={lobbyHref}>
-            <ChevronLeft className="h-4 w-4" /> Lobby
-          </Link>
-        </Button>
-        <span className="flex items-center gap-2 font-display font-semibold text-foreground">
-          {title}
-          <Badge variant="secondary">Demo</Badge>
-        </span>
-        <Button asChild variant="ghost" size="sm">
-          <Link href={dHref}>Details</Link>
-        </Button>
-      </header>
+      {header}
       <main className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 sm:px-5 lg:px-6">
         {/* Full-width immersive play surface — board dominates, vertically centered
             so there's no dead space under the table (scrolls if taller than view). */}

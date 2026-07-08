@@ -6,6 +6,7 @@ import { ChevronLeft, CircleDot, Gauge, Play, Timer, Users, Zap } from 'lucide-r
 import Link from 'next/link';
 
 import { RouletteGame } from '@/components/games/prototype/roulette-game';
+import { BetGate } from '@/components/wallet/bet-gate';
 import { rouletteApi } from '@/lib/roulette-api';
 
 /* ---- Deterministic demo roulette tables (backend-free) ------------------- */
@@ -101,7 +102,9 @@ export default function RouletteLobbyPage() {
             </h2>
             <Badge variant="new">Free coins</Badge>
           </div>
-          <RouletteGame />
+          <BetGate>
+            <RouletteGame />
+          </BetGate>
         </section>
 
         <div className="mb-3 flex items-center justify-between">
