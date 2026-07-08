@@ -63,7 +63,7 @@ export default function SportsbookPage() {
   const rest = liveMatches.slice(2);
 
   return (
-    <div className="relative h-full overflow-y-auto overflow-x-hidden">
+    <div className="relative h-full w-full min-w-0 overflow-y-auto overflow-x-hidden">
       <div className="pointer-events-none absolute inset-0 bg-grid opacity-10" />
       <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-black/10 glass-strong px-4">
         <Button asChild variant="ghost" size="sm">
@@ -77,8 +77,8 @@ export default function SportsbookPage() {
         <div className="w-24" />
       </header>
 
-      <main className="relative mx-auto grid max-w-[1600px] gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_380px]">
-        <div className="space-y-5">
+      <main className="relative mx-auto grid w-full min-w-0 max-w-[1600px] gap-6 px-4 py-6 max-md:max-w-none sm:px-6 lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_380px]">
+        <div className="min-w-0 space-y-5">
           {/* Hero banner */}
           <div className="card-premium relative overflow-hidden rounded-2xl p-5">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/25 via-violet/10 to-accent/15" />
@@ -265,7 +265,7 @@ export default function SportsbookPage() {
           )}
         </div>
 
-        <div className="lg:sticky lg:top-20 lg:self-start">
+        <div className="min-w-0 lg:sticky lg:top-20 lg:self-start">
           <BetSlip />
         </div>
       </main>

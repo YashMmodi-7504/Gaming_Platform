@@ -41,7 +41,7 @@ export default function MatchDetailsPage() {
   const away = data?.participants.find((p) => p.side === 'away') ?? data?.participants[1];
 
   return (
-    <div className="relative h-full overflow-auto">
+    <div className="relative h-full w-full min-w-0 overflow-y-auto overflow-x-hidden">
       <div className="pointer-events-none absolute inset-0 bg-grid opacity-10" />
       <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-black/10 glass-strong px-4">
         <Button asChild variant="ghost" size="sm">
@@ -53,8 +53,8 @@ export default function MatchDetailsPage() {
         <div className="w-20" />
       </header>
 
-      <main className="relative mx-auto grid max-w-6xl gap-6 px-4 py-6 lg:grid-cols-[1fr_320px]">
-        <div className="space-y-4">
+      <main className="relative mx-auto grid w-full min-w-0 max-w-6xl gap-6 px-4 py-6 max-md:max-w-none lg:grid-cols-[1fr_320px]">
+        <div className="min-w-0 space-y-4">
           {loading ? (
             <Spinner />
           ) : data ? (
@@ -126,7 +126,7 @@ export default function MatchDetailsPage() {
           )}
         </div>
 
-        <div className="lg:sticky lg:top-20 lg:self-start">
+        <div className="min-w-0 lg:sticky lg:top-20 lg:self-start">
           <BetSlip />
         </div>
       </main>
